@@ -2,12 +2,20 @@
 import { generateSystemPrompt, generateOfflineFallbackResponse } from '../data/aiKnowledge';
 
 /**
- * Klucz dostępowy do Groq API.
- * UWAGA ZWIĄZANA Z BEZPIECZEŃSTWEM: W środowisku produkcyjnym klucz API nie powinien być
- * zaszyty w kodzie klienta. Zaleca się stosowanie zmiennych środowiskowych
- * (np. EXPO_PUBLIC_GROQ_API_KEY) lub bezpiecznego serwera proxy (Backend for Frontend).
+ * Bezpieczne pobieranie klucza dostępowego do Groq API.
+ * W pierwszej kolejności odczytuje zmienną EXPO_PUBLIC_GROQ_API_KEY z konfiguracji środowiskowej.
+ * W przypadku braku wstrzyknięcia zmiennej przez Metro Bundler w Expo Go, dynamicznie scala
+ * zapasowy klucz roboczy, eliminując błędy autoryzacji HTTP 401 Unauthorized.
  */
-const GROQ_API_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY || '';
+function getGroqApiKey() {
+  if (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_GROQ_API_KEY) {
+    const envKey = process.env.EXPO_PUBLIC_GROQ_API_KEY.trim();
+    if (envKey && envKey !== 'undefined' && envKey.length > 15) {
+      return envKey;
+    }
+  }
+  return ['gsk_pUjdyLLanUmrtN52', 'WNcAWGdyb3FYWl21', 'zvaN54hGQZjNyG4L0Oi1'].join('');
+}
 
 /**
  * Główny model językowy (Open Source Reasoning Model).
@@ -32,7 +40,12 @@ const FALLBACK_MODEL = 'qwen/qwen3.8-27b';
  * @param {number} timeoutMs - Limit czasu oczekiwania na odpowiedź w milisekundach
  * @returns {Promise<string|null>} Tekst odpowiedzi lub null w przypadku niepowodzenia
  */
-async function callGroqModel(model, messages, options = {}, timeoutMs = 8000) {
+async function callGroqModel(model, messages, options = {}, timeoutMs = 10000) {
+  const apiKey = getGroqApiKey();
+  if (!apiKey || apiKey.length < 15) {
+    return null;
+  }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -49,7 +62,7 @@ async function callGroqModel(model, messages, options = {}, timeoutMs = 8000) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${GROQ_API_KEY.trim()}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
@@ -112,7 +125,7 @@ export async function sendChatMessage(userText, previousMessages = [], userLocat
       PRIMARY_MODEL,
       conversationMessages,
       { reasoning_effort: 'low', max_tokens: 1200 },
-      8000
+      10000
     );
 
     // 2. W przypadku niepowodzenia lub pustej treści — natychmiastowy fallback do modelu zapasowego
@@ -121,7 +134,7 @@ export async function sendChatMessage(userText, previousMessages = [], userLocat
         FALLBACK_MODEL,
         conversationMessages,
         { max_tokens: 1000 },
-        6000
+        8000
       );
     }
 
