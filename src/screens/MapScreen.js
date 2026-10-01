@@ -23,7 +23,6 @@ import { useScaledStyles } from '../hooks/useScale';
 import { getImageSource } from '../utils/imageSource';
 import CalmPressable from '../components/CalmPressable';
 import FadeInView from '../components/FadeInView';
-import { DARK_MAP_STYLE } from '../theme/mapStyles';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -152,13 +151,6 @@ export default function MapScreen({ route, navigation }) {
   const [userLocation, setUserLocation] = useState(null);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
 
-  // Dynamiczny typ mapy: w trybie ciemnym domyślnie elegancka mapa wektorowa (standard), z opcją przełączenia na satelitę
-  const [mapType, setMapType] = useState(isDarkMode ? 'standard' : 'hybrid');
-
-  useEffect(() => {
-    setMapType(isDarkMode ? 'standard' : 'hybrid');
-  }, [isDarkMode]);
-
   // Stan tras turystycznych
   const [activeRouteIds, setActiveRouteIds] = useState([]);
   const [currentRouteStopIndex, setCurrentRouteStopIndex] = useState(0);
@@ -166,10 +158,47 @@ export default function MapScreen({ route, navigation }) {
   const [selectedRouteTab, setSelectedRouteTab] = useState('custom'); // 'custom' | 'presets'
   const [draftCustomIds, setDraftCustomIds] = useState([]);
 
-  // Centrowanie kamery na wybranym obiekcie (podniesione wyżej, by dolna karta go nie zasłaniała)
+  // Obsługa parametrów przekazanych do mapy (wybrany zabytek lub trasa z AI / eksploratora)
   useEffect(() => {
-    if (initialPlaceId) {
-      const target = PLACES.find((p) => p.id === initialPlaceId);
+    const routePlacesParam = route?.params?.routePlaces;
+    const initialPlaceIdParam = route?.params?.initialPlaceId;
+
+    if (Array.isArray(routePlacesParam) && routePlacesParam.length > 0) {
+      setActiveRouteIds(routePlacesParam);
+      setDraftCustomIds(routePlacesParam);
+      setCurrentRouteStopIndex(0);
+
+      const firstTarget = PLACES.find((p) => p.id === routePlacesParam[0]);
+      if (firstTarget?.location?.latitude && firstTarget?.location?.longitude) {
+        setSelectedPlace(firstTarget);
+      }
+
+      const timer = setTimeout(() => {
+        const coords = routePlacesParam
+          .map((id) => PLACES.find((p) => p.id === id))
+          .filter((p) => p?.location?.latitude && p?.location?.longitude)
+          .map((p) => ({ latitude: p.location.latitude, longitude: p.location.longitude }));
+
+        if (coords.length > 1 && mapRef.current?.fitToCoordinates) {
+          mapRef.current.fitToCoordinates(coords, {
+            edgePadding: { top: 120, right: 60, bottom: 220, left: 60 },
+            animated: true,
+          });
+        } else if (firstTarget?.location) {
+          mapRef.current?.animateToRegion(
+            {
+              latitude: firstTarget.location.latitude - CAMERA_LAT_OFFSET,
+              longitude: firstTarget.location.longitude,
+              latitudeDelta: 0.008,
+              longitudeDelta: 0.008,
+            },
+            500
+          );
+        }
+      }, 350);
+      return () => clearTimeout(timer);
+    } else if (initialPlaceIdParam) {
+      const target = PLACES.find((p) => p.id === initialPlaceIdParam);
       if (target?.location?.latitude && target?.location?.longitude) {
         setSelectedPlace(target);
         const timer = setTimeout(() => {
@@ -186,33 +215,7 @@ export default function MapScreen({ route, navigation }) {
         return () => clearTimeout(timer);
       }
     }
-  }, [initialPlaceId]);
-
-  // Wczytanie trasy przekazanej w parametrach (np. z asystenta AI)
-  useEffect(() => {
-    if (Array.isArray(initialRoutePlaces) && initialRoutePlaces.length > 0) {
-      setActiveRouteIds(initialRoutePlaces);
-      setDraftCustomIds(initialRoutePlaces);
-      setCurrentRouteStopIndex(0);
-
-      const firstTarget = PLACES.find((p) => p.id === initialRoutePlaces[0]);
-      if (firstTarget?.location?.latitude && firstTarget?.location?.longitude) {
-        setSelectedPlace(firstTarget);
-        const timer = setTimeout(() => {
-          mapRef.current?.animateToRegion(
-            {
-              latitude: firstTarget.location.latitude - CAMERA_LAT_OFFSET,
-              longitude: firstTarget.location.longitude,
-              latitudeDelta: 0.008,
-              longitudeDelta: 0.008,
-            },
-            500
-          );
-        }, 400);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [initialRoutePlaces]);
+  }, [route?.params?.initialPlaceId, route?.params?.routePlaces, route?.params?.focusTimestamp]);
 
   // Sprawdzenie i pobranie lokalizacji GPS turysty
   useEffect(() => {
@@ -496,9 +499,8 @@ export default function MapScreen({ route, navigation }) {
           latitudeDelta: KOZUCHOW_COORDINATES.latitudeDelta,
           longitudeDelta: KOZUCHOW_COORDINATES.longitudeDelta,
         }}
-        mapType={mapType}
+        mapType="hybrid"
         userInterfaceStyle={isDarkMode ? 'dark' : 'light'}
-        customMapStyle={mapType === 'standard' && isDarkMode ? DARK_MAP_STYLE : []}
         showsUserLocation={hasLocationPermission}
         showsMyLocationButton={false}
         showsCompass={true}
@@ -754,31 +756,6 @@ export default function MapScreen({ route, navigation }) {
         ]}
         pointerEvents="box-none"
       >
-        {/* Przełącznik warstwy mapy: Wektorowa (ciemna) vs Satelitarna */}
-        <CalmPressable
-          style={[
-            styles.floatingActionButton,
-            styles.layerActionButton,
-            { backgroundColor: colors.white, borderColor: colors.borderLight },
-            highContrast && styles.highContrastControlButton,
-          ]}
-          onPress={() => setMapType((prev) => (prev === 'hybrid' ? 'standard' : 'hybrid'))}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel={
-            mapType === 'hybrid'
-              ? t('map.standardView')
-              : t('map.satelliteView')
-          }
-        >
-          <Ionicons
-            name={mapType === 'hybrid' ? 'map-outline' : 'earth-outline'}
-            size={22 * scale}
-            color={colors.primary}
-          />
-        </CalmPressable>
-
         <CalmPressable
           style={[
             styles.floatingActionButton,
@@ -1356,14 +1333,6 @@ const createStyles = (scale) =>
       shadowOpacity: 0.25,
       shadowRadius: 6,
       elevation: 6,
-    },
-    layerActionButton: {
-      width: 44 * scale,
-      height: 44 * scale,
-      minWidth: 44 * scale,
-      minHeight: 44 * scale,
-      marginBottom: 10 * scale,
-      borderRadius: 22 * scale,
     },
     recenterActionButton: {
       width: 52 * scale,

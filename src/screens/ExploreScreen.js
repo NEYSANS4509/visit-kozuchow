@@ -483,9 +483,8 @@ export default function ExploreScreen({ navigation }) {
               style={styles.embeddedMap}
               provider={PROVIDER_DEFAULT}
               initialRegion={KOZUCHOW_REGION}
-              mapType={isDarkMode ? 'standard' : 'hybrid'}
+              mapType="hybrid"
               userInterfaceStyle={isDarkMode ? 'dark' : 'light'}
-              customMapStyle={isDarkMode ? DARK_MAP_STYLE : []}
               showsUserLocation={false}
               showsCompass={false}
               toolbarEnabled={false}

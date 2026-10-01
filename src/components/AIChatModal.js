@@ -35,7 +35,7 @@ import { useLanguage } from '../context/LanguageContext';
  */
 export default function AIChatModal({ visible, onClose }) {
   const navigation = useNavigation();
-  const { colors, highContrast, colorBlindMode, getScaledFontSize } = useAccessibility();
+  const { colors, highContrast, colorBlindMode, isDarkMode, getScaledFontSize } = useAccessibility();
   const { t, language, ttsLocale, translatePlace } = useLanguage();
 
   const getWelcomeText = useCallback(() => {
@@ -71,11 +71,13 @@ export default function AIChatModal({ visible, onClose }) {
   const [userLocation, setUserLocation] = useState(null);
   const scrollRef = useRef(null);
 
-  // Automatyczne przewijanie listy do dołu po pojawieniu się klawiatury
+  // Płynne przewijanie do dołu przy otwarciu klawiatury bez szarpania ekranu
   useEffect(() => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const sub = Keyboard.addListener(showEvent, () => {
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollToEnd({ animated: true });
+      });
     });
 
     return () => sub.remove();
@@ -204,12 +206,29 @@ export default function AIChatModal({ visible, onClose }) {
     }, 220);
   };
 
+  // Otwarcie wybranego zabytku bezpośrednio na mapie
+  const handleOpenPlaceOnMap = (placeId) => {
+    Speech.stop();
+    onClose();
+    setTimeout(() => {
+      navigation.navigate('Map', {
+        initialPlaceId: placeId,
+        routePlaces: null,
+        focusTimestamp: Date.now(),
+      });
+    }, 220);
+  };
+
   // Otwarcie wyznaczonej trasy na mapie ze zminimalizowaniem czatu
   const handleOpenRoute = (placeIds) => {
     Speech.stop();
     onClose();
     setTimeout(() => {
-      navigation.navigate('Map', { routePlaces: placeIds });
+      navigation.navigate('Map', {
+        routePlaces: placeIds,
+        initialPlaceId: null,
+        focusTimestamp: Date.now(),
+      });
     }, 220);
   };
 
@@ -257,11 +276,11 @@ export default function AIChatModal({ visible, onClose }) {
       <SafeAreaView style={[styles.safeContainer, { backgroundColor: colors.white }]} edges={['top', 'bottom']}>
         <KeyboardAvoidingView
           style={[styles.keyboardContainer, { backgroundColor: colors.backgroundLight }]}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 75 : 25}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
         >
           {/* Nagłówek okna czatu */}
-          <View style={[styles.header, { borderBottomColor: colors.borderLight }, highContrast && styles.highContrastHeader]}>
+          <View style={[styles.header, { backgroundColor: colors.white, borderBottomColor: colors.borderLight }, highContrast && styles.highContrastHeader]}>
             <View style={styles.headerTitleBox}>
               <View
                 style={[
@@ -387,9 +406,10 @@ export default function AIChatModal({ visible, onClose }) {
           {/* Przewijana lista wiadomości w konwersacji */}
           <ScrollView
             ref={scrollRef}
-            style={styles.messagesList}
+            style={[styles.messagesList, { backgroundColor: colors.backgroundLight }]}
             contentContainerStyle={styles.messagesContainer}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
           >
             {messages.map((m) => {
               const { cleanText, targetPlaces, targetRoute } = parseMessageContent(m.text);
@@ -426,35 +446,43 @@ export default function AIChatModal({ visible, onClose }) {
                     <TouchableOpacity
                       style={[
                         styles.placeLinkButton,
-                        { backgroundColor: colorBlindMode ? '#E0F2FE' : '#F3E8FF' },
+                        {
+                          backgroundColor: isDarkMode
+                            ? (colorBlindMode ? '#082F49' : '#2E1065')
+                            : (colorBlindMode ? '#E0F2FE' : '#F3E8FF'),
+                          borderColor: isDarkMode
+                            ? (colorBlindMode ? '#0284C7' : '#7C3AED')
+                            : (colorBlindMode ? '#BAE6FD' : '#E9D5FF'),
+                          borderWidth: 1,
+                        },
                         highContrast && styles.highContrastPlaceLink,
                       ]}
                       activeOpacity={0.8}
                       onPress={() => handleOpenRoute(targetRoute.placeIds)}
                       accessible={true}
                       accessibilityRole="button"
-                      accessibilityLabel={`Wczytaj trasę na mapę: ${targetRoute.count} przystanków`}
+                      accessibilityLabel={`${t('chat.showRoute', { count: targetRoute.count })}: ${targetRoute.count} przystanków`}
                       accessibilityHint="Otwiera interaktywną mapę z wyznaczoną trasą i ponumerowanymi punktami"
                     >
                       <View style={styles.placeLinkLeft}>
                         <Ionicons
                           name="trail-sign"
                           size={22}
-                          color={colorBlindMode ? '#0284C7' : '#8B5CF6'}
+                          color={colorBlindMode ? '#0284C7' : (isDarkMode ? '#C4B5FD' : '#8B5CF6')}
                         />
                         <View style={{ flex: 1 }}>
                           <Text
                             style={[
                               styles.placeLinkText,
                               {
-                                color: colorBlindMode ? '#0284C7' : '#8B5CF6',
+                                color: colorBlindMode ? '#0284C7' : (isDarkMode ? '#C4B5FD' : '#8B5CF6'),
                                 fontSize: getScaledFontSize(13),
                               },
                             ]}
                             numberOfLines={1}
                             allowFontScaling={true}
                           >
-                            Pokaż trasę na mapie ({targetRoute.count} pkt)
+                            {t('chat.showRoute', { count: targetRoute.count })}
                           </Text>
                           <Text
                             style={[
@@ -471,7 +499,7 @@ export default function AIChatModal({ visible, onClose }) {
                       <Ionicons
                         name="chevron-forward"
                         size={18}
-                        color={colorBlindMode ? '#0284C7' : '#8B5CF6'}
+                        color={colorBlindMode ? '#0284C7' : (isDarkMode ? '#C4B5FD' : '#8B5CF6')}
                       />
                     </TouchableOpacity>
                   )}
@@ -481,41 +509,84 @@ export default function AIChatModal({ visible, onClose }) {
                     targetPlaces &&
                     targetPlaces.length > 0 &&
                     targetPlaces.map((place) => (
-                      <TouchableOpacity
-                        key={place.id}
-                        style={[
-                          styles.placeLinkButton,
-                          { backgroundColor: colors.primaryLight },
-                          highContrast && styles.highContrastPlaceLink,
-                        ]}
-                        activeOpacity={0.8}
-                        onPress={() => handleOpenPlace(place.id)}
-                        accessible={true}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Przejdź do obiektu: ${place.title}`}
-                        accessibilityHint="Otwiera szczegółową kartę zabytku"
-                      >
-                        <View style={styles.placeLinkLeft}>
-                          <Ionicons name="navigate-circle" size={22} color={colors.primary} />
-                          <Text
-                            style={[
-                              styles.placeLinkText,
-                              { color: colors.primary, fontSize: getScaledFontSize(13) },
-                            ]}
-                            numberOfLines={1}
-                            allowFontScaling={true}
-                          >
-                            {t('common.open')}: {place.title}
-                          </Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={18} color={colors.primary} />
-                      </TouchableOpacity>
+                      <View key={place.id} style={styles.placeCardRow}>
+                        <TouchableOpacity
+                          style={[
+                            styles.placeLinkButton,
+                            styles.placeLinkButtonFlex,
+                            {
+                              backgroundColor: isDarkMode ? '#132338' : colors.primaryLight,
+                              borderColor: isDarkMode ? '#1E3A5F' : colors.borderLight,
+                              borderWidth: 1,
+                            },
+                            highContrast && styles.highContrastPlaceLink,
+                          ]}
+                          activeOpacity={0.8}
+                          onPress={() => handleOpenPlaceOnMap(place.id)}
+                          accessible={true}
+                          accessibilityRole="button"
+                          accessibilityLabel={`${t('detail.showOnMap')}: ${place.title}`}
+                          accessibilityHint="Centruje mapę satelitarną na tym obiekcie"
+                        >
+                          <View style={styles.placeLinkLeft}>
+                            <Ionicons name="map" size={18} color={colors.primary} />
+                            <View style={{ flex: 1 }}>
+                              <Text
+                                style={[
+                                  styles.placeLinkText,
+                                  { color: colors.primary, fontSize: getScaledFontSize(13) },
+                                ]}
+                                numberOfLines={1}
+                                allowFontScaling={true}
+                              >
+                                {t('detail.showOnMap')}: {place.title}
+                              </Text>
+                              <Text
+                                style={[
+                                  styles.routeLinkSubText,
+                                  { color: colors.textMuted, fontSize: getScaledFontSize(11) },
+                                ]}
+                                numberOfLines={1}
+                                allowFontScaling={true}
+                              >
+                                {place.location?.address || place.category}
+                              </Text>
+                            </View>
+                          </View>
+                          <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          style={[
+                            styles.placeDetailSmallBtn,
+                            {
+                              backgroundColor: isDarkMode ? colors.white : '#FFFFFF',
+                              borderColor: colors.borderLight,
+                            },
+                            highContrast && styles.highContrastPlaceLink,
+                          ]}
+                          activeOpacity={0.8}
+                          onPress={() => handleOpenPlace(place.id)}
+                          accessible={true}
+                          accessibilityRole="button"
+                          accessibilityLabel={`${t('common.open')}: ${place.title}`}
+                          accessibilityHint="Otwiera szczegółową kartę zabytku"
+                        >
+                          <Ionicons name="information-circle-outline" size={20} color={colors.textDark} />
+                        </TouchableOpacity>
+                      </View>
                     ))}
 
                   {/* Przycisk odsłuchania lektorem (min. 48 dp) */}
                   {!isUser && (
                     <TouchableOpacity
-                      style={styles.speakButton}
+                      style={[
+                        styles.speakButton,
+                        {
+                          backgroundColor: isDarkMode ? 'rgba(56, 189, 248, 0.12)' : 'rgba(64, 141, 212, 0.08)',
+                          borderColor: isDarkMode ? 'rgba(56, 189, 248, 0.25)' : 'rgba(64, 141, 212, 0.2)',
+                        },
+                      ]}
                       onPress={() => playVoice(cleanText)}
                       activeOpacity={0.6}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -523,7 +594,7 @@ export default function AIChatModal({ visible, onClose }) {
                       accessibilityRole="button"
                       accessibilityLabel={t('chat.speakAnswer')}
                     >
-                      <Ionicons name="volume-medium-outline" size={18} color={colors.primary} />
+                      <Ionicons name="volume-medium-outline" size={16} color={colors.primary} />
                       <Text
                         style={[
                           styles.speakButtonText,
@@ -541,7 +612,12 @@ export default function AIChatModal({ visible, onClose }) {
 
             {loading && (
               <View
-                style={[styles.bubble, styles.aiBubble, styles.loadingRow]}
+                style={[
+                  styles.bubble,
+                  styles.aiBubble,
+                  styles.loadingRow,
+                  { backgroundColor: colors.white, borderColor: colors.borderLight },
+                ]}
                 accessible={true}
                 accessibilityRole="progressbar"
                 accessibilityLabel={t('chat.thinking')}
@@ -565,7 +641,13 @@ export default function AIChatModal({ visible, onClose }) {
             <TextInput
               style={[
                 styles.input,
-                { backgroundColor: colors.surfaceMuted, color: colors.textDark, fontSize: getScaledFontSize(14) },
+                {
+                  backgroundColor: colors.surfaceMuted,
+                  color: colors.textDark,
+                  borderColor: colors.borderLight,
+                  borderWidth: 1,
+                  fontSize: getScaledFontSize(14),
+                },
               ]}
               placeholder={t('chat.placeholder')}
               placeholderTextColor={colors.textMuted}
@@ -722,6 +804,26 @@ const styles = StyleSheet.create({
     marginTop: 10,
     gap: 8,
   },
+  placeCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 10,
+  },
+  placeLinkButtonFlex: {
+    flex: 1,
+    marginTop: 0,
+  },
+  placeDetailSmallBtn: {
+    width: 44,
+    height: 48,
+    minWidth: 44,
+    minHeight: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   highContrastPlaceLink: {
     borderWidth: 2,
     borderColor: '#000000',
@@ -742,8 +844,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginTop: 8,
-    minHeight: 40,
+    marginTop: 10,
+    minHeight: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    paddingHorizontal: 12,
     alignSelf: 'flex-start',
   },
   speakButtonText: {
