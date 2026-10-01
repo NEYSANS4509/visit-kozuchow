@@ -1,11 +1,12 @@
 // src/components/AudioGuideButton.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as Haptics from 'expo-haptics';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { useScale } from '../hooks/useScale';
+import CalmPressable from './CalmPressable';
 
 /**
  * Rozwija typowe polskie skróty historyczne i językowe,
@@ -43,7 +44,7 @@ const getBestPolishVoice = async () => {
 
     if (polishVoices.length === 0) return null;
 
-    // 1. Priorytet: głos o wysokiej jakości (Enhanced/Premium) lub głos Siri
+    // Priorytet: głos o wysokiej jakości (Enhanced/Premium) lub głos Siri
     const highQualityVoice = polishVoices.find((v) => {
       const q = String(v.quality || '').toLowerCase();
       const n = String(v.name || '').toLowerCase();
@@ -58,18 +59,46 @@ const getBestPolishVoice = async () => {
 
 /**
  * Przycisk audioprzewodnika odtwarzający opis obiektu za pomocą syntezy mowy (expo-speech).
- * Spełnia standardy WCAG 2.1 AA:
- * - Rozmiar dotyku min. 48x48 dp (Touch Target)
- * - Czytelne etykiety dla czytników ekranu (TalkBack / VoiceOver)
- * - Obsługa trybu wysokiego kontrastu.
+ * Posiada spokojny, hipnotyzujący puls oddechowy (Calm Breathing Animation) podczas mowy.
  *
  * @param {string} text - Tekst opisu do odczytania
  * @param {object} style - Opcjonalne style przycisku
  */
 export default function AudioGuideButton({ text, style }) {
   const { scale } = useScale();
-  const { colors, highContrast } = useAccessibility();
+  const { colors, highContrast, reduceMotion } = useAccessibility();
   const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Spokojna animacja pulsu oddechowego (okres 2.4 sekundy — bardzo łagodna i relaksująca)
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    let animationLoop = null;
+
+    if (isSpeaking && !reduceMotion) {
+      animationLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.06,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1.0,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      animationLoop.start();
+    } else {
+      pulseAnim.setValue(1);
+    }
+
+    return () => {
+      animationLoop?.stop?.();
+    };
+  }, [isSpeaking, reduceMotion]);
 
   useEffect(() => {
     return () => {
@@ -95,32 +124,18 @@ export default function AudioGuideButton({ text, style }) {
     Speech.speak(cleanedText, {
       language: 'pl-PL',
       voice: bestVoiceId || undefined,
-      rate: 0.87, // Optymalna prędkość: spokojny, zrozumiały lektor
-      pitch: 0.98, // Naturalna barwa głosu
+      rate: 0.87, // Spokojne tempo
+      pitch: 0.98,
       onDone: () => setIsSpeaking(false),
       onStopped: () => setIsSpeaking(false),
       onError: () => setIsSpeaking(false),
     });
   };
 
-  const btnSize = Math.max(48, Math.round(44 * scale));
+  const btnSize = Math.max(48, Math.round(46 * scale));
 
   return (
-    <TouchableOpacity
-      style={[
-        styles.button,
-        {
-          width: btnSize,
-          height: btnSize,
-          minWidth: 48,
-          minHeight: 48,
-          borderRadius: btnSize / 2,
-          backgroundColor: isSpeaking ? colors.primary : colors.primaryLight,
-        },
-        highContrast && styles.highContrastButton,
-        style,
-      ]}
-      activeOpacity={0.8}
+    <CalmPressable
       onPress={handleToggleSpeech}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       accessible={true}
@@ -133,12 +148,27 @@ export default function AudioGuideButton({ text, style }) {
       accessibilityHint="Uruchamia lub zatrzymuje syntezator mowy z opisem obiektu"
       accessibilityState={{ busy: isSpeaking }}
     >
-      <Ionicons
-        name={isSpeaking ? 'volume-high' : 'volume-medium-outline'}
-        size={22 * scale}
-        color={isSpeaking ? colors.white : colors.primary}
-      />
-    </TouchableOpacity>
+      <Animated.View
+        style={[
+          styles.button,
+          {
+            width: btnSize,
+            height: btnSize,
+            borderRadius: btnSize / 2,
+            backgroundColor: isSpeaking ? colors.primary : colors.primaryLight,
+            transform: [{ scale: pulseAnim }],
+          },
+          highContrast && styles.highContrastButton,
+          style,
+        ]}
+      >
+        <Ionicons
+          name={isSpeaking ? 'volume-high' : 'volume-medium-outline'}
+          size={22 * scale}
+          color={isSpeaking ? colors.white : colors.primary}
+        />
+      </Animated.View>
+    </CalmPressable>
   );
 }
 
@@ -146,6 +176,11 @@ const styles = StyleSheet.create({
   button: {
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 3,
   },
   highContrastButton: {
     borderWidth: 2,

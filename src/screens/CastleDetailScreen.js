@@ -19,6 +19,8 @@ import { useAccessibility } from '../context/AccessibilityContext';
 import { useScaledStyles } from '../hooks/useScale';
 import { getImageSource } from '../utils/imageSource';
 import AudioGuideButton from '../components/AudioGuideButton';
+import CalmPressable from '../components/CalmPressable';
+import FadeInView from '../components/FadeInView';
 
 /**
  * Ekran szczegółów zabytku lub sali ekspozycyjnej (CastleDetailScreen).
@@ -215,9 +217,8 @@ export default function CastleDetailScreen({ route, navigation }) {
               3. accessibilityLabel i accessibilityHint
              ========================================================================= */}
           <SafeAreaView style={styles.backButtonSafeArea} edges={['top']}>
-            <TouchableOpacity
+            <CalmPressable
               style={[styles.backPill, highContrast && styles.highContrastBorder]}
-              activeOpacity={0.8}
               onPress={() => navigation.goBack()}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               accessible={true}
@@ -226,7 +227,7 @@ export default function CastleDetailScreen({ route, navigation }) {
               accessibilityHint="Wraca do poprzedniego widoku"
             >
               <Ionicons name="arrow-back" size={22 * scale} color="#1C1C1E" />
-            </TouchableOpacity>
+            </CalmPressable>
           </SafeAreaView>
 
           {/* WCAG: Ukrycie czysto dekoracyjnych kropek paginacji przed czytnikiem */}
@@ -295,14 +296,13 @@ export default function CastleDetailScreen({ route, navigation }) {
 
           {/* WCAG: Przycisk przejścia na mapę (Touch Target >= 48x48 dp) */}
           {place.location?.latitude && place.location?.longitude ? (
-            <TouchableOpacity
+            <CalmPressable
               style={[
                 styles.mapButton,
                 { backgroundColor: colors.primaryLight, borderColor: colors.primary },
                 highContrast && styles.highContrastMapButton,
               ]}
               onPress={() => navigation.navigate('Map', { initialPlaceId: place.id })}
-              activeOpacity={0.8}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               accessible={true}
               accessibilityRole="button"
@@ -319,7 +319,7 @@ export default function CastleDetailScreen({ route, navigation }) {
               >
                 Pokaż na mapie
               </Text>
-            </TouchableOpacity>
+            </CalmPressable>
           ) : null}
 
           {/* Nagłówek sekcji z audioprzewodnikiem */}

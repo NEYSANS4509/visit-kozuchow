@@ -26,10 +26,12 @@ export default function SettingsScreen({ navigation }) {
     colorBlindMode,
     highContrast,
     largeText,
+    reduceMotion,
     colors,
     toggleColorBlindMode,
     toggleHighContrast,
     toggleLargeText,
+    toggleReduceMotion,
     resetAccessibilitySettings,
     getScaledFontSize,
   } = useAccessibility();
@@ -249,7 +251,12 @@ export default function SettingsScreen({ navigation }) {
           </View>
 
           {/* 3. Przełącznik: Większy tekst */}
-          <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+          <View
+            style={[
+              styles.settingRow,
+              highContrast && styles.highContrastDivider,
+            ]}
+          >
             <View style={styles.settingIconContainer}>
               <Ionicons
                 name="text-outline"
@@ -296,6 +303,58 @@ export default function SettingsScreen({ navigation }) {
                 accessibilityLabel="Większy tekst"
                 accessibilityHint="Powiększa rozmiar czcionek w całej aplikacji"
                 accessibilityState={{ checked: largeText }}
+              />
+            </View>
+          </View>
+
+          {/* 4. Przełącznik: Ograniczenie animacji (Bezpieczne dla błędnika / Kinetoza) */}
+          <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+            <View style={styles.settingIconContainer}>
+              <Ionicons
+                name="pause-circle-outline"
+                size={22 * scale}
+                color={colors.primary}
+              />
+            </View>
+
+            <View style={styles.settingInfo}>
+              <View style={styles.settingTitleRow}>
+                <Text
+                  style={[
+                    styles.settingTitle,
+                    { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
+                  ]}
+                >
+                  Ograniczenie animacji
+                </Text>
+                {reduceMotion && (
+                  <View style={styles.statusIndicatorActive}>
+                    <Ionicons name="checkmark-circle" size={14 * scale} color="#0D6EFD" />
+                    <Text style={styles.statusIndicatorText}>Aktywny</Text>
+                  </View>
+                )}
+              </View>
+              <Text
+                style={[
+                  styles.settingDescription,
+                  { color: colors.textSecondary, fontSize: getScaledFontSize(12 * scale) },
+                ]}
+              >
+                Wyłącza mikro-efekty i przejścia. Zapewnia maksymalny komfort osobom z chorobą lokomocyjną (kinetozą) i wrażliwym błędnikiem.
+              </Text>
+            </View>
+
+            <View style={styles.switchWrapper}>
+              <Switch
+                value={reduceMotion}
+                onValueChange={toggleReduceMotion}
+                trackColor={{ false: '#CBD5E1', true: colors.primary }}
+                thumbColor={colors.white}
+                accessible={true}
+                accessibilityRole="switch"
+                accessibilityLabel="Ograniczenie animacji"
+                accessibilityHint="Wyłącza wszelkie animacje dla ochrony osób z zaburzeniami błędnika"
+                accessibilityState={{ checked: reduceMotion }}
               />
             </View>
           </View>
@@ -406,7 +465,7 @@ export default function SettingsScreen({ navigation }) {
         </View>
 
         {/* Przycisk resetowania ustawień dostępności */}
-        {(colorBlindMode || highContrast || largeText) && (
+        {(colorBlindMode || highContrast || largeText || reduceMotion) && (
           <TouchableOpacity
             style={[
               styles.resetButton,

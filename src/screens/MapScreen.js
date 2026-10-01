@@ -19,6 +19,8 @@ import { PLACES } from '../data/places';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { useScaledStyles } from '../hooks/useScale';
 import { getImageSource } from '../utils/imageSource';
+import CalmPressable from '../components/CalmPressable';
+import FadeInView from '../components/FadeInView';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -544,9 +546,8 @@ export default function MapScreen({ route, navigation }) {
       <SafeAreaView style={styles.topHeaderContainer} edges={['top']} pointerEvents="box-none">
         {/* Wiersz 1: Przycisk powrotu oraz Przycisk "Utwórz trasę dla siebie" */}
         <View style={styles.topBarRow} pointerEvents="box-none">
-          <TouchableOpacity
+          <CalmPressable
             style={[styles.headerCircleButton, highContrast && styles.highContrastControlButton]}
-            activeOpacity={0.8}
             onPress={() => navigation.goBack()}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             accessible={true}
@@ -554,10 +555,10 @@ export default function MapScreen({ route, navigation }) {
             accessibilityLabel="Wróć do poprzedniego ekranu"
           >
             <Ionicons name="arrow-back" size={22 * scale} color={colors.textDark} />
-          </TouchableOpacity>
+          </CalmPressable>
 
           {/* Przycisk kreatora tras "Utwórz trasę dla siebie" (min. 48x48 dp) */}
-          <TouchableOpacity
+          <CalmPressable
             style={[
               styles.routeCreatorPill,
               activeRoutePlaces.length > 0 && {
@@ -565,7 +566,6 @@ export default function MapScreen({ route, navigation }) {
               },
               highContrast && styles.highContrastControlButton,
             ]}
-            activeOpacity={0.85}
             onPress={() => setRouteModalVisible(true)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessible={true}
@@ -593,7 +593,7 @@ export default function MapScreen({ route, navigation }) {
                 ? `Trasa (${activeRoutePlaces.length} pkt)`
                 : 'Utwórz trasę'}
             </Text>
-          </TouchableOpacity>
+          </CalmPressable>
         </View>
 
         {/* Wiersz 2: Pasek aktywnej trasy w terenie (poniżej strzałki, z pełną widocznością) */}
@@ -643,7 +643,7 @@ export default function MapScreen({ route, navigation }) {
             </View>
 
             <View style={styles.activeRouteActions}>
-              <TouchableOpacity
+              <CalmPressable
                 style={[
                   styles.activeRouteNextBtn,
                   { backgroundColor: colorBlindMode ? '#0284C7' : '#8B5CF6' },
@@ -656,9 +656,9 @@ export default function MapScreen({ route, navigation }) {
               >
                 <Text style={styles.activeRouteNextText}>Następny</Text>
                 <Ionicons name="arrow-forward" size={14 * scale} color="#FFFFFF" />
-              </TouchableOpacity>
+              </CalmPressable>
 
-              <TouchableOpacity
+              <CalmPressable
                 style={styles.activeRouteCancelBtn}
                 onPress={handleEndRoute}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -667,7 +667,7 @@ export default function MapScreen({ route, navigation }) {
                 accessibilityLabel="Zakończ trasę turystyczną"
               >
                 <Ionicons name="close-circle-outline" size={24 * scale} color={colors.textMuted} />
-              </TouchableOpacity>
+              </CalmPressable>
             </View>
           </View>
         )}
@@ -692,13 +692,12 @@ export default function MapScreen({ route, navigation }) {
         ]}
         pointerEvents="box-none"
       >
-        <TouchableOpacity
+        <CalmPressable
           style={[
             styles.floatingActionButton,
             styles.recenterActionButton,
             highContrast && styles.highContrastControlButton,
           ]}
-          activeOpacity={0.8}
           onPress={handleRecenter}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessible={true}
@@ -710,103 +709,105 @@ export default function MapScreen({ route, navigation }) {
             size={24 * scale}
             color={colors.primary}
           />
-        </TouchableOpacity>
+        </CalmPressable>
       </View>
 
       {/* =========================================================================
           DOLNA KARTA WYBRANEGO ZABYTKU (BOTTOM SHEET)
           ========================================================================= */}
       {selectedPlace && (
-        <SafeAreaView style={styles.bottomSheet} edges={['bottom']}>
-          <TouchableOpacity
-            style={[
-              styles.placeCard,
-              { backgroundColor: colors.white },
-              highContrast && styles.highContrastCard,
-            ]}
-            activeOpacity={0.9}
-            onPress={() =>
-              navigation.navigate('CastleDetail', { placeId: selectedPlace.id })
-            }
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel={`Szczegóły: ${selectedPlace.title}, kategoria ${selectedPlace.category}, odległość: ${
-              formatDistance(currentDistance) || 'brak danych'
-            }. Dotknij, aby przejść do opisu.`}
-          >
-            <Image
-              source={getImageSource(selectedPlace.imageUri)}
-              style={styles.cardImage}
-              resizeMode="cover"
+        <FadeInView style={styles.bottomSheet} duration={160}>
+          <SafeAreaView edges={['bottom']}>
+            <CalmPressable
+              style={[
+                styles.placeCard,
+                { backgroundColor: colors.white },
+                highContrast && styles.highContrastCard,
+              ]}
+              targetScale={0.985}
+              onPress={() =>
+                navigation.navigate('CastleDetail', { placeId: selectedPlace.id })
+              }
               accessible={true}
-              accessibilityRole="image"
-              accessibilityLabel={`Fotografia: ${selectedPlace.title}`}
-            />
+              accessibilityRole="button"
+              accessibilityLabel={`Szczegóły: ${selectedPlace.title}, kategoria ${selectedPlace.category}, odległość: ${
+                formatDistance(currentDistance) || 'brak danych'
+              }. Dotknij, aby przejść do opisu.`}
+            >
+              <Image
+                source={getImageSource(selectedPlace.imageUri)}
+                style={styles.cardImage}
+                resizeMode="cover"
+                accessible={true}
+                accessibilityRole="image"
+                accessibilityLabel={`Fotografia: ${selectedPlace.title}`}
+              />
 
-            <View style={styles.cardDetails}>
-              <View style={styles.badgeRow}>
-                <View
-                  style={[
-                    styles.badge,
-                    { backgroundColor: colors.primaryLight },
-                    highContrast && styles.highContrastSmallBorder,
-                  ]}
-                >
-                  <Text
+              <View style={styles.cardDetails}>
+                <View style={styles.badgeRow}>
+                  <View
                     style={[
-                      styles.badgeText,
-                      { color: colors.primary, fontSize: getScaledFontSize(10 * scale) },
+                      styles.badge,
+                      { backgroundColor: colors.primaryLight },
+                      highContrast && styles.highContrastSmallBorder,
                     ]}
-                    allowFontScaling={true}
                   >
-                    {selectedPlace.category}
-                  </Text>
-                </View>
-
-                {currentDistance != null && (
-                  <View style={styles.distanceBadge}>
-                    <Ionicons name="navigate-outline" size={11 * scale} color={colors.textMuted} />
                     <Text
                       style={[
-                        styles.distanceBadgeText,
-                        { color: colors.textMuted, fontSize: getScaledFontSize(10 * scale) },
+                        styles.badgeText,
+                        { color: colors.primary, fontSize: getScaledFontSize(10 * scale) },
                       ]}
                       allowFontScaling={true}
                     >
-                      {formatDistance(currentDistance)}
+                      {selectedPlace.category}
                     </Text>
                   </View>
-                )}
+
+                  {currentDistance != null && (
+                    <View style={styles.distanceBadge}>
+                      <Ionicons name="navigate-outline" size={11 * scale} color={colors.textMuted} />
+                      <Text
+                        style={[
+                          styles.distanceBadgeText,
+                          { color: colors.textMuted, fontSize: getScaledFontSize(10 * scale) },
+                        ]}
+                        allowFontScaling={true}
+                      >
+                        {formatDistance(currentDistance)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                <Text
+                  style={[
+                    styles.placeTitle,
+                    { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
+                  ]}
+                  numberOfLines={1}
+                  allowFontScaling={true}
+                >
+                  {selectedPlace.title}
+                </Text>
+
+                <Text
+                  style={[
+                    styles.placeAddress,
+                    { color: colors.textMuted, fontSize: getScaledFontSize(12 * scale) },
+                  ]}
+                  numberOfLines={1}
+                  allowFontScaling={true}
+                >
+                  {selectedPlace.location?.address}
+                </Text>
               </View>
 
-              <Text
-                style={[
-                  styles.placeTitle,
-                  { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
-                ]}
-                numberOfLines={1}
-                allowFontScaling={true}
-              >
-                {selectedPlace.title}
-              </Text>
-
-              <Text
-                style={[
-                  styles.placeAddress,
-                  { color: colors.textMuted, fontSize: getScaledFontSize(12 * scale) },
-                ]}
-                numberOfLines={1}
-                allowFontScaling={true}
-              >
-                {selectedPlace.location?.address}
-              </Text>
-            </View>
-
-            <View style={styles.cardArrowCircle}>
-              <Ionicons name="chevron-forward" size={18 * scale} color={colors.primary} />
-            </View>
-          </TouchableOpacity>
-        </SafeAreaView>
+              <View style={styles.cardArrowCircle}>
+                <Ionicons name="chevron-forward" size={18 * scale} color={colors.primary} />
+              </View>
+            </CalmPressable>
+          </SafeAreaView>
+        </FadeInView>
       )}
 
       {/* =========================================================================
@@ -836,7 +837,7 @@ export default function MapScreen({ route, navigation }) {
                 Planowanie trasy
               </Text>
             </View>
-            <TouchableOpacity
+            <CalmPressable
               onPress={() => setRouteModalVisible(false)}
               style={styles.modalCloseBtn}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -845,7 +846,7 @@ export default function MapScreen({ route, navigation }) {
               accessibilityLabel="Zamknij kreator trasy"
             >
               <Ionicons name="close" size={26 * scale} color={colors.textDark} />
-            </TouchableOpacity>
+            </CalmPressable>
           </View>
 
           {/* Przełącznik zakładek (Własna trasa / Szlaki AI) */}
@@ -1020,14 +1021,14 @@ export default function MapScreen({ route, navigation }) {
                 </Text>
 
                 {AI_ROUTE_PRESETS.map((preset) => (
-                  <TouchableOpacity
+                  <CalmPressable
                     key={preset.id}
                     style={[
                       styles.presetCard,
                       { backgroundColor: colors.white },
                       highContrast && styles.highContrastCard,
                     ]}
-                    activeOpacity={0.8}
+                    targetScale={0.985}
                     onPress={() => applyRoute(preset.placeIds)}
                     accessible={true}
                     accessibilityRole="button"
@@ -1074,7 +1075,7 @@ export default function MapScreen({ route, navigation }) {
                       </Text>
                       <Ionicons name="arrow-forward" size={16 * scale} color={colors.primary} />
                     </View>
-                  </TouchableOpacity>
+                  </CalmPressable>
                 ))}
               </View>
             )}
@@ -1083,7 +1084,7 @@ export default function MapScreen({ route, navigation }) {
           {/* Dolny przycisk zatwierdzenia własnej trasy */}
           {selectedRouteTab === 'custom' && (
             <View style={[styles.modalBottomBar, { backgroundColor: colors.white }]}>
-              <TouchableOpacity
+              <CalmPressable
                 style={[
                   styles.applyRouteButton,
                   { backgroundColor: colors.primary },
@@ -1107,7 +1108,7 @@ export default function MapScreen({ route, navigation }) {
                 >
                   Zatwierdź trasę ({draftCustomIds.length} pkt)
                 </Text>
-              </TouchableOpacity>
+              </CalmPressable>
             </View>
           )}
         </SafeAreaView>

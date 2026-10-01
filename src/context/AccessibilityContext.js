@@ -1,5 +1,6 @@
 // src/context/AccessibilityContext.js
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { AccessibilityInfo } from 'react-native';
 import { colors as defaultColors } from '../theme/colors';
 
 /**
@@ -46,23 +47,54 @@ const COLOR_BLIND_COLORS = {
 
 /**
  * Dostawca kontekstu dostępności (AccessibilityProvider).
- * Umożliwia dynamiczne przełączanie trybu wysokiego kontrastu, trybu dla daltonistów oraz powiększonego tekstu.
+ * Umożliwia dynamiczne przełączanie:
+ * 1. Trybu dla daltonistów
+ * 2. Trybu wysokiego kontrastu (7:1)
+ * 3. Powiększonego tekstu (+25%)
+ * 4. Trybu redukcji ruchu / spokojnych animacji (WCAG 2.1 - Kryterium 2.3.3)
  */
 export function AccessibilityProvider({ children }) {
   const [colorBlindMode, setColorBlindMode] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [largeText, setLargeText] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  // Automatyczne wykrycie systemowych preferencji redukcji ruchu użytkownika
+  useEffect(() => {
+    let isMounted = true;
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then((enabled) => {
+        if (isMounted && enabled) {
+          setReduceMotion(true);
+        }
+      })
+      .catch(() => {});
+
+    const subscription = AccessibilityInfo.addEventListener(
+      'reduceMotionChanged',
+      (enabled) => {
+        if (isMounted) setReduceMotion(enabled);
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      subscription?.remove?.();
+    };
+  }, []);
 
   // Przełączniki poszczególnych opcji
   const toggleColorBlindMode = () => setColorBlindMode((prev) => !prev);
   const toggleHighContrast = () => setHighContrast((prev) => !prev);
   const toggleLargeText = () => setLargeText((prev) => !prev);
+  const toggleReduceMotion = () => setReduceMotion((prev) => !prev);
 
   // Resetowanie wszystkich ułatwień dostępu do wartości domyślnych
   const resetAccessibilitySettings = () => {
     setColorBlindMode(false);
     setHighContrast(false);
     setLargeText(false);
+    setReduceMotion(false);
   };
 
   // Mnożnik rozmiaru czcionki (1.0 = standard, 1.25 = powiększony o 25%)
@@ -101,18 +133,21 @@ export function AccessibilityProvider({ children }) {
       colorBlindMode,
       highContrast,
       largeText,
+      reduceMotion,
       fontScale,
       colors: activeColors,
       toggleColorBlindMode,
       toggleHighContrast,
       toggleLargeText,
+      toggleReduceMotion,
       setColorBlindMode,
       setHighContrast,
       setLargeText,
+      setReduceMotion,
       resetAccessibilitySettings,
       getScaledFontSize,
     }),
-    [colorBlindMode, highContrast, largeText, fontScale, activeColors]
+    [colorBlindMode, highContrast, largeText, reduceMotion, fontScale, activeColors]
   );
 
   return (
@@ -130,19 +165,21 @@ export function AccessibilityProvider({ children }) {
 export function useAccessibility() {
   const context = useContext(AccessibilityContext);
   if (!context) {
-    // Bezpieczny stan awaryjny, jeśli komponent zostanie wyrenderowany poza dostawcą
     return {
       colorBlindMode: false,
       highContrast: false,
       largeText: false,
+      reduceMotion: false,
       fontScale: 1.0,
       colors: defaultColors,
       toggleColorBlindMode: () => {},
       toggleHighContrast: () => {},
       toggleLargeText: () => {},
+      toggleReduceMotion: () => {},
       setColorBlindMode: () => {},
       setHighContrast: () => {},
       setLargeText: () => {},
+      setReduceMotion: () => {},
       resetAccessibilitySettings: () => {},
       getScaledFontSize: (s) => s,
     };

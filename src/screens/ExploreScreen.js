@@ -18,6 +18,8 @@ import { useScaledStyles } from '../hooks/useScale';
 import { getImageSource } from '../utils/imageSource';
 import LegalModal from '../components/LegalModal';
 import AIChatModal from '../components/AIChatModal';
+import CalmPressable from '../components/CalmPressable';
+import FadeInView from '../components/FadeInView';
 
 /**
  * Domyślny wycinek mapy wycentrowany na historyczne centrum Kożuchowa.
@@ -178,69 +180,70 @@ export default function ExploreScreen({ navigation }) {
             </Text>
           </View>
         ) : (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.cardsScroll}
-          >
-            {filteredPlaces.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={[
-                  styles.placeCard,
-                  { backgroundColor: colors.white },
-                  highContrast && styles.highContrastCard,
-                ]}
-                activeOpacity={0.85}
-                onPress={() => navigation.navigate('CastleDetail', { placeId: item.id })}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel={`Obiekt: ${item.title}, kategoria: ${item.category}, adres: ${item.location?.address || 'Kożuchów'}. Dotknij, aby przejść do szczegółów.`}
-                accessibilityHint="Przenosi do karty zabytku z audioprzewodnikiem i galerią"
-              >
-                <View style={styles.cardImageWrapper}>
-                  <Image
-                    source={getImageSource(item.imageUri)}
-                    style={styles.cardImage}
-                    resizeMode="cover"
-                    accessible={true}
-                    accessibilityRole="image"
-                    accessibilityLabel={`Zdjęcie obiektu: ${item.title}`}
-                  />
-                  <View
-                    style={styles.cardBookmark}
-                    accessible={false}
-                    importantForAccessibility="no"
-                  >
-                    <Ionicons name="bookmark-outline" size={16 * scale} color="#FFFFFF" />
+          <FadeInView key={`${searchQuery}_${filteredPlaces.length}`} duration={160}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.cardsScroll}
+            >
+              {filteredPlaces.map((item) => (
+                <CalmPressable
+                  key={item.id}
+                  style={[
+                    styles.placeCard,
+                    { backgroundColor: colors.white },
+                    highContrast && styles.highContrastCard,
+                  ]}
+                  onPress={() => navigation.navigate('CastleDetail', { placeId: item.id })}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Obiekt: ${item.title}, kategoria: ${item.category}, adres: ${item.location?.address || 'Kożuchów'}. Dotknij, aby przejść do szczegółów.`}
+                  accessibilityHint="Przenosi do karty zabytku z audioprzewodnikiem i galerią"
+                >
+                  <View style={styles.cardImageWrapper}>
+                    <Image
+                      source={getImageSource(item.imageUri)}
+                      style={styles.cardImage}
+                      resizeMode="cover"
+                      accessible={true}
+                      accessibilityRole="image"
+                      accessibilityLabel={`Zdjęcie obiektu: ${item.title}`}
+                    />
+                    <View
+                      style={styles.cardBookmark}
+                      accessible={false}
+                      importantForAccessibility="no"
+                    >
+                      <Ionicons name="bookmark-outline" size={16 * scale} color="#FFFFFF" />
+                    </View>
                   </View>
-                </View>
 
-                <View style={styles.cardContent}>
-                  <Text
-                    style={[
-                      styles.cardTitle,
-                      { color: colors.textDark, fontSize: getScaledFontSize(16 * scale) },
-                    ]}
-                    numberOfLines={2}
-                    allowFontScaling={true}
-                  >
-                    {item.title}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.cardSubtitle,
-                      { color: colors.textMuted, fontSize: getScaledFontSize(12 * scale) },
-                    ]}
-                    numberOfLines={1}
-                    allowFontScaling={true}
-                  >
-                    {item.location?.address}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+                  <View style={styles.cardContent}>
+                    <Text
+                      style={[
+                        styles.cardTitle,
+                        { color: colors.textDark, fontSize: getScaledFontSize(16 * scale) },
+                      ]}
+                      numberOfLines={2}
+                      allowFontScaling={true}
+                    >
+                      {item.title}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.cardSubtitle,
+                        { color: colors.textMuted, fontSize: getScaledFontSize(12 * scale) },
+                      ]}
+                      numberOfLines={1}
+                      allowFontScaling={true}
+                    >
+                      {item.location?.address}
+                    </Text>
+                  </View>
+                </CalmPressable>
+              ))}
+            </ScrollView>
+          </FadeInView>
         )}
 
         {/* 4. Nagłówek sekcji mapy */}
@@ -255,9 +258,8 @@ export default function ExploreScreen({ navigation }) {
           >
             Mapa
           </Text>
-          <TouchableOpacity
+          <CalmPressable
             style={styles.moreButton}
-            activeOpacity={0.7}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             onPress={() => navigation.navigate('Map')}
             accessible={true}
@@ -274,16 +276,15 @@ export default function ExploreScreen({ navigation }) {
             >
               Pełny ekran
             </Text>
-          </TouchableOpacity>
+          </CalmPressable>
         </View>
 
         {/* 5. Widżet podglądu mapy (min. 48x48 touch target) */}
-        <TouchableOpacity
+        <CalmPressable
           style={[
             styles.mapCardContainer,
             highContrast && styles.highContrastCard,
           ]}
-          activeOpacity={0.85}
           onPress={() => navigation.navigate('Map')}
           accessible={true}
           accessibilityRole="button"
@@ -365,7 +366,7 @@ export default function ExploreScreen({ navigation }) {
               <Ionicons name="navigate" size={18 * scale} color="#FFF" />
             </View>
           </View>
-        </TouchableOpacity>
+        </CalmPressable>
       </ScrollView>
 
       {/* 6. Dolny pasek nawigacyjny: Odkryj | Mapa | Skaner | Asystent AI (min. wysokość 48 dp) */}
