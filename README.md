@@ -197,8 +197,3 @@ visit-kozuchow/
 ```
 
 ---
-
-## 📄 Licencja
-
-Projekt udostępniony na licencji **MIT**. Zobacz plik [LICENSE](LICENSE), aby uzyskać więcej informacji.
-Wszystkie materiały historyczne i archiwalne o Kożuchowie pochodzą z oficjalnych opracowań regionalnych.
