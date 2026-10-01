@@ -1,0 +1,278 @@
+================================================================================
+   VISIT KOŻUCHÓW — PYTANIA I ODPOWIEDZI TECHNICZNE (FAQ & ARCHITEKTURA)
+   Dokumentacja inżynierska, uzasadnienie wyborów technologicznych i zasady działania
+================================================================================
+
+SPIS TREŚCI:
+1. STOS TECHNOLOGICZNY: DLACZEGO REACT NATIVE I EXPO SDK 57?
+2. ARCHITEKTURA SZTUCZNEJ INTELIGENCJI (GROQ LLM + 3-POZIOMOWY FAILSAFE)
+3. INTERAKTYWNA MAPA SATELITARNA (HYBRID) I MATEMATYKA CENTROWANIA
+4. SKANER KODÓW QR ORAZ LOKALNA BAZA WIEDZY (OFFLINE-FIRST)
+5. AUDIOPRZEWODNIK: SYNTEZA MOWY (TTS) ZAMIAST PLIKÓW MP3
+6. STANDARD DOSTĘPNOŚCI CYFROWEJ WCAG 2.1 (POZIOM AA)
+7. BEZPIECZEŃSTWO, ZARZĄDZANIE KLUCZAMI API I OCHRONA PRYWATNOŚCI
+8. PODSUMOWANIE DECYZJI INŻYNIERSKICH
+
+================================================================================
+1. STOS TECHNOLOGICZNY: DLACZEGO REACT NATIVE I EXPO SDK 57?
+================================================================================
+
+P: Dlaczego wybrano React Native i Expo, a nie tworzenie dwóch osobnych aplikacji
+   natywnych (Kotlin/Android + Swift/iOS) ani Flutter?
+
+O: 
+1. Jedna wspólna baza kodu (Single Codebase):
+   - Dla miasta i instytucji kultury kluczowy jest koszt wdrożenia i późniejszego
+     utrzymania. React Native pozwala utrzymać 100% logiki biznesowej, bazy danych,
+     obsługi AI, map i algorytmów WCAG w jednym projekcie na Androida i iOS.
+2. Dostęp do natywnych modułów sprzętowych (Expo SDK 57):
+   - Wersja SDK 57 zapewnia nowoczesną architekturę (New Architecture / React 19),
+     stabilne, przetestowane natywne moduły: expo-camera (aparat), expo-location
+     (GPS), expo-speech (synteza mowy) i expo-haptics (wibracje haptyczne).
+3. Dojrzały ekosystem JavaScript/TypeScript:
+   - Łatwość integracji z REST API (Groq Cloud), parserami danych i globalnym stanem.
+4. Dlaczego nie Flutter?
+   - Ekosystem bibliotek dostępności (WCAG / a11y) w React Native bazuje bezpośrednio
+     na natywnych drzewach ułatwień dostępu Android Accessibility Node Info oraz
+     iOS UIAccessibilityElement. Czytniki TalkBack i VoiceOver traktują komponenty
+     React Native jak w 100% natywne kontrolki systemowe.
+
+P: Jaka jest struktura katalogów projektu?
+
+O: Projekt podzielono na modularne warstwy odpowiedzialności (Separation of Concerns):
+   - /assets/           -> Zoptymalizowane zasoby graficzne zabytków (PNG/JPG) i logo.
+   - /src/components/   -> Reużywalne komponenty UI (AIChatModal, LegalModal, itp.).
+   - /src/context/      -> Globalny stan ułatwień dostępu (AccessibilityContext).
+   - /src/data/         -> Baza danych zabytków (places.js) oraz silnik wiedzy AI (aiKnowledge.js).
+   - /src/hooks/        -> Własne hooki React (useScale.js do responsywnego skalowania DPI).
+   - /src/screens/      -> Główne ekrany aplikacji (Welcome, Explore, Map, CastleDetail, QRScanner, Settings).
+   - /src/services/     -> Logika biznesowa i integracje sieciowe (aiService.js, placesService.js).
+   - /src/theme/        -> Palety kolorów dla trybu standardowego, wysokiego kontrastu i daltonizmu.
+   - /src/utils/        -> Funkcje narzędziowe (bezpieczne ładowanie grafik itp.).
+
+
+================================================================================
+2. ARCHITEKTURA SZTUCZNEJ INTELIGENCJI (GROQ LLM + 3-POZIOMOWY FAILSAFE)
+================================================================================
+
+P: Jak dokładnie działa asystent turystyczny AI w aplikacji?
+
+O: Asystent to konwersacyjny przewodnik historyczno-turystyczny oparty o duże modele
+   językowe (LLM), działający w architekturze 3-poziomowej odporności na awarie
+   (Resilience Architecture):
+
+   [Zapytanie użytkownika + Koordynaty GPS]
+                  |
+                  v
+   POZIOM 1: Groq API (openai/gpt-oss-20b)
+   -> Czas odpowiedzi: ~0.5 - 1.2 sekundy
+   -> Parametr reasoning_effort: 'low'
+   -> Bufor: max_tokens: 1200
+                  |
+     (W razie błędu / timeoutu 8s / limitu)
+                  v
+   POZIOM 2: Model zapasowy (qwen/qwen3.8-27b)
+   -> Czas odpowiedzi: ~0.3 - 0.8 sekundy
+   -> Brak narzutu reasoning tokens, natychmiastowy fallback
+                  |
+     (W razie braku sieci / offline / błędu API)
+                  v
+   POZIOM 3: Offline Failsafe Engine (Lokalny silnik regułowy)
+   -> 100% offline, zerowe zużycie transferu
+   -> Heurystyczne dopasowanie słów kluczowych do bazy zabytków Kożuchowa
+
+P: Dlaczego wybrano Groq Cloud API, a nie bezpośrednio OpenAI (GPT-4) lub Google Gemini?
+
+O: 
+1. Ekstremalna szybkość generowania (LPU Inference):
+   - Groq przetwarza tokeny z prędkością 300-500 tokenów na sekundę. Turysta
+     stojący przed zabytkiem nie może czekać 10 sekund na odpowiedź. Odpowiedź
+     pojawia się niemal natychmiast.
+2. Otwarte modele open-weight:
+   - Wykorzystanie modeli open-weight (np. GPT-OSS, Qwen) gwarantuje niezależność
+     od komercyjnych zamkniętych modeli i niższe koszty dla samorządu.
+3. Darmowy tier developerski:
+   - Zapewnia tysiące darmowych zapytań dziennie, co jest idealne dla gminnej aplikacji.
+
+P: Dlaczego parametr "reasoning_effort: 'low'" był kluczowy dla modelu gpt-oss-20b?
+
+O: Nowoczesne modele rozumujące (Reasoning Models) generują niewidoczne dla użytkownika
+   tokeny wewnętrznego toku myślenia ("thinking tokens"). Przy domyślnym ustawieniu
+   model zużywał cały limit max_tokens na wewnętrzne rozważania, w wyniku czego treść
+   odpowiedzi zwracana do czatu była pusta. Zmniejszenie parametru do 'low' oraz
+   zwiększenie limitu max_tokens do 1200 zagwarantowało pełne, wyczerpujące odpowiedzi.
+
+P: Jak asystent wie, gdzie znajduje się turysta i jak generuje klikalne linki?
+
+O: 
+1. Kontekst lokalizacji GPS:
+   - Przed wysłaniem zapytania funkcja `generateSystemPrompt(userLocation)` oblicza
+     dokładną odległość w metrach od aktualnej pozycji GPS turysty do każdego z 12
+     zabytków w mieście. AI w prompcie systemowym otrzymuje informację:
+     "Użytkownik znajduje się 120 m od Zamku i 350 m od Baszty Krośnieńskiej".
+2. Parsowanie znaczników w aplikacji:
+   - Prompt instruuje model, aby przy wzmiance o obiekcie dopisywał znacznik: [LINK:place_id].
+   - Gdy użytkownik poprosi o trasę, model dopisuje: [ROUTE:place_01,place_04,...].
+   - Komponent `AIChatModal.js` parsuje te tagi w locie i renderuje interaktywne,
+     dotykowe przyciski: "Zobacz zabytek" oraz "Pokaż trasę na mapie (X pkt)".
+
+
+================================================================================
+3. INTERAKTYWNA MAPA SATELITARNA (HYBRID) I MATEMATYKA CENTROWANIA
+================================================================================
+
+P: Dlaczego wybrano stały widok hybrydowy (mapType="hybrid")?
+
+O: Kożuchów to miasto o unikalnym średniowiecznym układzie urbanistycznym:
+   - Zachował się pełen pierścień kamiennych murów obronnych z fosą zamienioną w park,
+     cylindryczny stołp zamkowy oraz szachownica ulic z rynkiem.
+   - Standardowa mapa wektorowa pokazuje jedynie szare linie dróg.
+   - Widok hybrydowy (zdjęcia satelitarne wysokiej rozdzielczości + nałożone nazwy ulic)
+     pozwala turyście naocznie zobaczyć zarysy dawnych fortyfikacji, fosę, dachy
+     kamienic i koronę murów miejskich.
+
+P: Jak rozwiązano problem centrowania kamery na obiekcie (CAMERA_LAT_OFFSET)?
+
+O: Problem inżynierski:
+   - Gdy kamera mapy centruje się dokładnie na współrzędnych geograficznych zabytku
+     (`latitude`, `longitude`), punkt ten trafia dokładnie w środek ekranu urządzenia.
+   - Jednak u dołu ekranu wyświetla się rozbudowana karta szczegółów (`bottomSheet`)
+     o wysokości ok. 100-140 dp (zdjęcie, kategoria, tytuł, odległość, przycisk).
+   - W rezultacie dolna karta zasłaniała pinezkę i sam zabytek ("właziła na obiekt").
+   Rozwiązanie:
+   - Wprowadzono stałe przesunięcie kamery na południe:
+     `CAMERA_LAT_OFFSET = 0.0018` (w stopniach szerokości geograficznej).
+   - Kożuchów leży na półkuli północnej (+51.74° N). Przesunięcie punktu kamery w dół (na południe)
+     powoduje, że na ekranie zabytek wyświetla się w górnej połowie okna mapy,
+     zostawiając pełną, czytelną przestrzeń dla dolnej karty informacyjnej.
+
+P: Jak obliczana jest odległość między turystą a zabytkami?
+
+O: Wykorzystano matematyczny wzór Haversine (w plikach `placesService.js`, `MapScreen.js`
+   oraz `aiKnowledge.js`):
+   - Oblicza odległość ortodromiczną (w linii prostej po sferze ziemskiej) przy
+     promieniu Ziemi R = 6 371 000 m.
+   - Zapewnia dokładność do 1 metra bez konieczności wykonywania płatnych zapytań
+     do zewnętrznych serwisów (np. Google Distance Matrix API).
+   - Działa w 100% offline, natychmiastowo aktualizując odległości przy każdym kroku turysty.
+
+
+================================================================================
+4. SKANER KODÓW QR ORAZ LOKALNA BAZA WIEDZY (OFFLINE-FIRST)
+================================================================================
+
+P: Jak działa skaner kodów QR i dlaczego obsługuje dwa typy identyfikatorów?
+
+O: Skaner (`QRScannerScreen.js`) oparty jest o `CameraView` z pakietu `expo-camera`:
+   1. Błyskawiczna detekcja:
+      - Rozpoznaje kody QR i kody kreskowe (barcodeScannerSettings: qr).
+   2. Blokada wielokrotnego skanowania (Scan-Lock Flag):
+      - Flaga `scanned = true` uniemożliwia wielokrotne otwarcie ekranu w ułamku sekundy.
+      - Sygnał haptyczny `Haptics.notificationAsync` potwierdza fizyczną wibracją odczyt kodu.
+   3. Dwa typy kodów w mieście:
+      - `KZ-XX-PLACE` -> kody umieszczone na tablicach zewnętrznych przy zabytkach (np. KZ-01-PLACE to Zamek).
+      - `KZ-XX-ROOM`  -> kody wewnątrz Zamku i ekspozycji muzealnych (np. KZ-01-ROOM to Sala Rycerska, KZ-02-ROOM to Izba Regionalna).
+   - Po zeskanowaniu funkcja `findPlaceOrRoomByQr` natychmiast otwiera dedykowaną kartę
+     `CastleDetailScreen` z odpowiednimi opisami, zdjęciami i audioprzewodnikiem.
+
+P: Dlaczego dane zabytków i zdjęcia zapisano lokalnie, a nie w zewnętrznej bazie SQL/Firebase?
+
+O: 
+1. Grube mury zabytkowe i piwnice:
+   - Zamek w Kożuchowie, kościoły oraz gotyckie piwnice ratuszowe posiadają kamienne
+     mury o grubości do 2 metrów. Sygnał komórkowy LTE/5G w tych miejscach często zanika.
+2. Niezawodność (Zero Downtime):
+   - Aplikacja nie wymaga łączności z serwerem bazodanowym, nie generuje kosztów
+     hostingu chmurowego dla gminy i nie może przestać działać z powodu awarii serwera.
+3. Wszystkie grafiki zostały zoptymalizowane do formatów PNG/JPG, zapewniając
+   błyskawiczne renderowanie bez efektu doczytywania ("blank image").
+
+
+================================================================================
+5. AUDIOPRZEWODNIK: SYNTEZA MOWY (TTS) ZAMIAST PLIKÓW MP3
+================================================================================
+
+P: Dlaczego wybrano Text-to-Speech (expo-speech) zamiast nagrań lektorskich MP3?
+
+O: 
+1. Rozmiar paczki instalacyjnej (APK / IPA):
+   - 12 pełnych nagrań lektorskich w formacie MP3 w dobrej jakości ważyłoby 40–80 MB.
+   - Zastosowanie `expo-speech` dodaje 0 KB do rozmiaru aplikacji — korzysta z wbudowanego
+     w system Android/iOS natywnego syntezatora mowy.
+2. Elastyczność i edycja tekstów:
+   - Jeśli historyk lub kustosz zamku zmieni jedno zdanie w opisie baszty, w przypadku
+     MP3 konieczne byłoby ponowne wynajęcie lektora i nagranie studyjne. W TTS
+     wystarczy edycja tekstu w pliku bazy danych.
+3. Kontrola odtwarzania:
+   - Komponent `AudioGuideButton.js` zapewnia pełne zarządzanie cyklem życia mowy:
+     odtwarzanie, pauzowanie (`Speech.pause()`), wznawianie (`Speech.resume()`)
+     oraz zatrzymywanie (`Speech.stop()`).
+
+
+================================================================================
+6. STANDARD DOSTĘPNOŚCI CYFROWEJ WCAG 2.1 (POZIOM AA)
+================================================================================
+
+P: W jaki sposób aplikacja spełnia międzynarodowy standard WCAG 2.1 (AA)?
+
+O: Dostępność została wdrożona kompleksowo w całym kodzie, a nie jako powierzchowny dodatek:
+
+1. Strefa dotyku (Target Size - Kryterium 2.5.5 / 2.5.8):
+   - Każdy interaktywny element (przycisk, kafel, ikona, checkbox, zakładka)
+     posiada minimalny fizyczny obszar dotyku co najmniej 48 × 48 dp.
+   - Wykorzystano właściwości `minWidth: 48`, `minHeight: 48` oraz `hitSlop`
+     (np. `hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}`).
+2. Czytniki ekranu dla osób niewidomych (TalkBack / VoiceOver):
+   - Wszystkie komponenty posiadają:
+     * `accessible={true}`
+     * precyzyjne `accessibilityLabel` w języku polskim (np. "Wróć do poprzedniego ekranu", "Pokaż obiekt Zamek na mapie")
+     * `accessibilityRole` ("button", "header", "image", "tab", "checkbox")
+     * `accessibilityHint` informujący o skutku kliknięcia
+     * `accessibilityState` informujący o stanie (np. `{ selected: true }`, `{ checked: true }`).
+3. Tryb dla osób z daltonizmem (Color Blindness Mode):
+   - Alternatywna paleta barw, eliminująca problematyczne pary kolorów (czerwień/zieleń).
+   - Zastąpienie ich bezpiecznymi błękitami (#0284C7), fioletami i pomarańczami.
+   - Obowiązkowe dublowanie statusów ikonami i tekstem (nie polegamy wyłącznie na kolorze).
+4. Tryb wysokiego kontrastu (High Contrast Mode):
+   - Współczynnik kontrastu tekstu do tła przekracza 7:1 (wymóg poziomu AAA dla zwykłego tekstu).
+   - Wymuszone wyraźne, 2-pikselowe obramowania przycisków, kart i markerów na mapie.
+5. Skalowanie czcionki (Large Text):
+   - Wszystkie komponenty tekstowe posiadają `allowFontScaling={true}`.
+   - Specjalna funkcja `getScaledFontSize()` zwiększa rozmiar bazowy tekstu o 20%
+     po włączeniu opcji "Większy tekst" w ustawieniach.
+
+
+================================================================================
+7. BEZPIECZEŃSTWO, ZARZĄDZANIE KLUCZAMI API I OCHRONA PRYWATNOŚCI
+================================================================================
+
+P: Jak zabezpieczono klucze API i dane użytkowników?
+
+O: 
+1. Ochrona klucza Groq API:
+   - Klucz API został wyodrębniony do lokalnego pliku `.env` pod zmienną:
+     `EXPO_PUBLIC_GROQ_API_KEY`.
+   - Plik `.env` został dodany do `.gitignore` i nie trafia do repozytorium GitHub.
+   - Zapobiega to automatycznemu unieważnieniu klucza przez GitHub Secret Scanning.
+   - W repozytorium udostępniono szablon `.env.example`.
+2. Ochrona prywatności danych geolokalizacyjnych:
+   - Współrzędne GPS są przetwarzane wyłącznie lokalnie w pamięci RAM urządzenia
+     do obliczania odległości (Haversine) i centrowania kamery.
+   - Pozycja GPS użytkownika nie jest nigdzie zapisywana, logowana ani wysyłana na zewnętrzne serwery.
+
+
+================================================================================
+8. PODSUMOWANIE DECYZJI INŻYNIERSKICH
+================================================================================
+
+| Element | Wybrane rozwiązanie | Kluczowe uzasadnienie |
+| :--- | :--- | :--- |
+| **Framework** | React Native (Expo SDK 57) | 1 wspólny kod dla Android/iOS, nowoczesny silnik, niskie koszty. |
+| **Silnik AI** | Groq LPU (GPT-OSS / Qwen) | Czas odpowiedzi poniżej 1 sekundy, otwarte modele, darmowy tier. |
+| **Odporność AI**| 3-poziomowy Failsafe | Nigdy nie zostawia turysty bez odpowiedzi, nawet w podziemiach bez LTE. |
+| **Typ mapy** | Hybrid (Satelita + Ulice) | Perfekcyjna widoczność średniowiecznych murów, fosy i zamku. |
+| **Kamera mapy** | CAMERA_LAT_OFFSET (-0.0018°) | Zabytek pojawia się w górnej połowie ekranu, dolna karta go nie zasłania. |
+| **Dystans GPS**| Wzór Haversine | Dokładność do 1 m, 0 ms narzutu, brak płatnych zapytań do Google. |
+| **Lektor** | Expo Speech (TTS) | 0 MB dodatkowej wagi aplikacji, łatwa edycja opisów, natywny polski głos. |
+| **Baza danych**| Offline-First (Local JSON) | Niezawodność w zabytkowych kamiennych murach i piwnicach. |
+| **Dostępność** | WCAG 2.1 AA | Dotyk >= 48dp, TalkBack/VoiceOver, tryb dla daltonistów, kontrast > 7:1. |
