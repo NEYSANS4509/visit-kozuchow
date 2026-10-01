@@ -584,6 +584,7 @@ const createStyles = (scale) =>
     },
     placeCard: {
       width: 220 * scale,
+      height: 290 * scale,
       borderRadius: 22 * scale,
       padding: 10 * scale,
       shadowColor: '#000',
@@ -615,12 +616,14 @@ const createStyles = (scale) =>
       justifyContent: 'center',
     },
     cardContent: {
-      paddingVertical: 10 * scale,
+      flex: 1,
+      justifyContent: 'space-between',
+      paddingVertical: 8 * scale,
       paddingHorizontal: 4 * scale,
     },
     cardTitle: {
       fontWeight: '700',
-      marginBottom: 4 * scale,
+      marginBottom: 2 * scale,
     },
     cardSubtitle: {
       fontWeight: '500',

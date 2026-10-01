@@ -584,21 +584,19 @@ const createStyles = (scale) =>
       fontWeight: '700',
     },
     infoSectionHeader: {
-      position: 'relative',
       flexDirection: 'row',
-      justifyContent: 'center',
+      justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: 14 * scale,
       minHeight: 48 * scale,
     },
     sectionTitle: {
       fontWeight: '600',
-      textAlign: 'center',
+      textAlign: 'left',
       fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
     },
     audioBtn: {
-      position: 'absolute',
-      right: 0,
+      marginLeft: 12 * scale,
     },
     descriptionText: {
       lineHeight: 24 * scale,

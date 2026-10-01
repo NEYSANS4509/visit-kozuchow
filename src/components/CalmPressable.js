@@ -14,6 +14,8 @@ import { useAccessibility } from '../context/AccessibilityContext';
  *
  * @param {object} props - Właściwości komponentu (onPress, style, children, hitSlop, itp.)
  */
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 export default function CalmPressable({
   children,
   style,
@@ -57,7 +59,7 @@ export default function CalmPressable({
   };
 
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={disabled ? undefined : onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
@@ -69,20 +71,15 @@ export default function CalmPressable({
       accessibilityHint={accessibilityHint}
       accessibilityState={accessibilityState}
       testID={testID}
+      style={[
+        style,
+        !reduceMotion && {
+          transform: [{ scale: scaleAnim }],
+        },
+        disabled && { opacity: 0.5 },
+      ]}
     >
-      {({ pressed }) => (
-        <Animated.View
-          style={[
-            style,
-            !reduceMotion && {
-              transform: [{ scale: scaleAnim }],
-            },
-            disabled && { opacity: 0.5 },
-          ]}
-        >
-          {typeof children === 'function' ? children({ pressed }) : children}
-        </Animated.View>
-      )}
-    </Pressable>
+      {children}
+    </AnimatedPressable>
   );
 }

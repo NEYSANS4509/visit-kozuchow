@@ -496,8 +496,7 @@ export default function MapScreen({ route, navigation }) {
                 longitude: place.location.longitude,
               }}
               onPress={() => handleMarkerPress(place)}
-              title={place.title}
-              description={place.category}
+              tracksInfoWindowChanges={false}
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel={`Pinezka zabytku: ${place.title}. Kategoria: ${place.category}${

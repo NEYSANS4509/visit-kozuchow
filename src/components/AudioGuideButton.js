@@ -1,7 +1,7 @@
 // src/components/AudioGuideButton.js
 import React, { useState, useEffect, useRef } from 'react';
 import * as Haptics from 'expo-haptics';
-import { StyleSheet, Animated } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
 import { useAccessibility } from '../context/AccessibilityContext';
@@ -66,39 +66,8 @@ const getBestPolishVoice = async () => {
  */
 export default function AudioGuideButton({ text, style }) {
   const { scale } = useScale();
-  const { colors, highContrast, reduceMotion } = useAccessibility();
+  const { colors, highContrast } = useAccessibility();
   const [isSpeaking, setIsSpeaking] = useState(false);
-
-  // Spokojna animacja pulsu oddechowego (okres 2.4 sekundy — bardzo łagodna i relaksująca)
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    let animationLoop = null;
-
-    if (isSpeaking && !reduceMotion) {
-      animationLoop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.06,
-            duration: 1200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1.0,
-            duration: 1200,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      animationLoop.start();
-    } else {
-      pulseAnim.setValue(1);
-    }
-
-    return () => {
-      animationLoop?.stop?.();
-    };
-  }, [isSpeaking, reduceMotion]);
 
   useEffect(() => {
     return () => {
@@ -147,27 +116,25 @@ export default function AudioGuideButton({ text, style }) {
       }
       accessibilityHint="Uruchamia lub zatrzymuje syntezator mowy z opisem obiektu"
       accessibilityState={{ busy: isSpeaking }}
+      style={[
+        styles.button,
+        {
+          width: btnSize,
+          height: btnSize,
+          minWidth: 48,
+          minHeight: 48,
+          borderRadius: btnSize / 2,
+          backgroundColor: isSpeaking ? colors.primary : colors.primaryLight,
+        },
+        highContrast && styles.highContrastButton,
+        style,
+      ]}
     >
-      <Animated.View
-        style={[
-          styles.button,
-          {
-            width: btnSize,
-            height: btnSize,
-            borderRadius: btnSize / 2,
-            backgroundColor: isSpeaking ? colors.primary : colors.primaryLight,
-            transform: [{ scale: pulseAnim }],
-          },
-          highContrast && styles.highContrastButton,
-          style,
-        ]}
-      >
-        <Ionicons
-          name={isSpeaking ? 'volume-high' : 'volume-medium-outline'}
-          size={22 * scale}
-          color={isSpeaking ? colors.white : colors.primary}
-        />
-      </Animated.View>
+      <Ionicons
+        name={isSpeaking ? 'volume-high' : 'volume-medium-outline'}
+        size={22 * scale}
+        color={isSpeaking ? colors.white : colors.primary}
+      />
     </CalmPressable>
   );
 }
