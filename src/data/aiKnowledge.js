@@ -148,9 +148,12 @@ Odpowiadaj turystom wyłącznie w języku polskim. Bądź konkretny, ciekawy i u
 2. GRAMATYKA I ODMIANA: Pisz naturalną polszczyzną. BEZWZGLĘDNIE odmieniaj nazwy własne, restauracje i zabytki przez przypadki (np. mów: "przy Zamku", "obok Baszty Krośnieńskiej", "w Kożuchowie", "udaj się do Restauracji Rycerskiej" lub "do Pizzerii Ciao Ciao" — NIGDY nie zostawiaj nazw w mianowniku, gdy kontekst wymaga dopełniacza czy miejscownika!).
 3. DOMYKANIE MYŚLI: Zawsze kończ odpowiedź pełnym zdaniem z kropką.
 4. GPS: Jeśli turysta pyta "gdzie zjeść" lub "co jest najbliżej", podawaj pierwszy obiekt z listy GPS wraz z odległością w metrach.
-5. KOLEJNE PYTANIA: Przy dalszej rozmowie również zachowuj zwartą formę bez przeciągania.
-6. ZASADA LINKOWANIA (BARDZO WAŻNE): Jeśli Twoja odpowiedź dotyczy lub wspomina o konkretnym zabytku z listy poniżej, MUSISZ na samym końcu odpowiedzi dopisać dokładnie taki znacznik: [LINK:dokładne_id].
-7. ZASADA PLANOWANIA TRASY: Jeśli turysta pyta o zaplanowanie trasy lub spaceru (np. "trasa na 2 godziny", "trasa na 1h", "zaplanuj wycieczkę", "jaki szlak"), zaproponuj kolejność zwiedzania i na samym końcu dopisz znacznik [ROUTE:id1,id2,id3] z identyfikatorami w kolejności marszu! (Np. [ROUTE:place_01,place_04,place_03,place_06]).
+6. ZASADA CZYSTEJ NARRACJI I LINKOWANIA (BARDZO WAŻNE):
+- W samej treści odpowiedzi NIGDY nie wspominaj o linkach ani odnośnikach (BEZWZGLĘDNY ZAKAZ pisania słów: "oto link", "link poniżej", "zobacz w linku", "kliknij poniżej" itp.). Pisz wyłącznie naturalną, wciągającą opowieść historyczną.
+- NIGDY nie wstawiaj znaczników [LINK:id] wewnątrz zdań ani w środku tekstu!
+- Jeśli Twoja odpowiedź dotyczy danego zabytku, dopisz znacznik [LINK:dokładne_id] WYŁĄCZNIE jako niewidoczny kod na samym końcu całej wypowiedzi (po kropce kończącej ostatnie zdanie). Aplikacja sama utworzy pod Twoją wypowiedzią interaktywny przycisk.
+- Jeśli wspominasz o kilku zabytkach, dopisz ich znaczniki na samym końcu (np. "...To wyjątkowe miejsca. [LINK:place_01][LINK:place_04]").
+7. ZASADA PLANOWANIA TRASY: Jeśli turysta pyta o zaplanowanie trasy lub spaceru (np. "trasa na 2 godziny", "trasa na 1h", "zaplanuj wycieczkę", "jaki szlak"), zaproponuj kolejność zwiedzania i na samym końcu dopisz znacznik [ROUTE:id1,id2,id3] z identyfikatorami w kolejności marszu! (Np. [ROUTE:place_01,place_04,place_03,place_06]). Nie pisz "kliknij poniżej", przycisk pojawi się automatycznie.
 Oto dostępne znaczniki:
 ${linksHelp}
 
@@ -257,7 +260,7 @@ export function generateOfflineFallbackResponse(userText, userLocation) {
     ) {
       return 'Na szybki 1-godzinny spacer polecam klasyczny szlak: Zamek Kożuchów → Mury obronne i fosa → Baszta Krośnieńska → Rynek z Ratuszem. To zwarta pętla ukazująca kluczowe symbole średniowiecznego miasta. [ROUTE:place_01,place_04,place_03,place_06]';
     }
-    return 'Polecam sprawdzoną trasę spacerową po Kożuchowie (ok. 1.5h): Zamek Piastowski → Mury obronne → Baszta Krośnieńska → Zabytkowa fasada ul. Klasztornej → Rynek i Ratusz. Kliknij poniżej, aby wczytać ścieżkę na mapie! [ROUTE:place_01,place_04,place_03,place_09,place_06]';
+    return 'Polecam sprawdzoną trasę spacerową po Kożuchowie (ok. 1.5h): Zamek Piastowski → Mury obronne → Baszta Krośnieńska → Zabytkowa fasada ul. Klasztornej → Rynek i Ratusz. [ROUTE:place_01,place_04,place_03,place_09,place_06]';
   }
 
   // 1. Pytania o gastronomię / restauracje
@@ -398,5 +401,5 @@ export function generateOfflineFallbackResponse(userText, userLocation) {
   }
 
   // 14. Domyślna rekomendacja turystyczna
-  return 'W Kożuchowie warto zobaczyć Zamek Piastowski [LINK:place_01], mury obronne z fosą [LINK:place_04], Lapidarium rzeźby nagrobnej [LINK:place_07], barokowy portyk w parku [LINK:place_08] oraz zabytkowy Rynek [LINK:place_06]. Zapytaj o dowolny z tych obiektów!';
+  return 'W Kożuchowie warto zobaczyć Zamek Piastowski, mury obronne z fosą, Lapidarium rzeźby nagrobnej, barokowy portyk w parku oraz zabytkowy Rynek. Zapytaj o dowolny z tych obiektów! [LINK:place_01][LINK:place_04][LINK:place_07][LINK:place_08][LINK:place_06]';
 }

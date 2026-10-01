@@ -115,11 +115,11 @@ export default function AIChatModal({ visible, onClose }) {
 
   // Parsowanie tekstu wypowiedzi i wykrywanie znaczników: [ROUTE:id1,id2] oraz [LINK:id]
   const parseMessageContent = (rawText) => {
-    if (!rawText) return { cleanText: '', targetPlace: null, targetRoute: null };
+    if (!rawText) return { cleanText: '', targetPlaces: [], targetRoute: null };
 
     let text = rawText;
-    let targetPlace = null;
     let targetRoute = null;
+    const targetPlaces = [];
 
     // 1. Wykrywanie trasy [ROUTE:id1,id2,id3]
     const routeMatch = text.match(/\[ROUTE:([^\]]+)\]/i);
@@ -142,23 +142,43 @@ export default function AIChatModal({ visible, onClose }) {
           places: matchedPlaces,
         };
       }
-      text = text.replace(routeMatch[0], '').trim();
     }
 
-    // 2. Wykrywanie linku do pojedynczego zabytku [LINK:id]
-    const linkMatch = text.match(/\[LINK:([^\]]+)\]/i);
-    if (linkMatch) {
-      const rawTargetId = linkMatch[1].trim();
+    // 2. Wykrywanie WSZYSTKICH linków do zabytków [LINK:id]
+    const linkMatches = [...text.matchAll(/\[LINK:([^\]]+)\]/gi)];
+    for (const match of linkMatches) {
+      const rawTargetId = match[1].trim();
       const foundPlace = PLACES.find(
         (p) =>
           p.id?.toLowerCase() === rawTargetId.toLowerCase() ||
           p.title?.toLowerCase().includes(rawTargetId.toLowerCase())
       );
-      targetPlace = foundPlace || null;
-      text = text.replace(linkMatch[0], '').trim();
+      if (foundPlace && !targetPlaces.some((tp) => tp.id === foundPlace.id)) {
+        targetPlaces.push(foundPlace);
+      }
     }
 
-    return { cleanText: text, targetPlace, targetRoute };
+    // 3. Całkowite i bezwzględne oczyszczenie tekstu ze znaczników i zwrotów wprowadzających do linków:
+    text = text
+      .replace(/\[LINK:[^\]]+\]/gi, '')
+      .replace(/\[ROUTE:[^\]]+\]/gi, '');
+
+    // Usunięcie ewentualnych sformułowań wprowadzających na końcu wypowiedzi
+    text = text
+      .replace(/(?:,\s*)?(?:[Oo]to|[Pp]oniżej|[Zz]obacz|[Kk]liknij)?\s*(?:znajdziesz\s+)?(?:linki?|odnośniki?)\s*(?:do\s+obiekt[óu]w?|do\s+miejsca?|do\s+szczegółów?)?\s*[:.]?\s*$/gi, '')
+      .replace(/(?:,\s*)?(?:[Вв]от|[Нн]иже|[Сс]мотрите)?\s*(?:ссылк[аиу]|линки?)\s*(?:на\s+место|на\s+объект)?\s*[:.]?\s*$/gi, '');
+
+    // Usunięcie ewentualnych formatowań Markdown [Tekst](url) -> Tekst
+    text = text.replace(/\[([^\]]+)\]\((?:https?:\/\/[^\)]+|#[^\)]*)\)/gi, '$1');
+
+    // Kosmetyka interpunkcji i białych znaków (zamiana wiszącego dwukropka na kropkę, usunięcie spacji)
+    text = text
+      .replace(/\s*:\s*$/, '.')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\s+([.,!?;:])/g, '$1')
+      .trim();
+
+    return { cleanText: text, targetPlaces, targetRoute };
   };
 
   // Przejście do szczegółów zabytku ze zminimalizowaniem czatu
@@ -320,7 +340,7 @@ export default function AIChatModal({ visible, onClose }) {
             keyboardShouldPersistTaps="handled"
           >
             {messages.map((m) => {
-              const { cleanText, targetPlace, targetRoute } = parseMessageContent(m.text);
+              const { cleanText, targetPlaces, targetRoute } = parseMessageContent(m.text);
               const isUser = m.sender === 'user';
 
               return (
@@ -404,37 +424,41 @@ export default function AIChatModal({ visible, onClose }) {
                     </TouchableOpacity>
                   )}
 
-                  {/* Karta szybkiego przejścia do wskazanego zabytku (min. 48 dp) */}
-                  {!isUser && targetPlace && (
-                    <TouchableOpacity
-                      style={[
-                        styles.placeLinkButton,
-                        { backgroundColor: colors.primaryLight },
-                        highContrast && styles.highContrastPlaceLink,
-                      ]}
-                      activeOpacity={0.8}
-                      onPress={() => handleOpenPlace(targetPlace.id)}
-                      accessible={true}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Przejdź do obiektu: ${targetPlace.title}`}
-                      accessibilityHint="Otwiera szczegółową kartę zabytku"
-                    >
-                      <View style={styles.placeLinkLeft}>
-                        <Ionicons name="navigate-circle" size={22} color={colors.primary} />
-                        <Text
-                          style={[
-                            styles.placeLinkText,
-                            { color: colors.primary, fontSize: getScaledFontSize(13) },
-                          ]}
-                          numberOfLines={1}
-                          allowFontScaling={true}
-                        >
-                          Otwórz: {targetPlace.title}
-                        </Text>
-                      </View>
-                      <Ionicons name="chevron-forward" size={18} color={colors.primary} />
-                    </TouchableOpacity>
-                  )}
+                  {/* Karty szybkiego przejścia do wskazanych zabytków (wyłącznie pod wiadomością) */}
+                  {!isUser &&
+                    targetPlaces &&
+                    targetPlaces.length > 0 &&
+                    targetPlaces.map((place) => (
+                      <TouchableOpacity
+                        key={place.id}
+                        style={[
+                          styles.placeLinkButton,
+                          { backgroundColor: colors.primaryLight },
+                          highContrast && styles.highContrastPlaceLink,
+                        ]}
+                        activeOpacity={0.8}
+                        onPress={() => handleOpenPlace(place.id)}
+                        accessible={true}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Przejdź do obiektu: ${place.title}`}
+                        accessibilityHint="Otwiera szczegółową kartę zabytku"
+                      >
+                        <View style={styles.placeLinkLeft}>
+                          <Ionicons name="navigate-circle" size={22} color={colors.primary} />
+                          <Text
+                            style={[
+                              styles.placeLinkText,
+                              { color: colors.primary, fontSize: getScaledFontSize(13) },
+                            ]}
+                            numberOfLines={1}
+                            allowFontScaling={true}
+                          >
+                            Otwórz: {place.title}
+                          </Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+                      </TouchableOpacity>
+                    ))}
 
                   {/* Przycisk odsłuchania lektorem (min. 48 dp) */}
                   {!isUser && (
