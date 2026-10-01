@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "visit-kozuchow",
+    "name": "Visit Kożuchów",
     "slug": "visit-kozuchow",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,13 +15,39 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.visitkozuchow.guide",
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAyCnn5Ne97LH_oQH4iuy4Ws5vbB0cVhgI"
+        }
       }
     },
     "web": {
       "favicon": "./assets/logo.png"
+    },
+    "plugins": [
+      "expo-status-bar",
+      "expo-asset",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Aplikacja potrzebuje dostępu do aparatu, aby skanować kody QR zabytków."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5d81bd28-339d-4b8d-a074-a3f4df5620dd"
+      }
     }
   }
 }

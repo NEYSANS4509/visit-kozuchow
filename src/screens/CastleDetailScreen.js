@@ -1,5 +1,5 @@
 // src/screens/CastleDetailScreen.js
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,46 +7,62 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
-  useWindowDimensions,
   ActivityIndicator,
+  Platform,
+  AccessibilityInfo,
+  findNodeHandle,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { placesService } from '../services/placesService'; // Odczyt danych z lokalnego serwisu
-import { colors } from '../theme/colors'; // Wspólna paleta barw z Figmy
+import { placesService } from '../services/placesService';
+import { useAccessibility } from '../context/AccessibilityContext';
+import { useScaledStyles } from '../hooks/useScale';
+import { getImageSource } from '../utils/imageSource';
+import AudioGuideButton from '../components/AudioGuideButton';
 
+/**
+ * Ekran szczegółów zabytku lub sali ekspozycyjnej (CastleDetailScreen).
+ * Prezentuje galerię zdjęć, audioprzewodnik (Text-to-Speech), pełny opis historyczny
+ * oraz horyzontalną listę sal muzealnych (w przypadku Zamku).
+ * Spełnia standardy dostępności cyfrowej WCAG 2.1 AA:
+ * - Touch Target >= 48x48 dp dla wszystkich przycisków
+ * - Skalowanie czcionek (allowFontScaling={true})
+ * - Zarządzanie fokusem czytnika ekranu (setAccessibilityFocus)
+ * - Obsługa wysokiego kontrastu i trybu dla osób z daltonizmem.
+ *
+ * @param {object} route - Parametry trasy ({ placeId, placeData })
+ * @param {object} navigation - Obiekt nawigacji React Navigation
+ */
 export default function CastleDetailScreen({ route, navigation }) {
-  // Identyfikator miejsca (domyślnie Zamek: place_01)
   const placeId = route?.params?.placeId || 'place_01';
+  const placeDataParam = route?.params?.placeData || null;
 
-  const [place, setPlace] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { scale, styles, windowWidth, windowHeight } = useScaledStyles(createStyles);
+  const { colors, highContrast, getScaledFontSize } = useAccessibility();
 
-  // Stan aktualnie wyświetlanego zdjęcia głównego (pozwala na podgląd po kliknięciu miniatury)
-  const [activeImage, setActiveImage] = useState(null);
+  const [place, setPlace] = useState(placeDataParam);
+  const [loading, setLoading] = useState(!placeDataParam);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  // Dynamiczne skalowanie pikseli względem szerokości bazowej z Figmy (390px)
-  const { width: windowWidth } = useWindowDimensions();
-  const scale = windowWidth / 390;
-  const styles = useMemo(() => createStyles(scale), [scale]);
+  const galleryRef = useRef(null);
+  const titleRef = useRef(null);
 
-  // Pomocnicza funkcja: obsługa zasobów require() oraz adresów URL
-  const getImageSource = (source) => {
-    if (!source) return null;
-    return typeof source === 'string' ? { uri: source } : source;
-  };
+  const cardWidth = Math.round(windowWidth * 0.72);
+  const cardGap = Math.round(14 * scale);
 
   useEffect(() => {
-    let isMounted = true;
+    if (placeDataParam) {
+      setPlace(placeDataParam);
+      setLoading(false);
+      return;
+    }
 
+    let isMounted = true;
     placesService
       .getPlaceById(placeId)
       .then((data) => {
         if (isMounted) {
           setPlace(data);
-          // Ustawienie domyślnego zdjęcia głównego zaraz po pobraniu danych
-          setActiveImage(data?.imageUri);
           setLoading(false);
         }
       })
@@ -60,140 +76,368 @@ export default function CastleDetailScreen({ route, navigation }) {
     return () => {
       isMounted = false;
     };
-  }, [placeId]);
+  }, [placeId, placeDataParam]);
 
-  // 1. Ekran ładowania (spinner)
+  // =========================================================================
+  // WCAG / DOSTĘPNOŚĆ: ZARZĄDZANIE FOKUSEM DLA CZYTNIKÓW EKRANU (a11y)
+  // Gdy dane obiektu zostaną pomyślnie załadowane, przenosimy fokus czytnika
+  // (TalkBack na Androidzie / VoiceOver na iOS) bezpośrednio na główny nagłówek.
+  // Zapobiega to gubieniu kontekstu przez osoby niewidome po zmianie ekranu.
+  // =========================================================================
+  useEffect(() => {
+    if (!loading && place && titleRef.current) {
+      const handle = findNodeHandle(titleRef.current);
+      if (handle) {
+        AccessibilityInfo.setAccessibilityFocus(handle);
+      }
+    }
+  }, [loading, place]);
+
+  // Pełna lista fotografii do galerii (zdjęcie główne + miniatury)
+  const galleryList = useMemo(() => {
+    if (!place) return [];
+    const list = [];
+    if (place.imageUri) list.push(place.imageUri);
+    if (Array.isArray(place.galleryImages) && place.galleryImages.length > 0) {
+      list.push(...place.galleryImages);
+    }
+    return list;
+  }, [place]);
+
+  const handleScroll = (event) => {
+    const layoutWidth = event.nativeEvent.layoutMeasurement?.width || windowWidth;
+    if (layoutWidth <= 0) return;
+    const slide = Math.round(event.nativeEvent.contentOffset.x / layoutWidth);
+    if (slide !== activeImageIndex && slide >= 0 && slide < galleryList.length) {
+      setActiveImageIndex(slide);
+    }
+  };
+
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
+      <View
+        style={[styles.centerContainer, { backgroundColor: colors.white }]}
+        accessible={true}
+        accessibilityRole="progressbar"
+        accessibilityLabel="Ładowanie informacji o zabytku"
+      >
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
-  // 2. Obsługa błędu, gdy obiekt nie został odnaleziony w bazie
   if (!place) {
     return (
-      <SafeAreaView style={styles.centerContainer}>
+      <SafeAreaView style={[styles.centerContainer, { backgroundColor: colors.white }]}>
         <Ionicons name="alert-circle-outline" size={56 * scale} color={colors.danger} />
-        <Text style={styles.errorTitle}>Nie znaleziono obiektu</Text>
-        <Text style={styles.errorMessage}>
-          Wskazany identyfikator zabytku nie figuruje w lokalnej bazie danych.
+        <Text
+          style={[
+            styles.errorTitle,
+            { color: colors.textDark, fontSize: getScaledFontSize(18 * scale) },
+          ]}
+          allowFontScaling={true}
+        >
+          Nie znaleziono obiektu
         </Text>
         <TouchableOpacity
-          style={styles.errorBackButton}
-          activeOpacity={0.8}
+          style={[styles.errorBackButton, { backgroundColor: colors.primary }]}
           onPress={() => navigation.goBack()}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Wróć do poprzedniego ekranu"
         >
-          <Ionicons name="arrow-back" size={18 * scale} color={colors.white} />
-          <Text style={styles.errorBackButtonText}>Wróć do menu</Text>
+          <Ionicons name="arrow-back" size={20 * scale} color={colors.white} />
+          <Text
+            style={[
+              styles.errorBackButtonText,
+              { fontSize: getScaledFontSize(14 * scale) },
+            ]}
+            allowFontScaling={true}
+          >
+            Wróć
+          </Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-  // 3. Widok właściwy obiektu
+  const audioText = `${place.title}. ${
+    place.location?.address ? `Ulica ${place.location.address}. ` : ''
+  }${place.fullDescription || place.shortDescription || ''}`;
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.white }]}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
         bounces={false}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        {/* Kontener zdjęcia głównego zabytku (Figma: wysokość bazowa 453px) */}
-        <View style={styles.imageContainer}>
-          {/* Wyświetla aktualnie wybrane zdjęcie (domyślne lub klikniętą miniaturę) */}
-          <Image
-            source={getImageSource(activeImage || place.imageUri)}
-            style={styles.mainCastleImage}
-            resizeMode="cover"
-          />
+        {/* Galeria fotografii zabytku */}
+        <View style={[styles.heroContainer, { height: windowHeight * 0.45 }]}>
+          {galleryList.length > 1 ? (
+            <ScrollView
+              ref={galleryRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={handleScroll}
+              scrollEventThrottle={16}
+            >
+              {galleryList.map((imgItem, idx) => (
+                /* WCAG: Precyzyjna etykieta zdjęcia z numerem slajdu */
+                <Image
+                  key={`img_${idx}`}
+                  source={getImageSource(imgItem)}
+                  style={{ width: windowWidth, height: '100%' }}
+                  resizeMode="cover"
+                  accessible={true}
+                  accessibilityRole="image"
+                  accessibilityLabel={`Fotografia ${idx + 1} z ${galleryList.length}: ${place.title}`}
+                />
+              ))}
+            </ScrollView>
+          ) : (
+            <Image
+              source={getImageSource(place.imageUri)}
+              style={{ width: windowWidth, height: '100%' }}
+              resizeMode="cover"
+              accessible={true}
+              accessibilityRole="image"
+              accessibilityLabel={`Fotografia: ${place.title}`}
+            />
+          )}
 
-          {/* Przycisk powrotu w lewym górnym rogu (Figma: 49 x 25px) */}
-          <TouchableOpacity
-            style={styles.backButtonPill}
-            activeOpacity={0.8}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={18 * scale} color={colors.textDark} />
-          </TouchableOpacity>
+          {/* =========================================================================
+              WCAG / DOSTĘPNOŚĆ: PRZYCISK POWROTU
+              1. minWidth i minHeight >= 48dp (Touch Target)
+              2. accessibilityRole="button"
+              3. accessibilityLabel i accessibilityHint
+             ========================================================================= */}
+          <SafeAreaView style={styles.backButtonSafeArea} edges={['top']}>
+            <TouchableOpacity
+              style={[styles.backPill, highContrast && styles.highContrastBorder]}
+              activeOpacity={0.8}
+              onPress={() => navigation.goBack()}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Powrót"
+              accessibilityHint="Wraca do poprzedniego widoku"
+            >
+              <Ionicons name="arrow-back" size={22 * scale} color="#1C1C1E" />
+            </TouchableOpacity>
+          </SafeAreaView>
 
-          {/* Grupa miniatur (Figma Group 48: Top 385px, Left 67px) */}
-          <View style={styles.thumbnailsGroup}>
-            {place.galleryImages?.map((imgSource, index) => {
-              const isSelected = activeImage === imgSource;
-
-              return (
-                <TouchableOpacity
-                  key={`${place.id}_thumb_${index}`}
-                  style={[
-                    styles.thumbnailFrame,
-                    isSelected && styles.thumbnailFrameActive,
-                  ]}
-                  activeOpacity={0.8}
-                  // Kliknięcie miniatury podmienia zdjęcie na głównym widoku
-                  onPress={() => setActiveImage(imgSource)}
-                >
-                  <Image
-                    source={getImageSource(imgSource)}
-                    style={styles.thumbnailImage}
-                    resizeMode="cover"
-                  />
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+          {/* WCAG: Ukrycie czysto dekoracyjnych kropek paginacji przed czytnikiem */}
+          {galleryList.length > 1 && (
+            <View
+              style={styles.dotsWrapper}
+              pointerEvents="none"
+              accessible={false}
+              importantForAccessibility="no-hide-descendants"
+            >
+              {galleryList.map((_, idx) => (
+                <View
+                  key={`dot_${idx}`}
+                  style={[styles.dot, activeImageIndex === idx && styles.dotActive]}
+                />
+              ))}
+            </View>
+          )}
         </View>
 
-        {/* Sekcja informacyjna z opisem obiektu */}
-        <View style={styles.infoContainer}>
-          {/* Nazwa zabytku (Figma: Inter SemiBold 20px, kolor #323232) */}
-          <Text style={styles.title}>{place.title}</Text>
+        {/* =========================================================================
+            WCAG / DOSTĘPNOŚĆ: STRUKTURA SEMANTYCZNA I NAGŁÓWKI (accessibilityRole="header")
+           ========================================================================= */}
+        <View
+          style={[
+            styles.contentCard,
+            { backgroundColor: colors.white },
+            highContrast && styles.highContrastContentCard,
+          ]}
+        >
+          <Text
+            ref={titleRef}
+            style={[
+              styles.mainTitle,
+              { color: colors.textDark, fontSize: getScaledFontSize(30 * scale) },
+            ]}
+            accessible={true}
+            accessibilityRole="header"
+            allowFontScaling={true}
+          >
+            {place.title}
+          </Text>
 
-          {/* Wiersz lokalizacji ze znacznikiem adresu (Figma: Top 524px, Left 23px) */}
-          <View style={styles.locationRow}>
-            <Ionicons
-              name="location-sharp"
-              size={18 * scale}
-              color={colors.textSecondary}
-              style={styles.locationIcon}
-            />
-            <Text style={styles.locationText}>{place.location?.address}</Text>
+          {place.location?.address ? (
+            <View
+              style={styles.locationRow}
+              accessible={true}
+              accessibilityLabel={`Lokalizacja: ulica ${place.location.address}`}
+            >
+              <Ionicons
+                name="location-sharp"
+                size={18 * scale}
+                color={colors.primaryAccessible}
+              />
+              <Text
+                style={[
+                  styles.locationText,
+                  { color: colors.primaryAccessible, fontSize: getScaledFontSize(14 * scale) },
+                ]}
+                allowFontScaling={true}
+              >
+                {place.location.address}
+              </Text>
+            </View>
+          ) : null}
+
+          {/* WCAG: Przycisk przejścia na mapę (Touch Target >= 48x48 dp) */}
+          {place.location?.latitude && place.location?.longitude ? (
+            <TouchableOpacity
+              style={[
+                styles.mapButton,
+                { backgroundColor: colors.primaryLight, borderColor: colors.primary },
+                highContrast && styles.highContrastMapButton,
+              ]}
+              onPress={() => navigation.navigate('Map', { initialPlaceId: place.id })}
+              activeOpacity={0.8}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`Pokaż obiekt ${place.title} na mapie`}
+              accessibilityHint="Przełącza na widok interaktywnej mapy i centruje kamerę na tym zabytku"
+            >
+              <Ionicons name="map" size={18 * scale} color={colors.primary} />
+              <Text
+                style={[
+                  styles.mapButtonText,
+                  { color: colors.primary, fontSize: getScaledFontSize(14 * scale) },
+                ]}
+                allowFontScaling={true}
+              >
+                Pokaż na mapie
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+
+          {/* Nagłówek sekcji z audioprzewodnikiem */}
+          <View style={styles.infoSectionHeader}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: colors.textDark, fontSize: getScaledFontSize(22 * scale) },
+              ]}
+              accessibilityRole="header"
+              allowFontScaling={true}
+            >
+              Informacje
+            </Text>
+
+            {/* WCAG: Audioprzewodnik (Text-to-Speech) o wymiarach min. 48x48 */}
+            <AudioGuideButton text={audioText} style={styles.audioBtn} />
           </View>
 
-          {/* Treść opisu zabytku (Figma: Szerokość 344px, Inter Regular 15px) */}
-          <Text style={styles.description}>
+          <Text
+            style={[
+              styles.descriptionText,
+              { color: colors.textPrimary, fontSize: getScaledFontSize(15 * scale) },
+            ]}
+            allowFontScaling={true}
+          >
             {place.fullDescription || place.shortDescription}
           </Text>
+
+          {/* Sekcja ekspozycji i sal wewnętrznych */}
+          {Array.isArray(place.rooms) && place.rooms.length > 0 && (
+            <View style={styles.roomsSection}>
+              <Text
+                style={[
+                  styles.roomsSectionTitle,
+                  { color: colors.textDark, fontSize: getScaledFontSize(20 * scale) },
+                ]}
+                accessibilityRole="header"
+                allowFontScaling={true}
+              >
+                Sale i ekspozycje
+              </Text>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                snapToInterval={cardWidth + cardGap}
+                decelerationRate="fast"
+                contentContainerStyle={styles.roomsScrollTrack}
+              >
+                {place.rooms.map((room, idx) => (
+                  <TouchableOpacity
+                    key={room.id}
+                    style={[
+                      styles.roomCard,
+                      {
+                        width: cardWidth,
+                        marginRight: idx === place.rooms.length - 1 ? 0 : cardGap,
+                        backgroundColor: colors.backgroundLight,
+                      },
+                      highContrast && styles.highContrastBorder,
+                    ]}
+                    activeOpacity={0.85}
+                    onPress={() =>
+                      navigation.push('CastleDetail', {
+                        placeId: room.id,
+                        placeData: room,
+                      })
+                    }
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    accessible={true}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Sala: ${room.title}. ${room.shortDescription}. Dotknij, aby zobaczyć szczegóły.`}
+                  >
+                    <Image
+                      source={getImageSource(room.imageUri)}
+                      style={styles.roomImage}
+                      resizeMode="cover"
+                      accessible={true}
+                      accessibilityRole="image"
+                      accessibilityLabel={`Zdjęcie sali: ${room.title}`}
+                    />
+                    <View style={styles.roomInfo}>
+                      <View style={styles.roomHeaderRow}>
+                        <Text
+                          style={[
+                            styles.roomTitle,
+                            { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
+                          ]}
+                          numberOfLines={1}
+                          allowFontScaling={true}
+                        >
+                          {room.title}
+                        </Text>
+                        <Ionicons
+                          name="chevron-forward-circle-outline"
+                          size={22 * scale}
+                          color={colors.primaryAccessible}
+                        />
+                      </View>
+                      <Text
+                        style={[
+                          styles.roomDescription,
+                          { color: colors.textSecondary, fontSize: getScaledFontSize(12 * scale) },
+                        ]}
+                        numberOfLines={2}
+                        allowFontScaling={true}
+                      >
+                        {room.shortDescription}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
       </ScrollView>
-
-      {/* Dolny pasek akcji: Start oraz Ulubione */}
-      <SafeAreaView style={styles.bottomBarWrapper}>
-        <View style={styles.bottomBar}>
-          {/* Przycisk Start (Figma Rectangle 3: Szerokość 296px, Wysokość 45px, Promień 20px) */}
-          <TouchableOpacity
-            style={styles.startButton}
-            activeOpacity={0.85}
-            onPress={() => console.log(`Rozpoczęto trasę dla: ${place.title}`)}
-          >
-            <Text style={styles.startButtonText}>Start</Text>
-          </TouchableOpacity>
-
-          {/* Przycisk serca (Figma Vector: Szerokość 33px, Wysokość 30px) */}
-          <TouchableOpacity
-            style={[styles.favoriteButton, isFavorite && styles.favoriteButtonActive]}
-            activeOpacity={0.7}
-            onPress={() => setIsFavorite(!isFavorite)}
-          >
-            <Ionicons
-              name={isFavorite ? 'heart' : 'heart-outline'}
-              size={20 * scale}
-              color={isFavorite ? colors.danger : colors.borderMuted}
-            />
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
     </View>
   );
 }
@@ -202,171 +446,208 @@ const createStyles = (scale) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colors.white,
     },
     centerContainer: {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      paddingHorizontal: 28 * scale,
-      backgroundColor: colors.white,
+      paddingHorizontal: 24 * scale,
     },
     errorTitle: {
-      fontSize: 20 * scale,
       fontWeight: '700',
-      color: colors.textPrimary,
-      marginTop: 16 * scale,
-      marginBottom: 8 * scale,
-    },
-    errorMessage: {
-      fontSize: 14 * scale,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 20 * scale,
-      marginBottom: 24 * scale,
+      marginBottom: 16 * scale,
     },
     errorBackButton: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8 * scale,
-      backgroundColor: colors.primary,
       paddingHorizontal: 20 * scale,
-      paddingVertical: 12 * scale,
-      borderRadius: 16 * scale,
+      minWidth: 48 * scale,
+      minHeight: 48 * scale,
+      borderRadius: 14 * scale,
+      justifyContent: 'center',
     },
     errorBackButtonText: {
-      color: colors.white,
-      fontSize: 15 * scale,
-      fontWeight: '600',
+      color: '#FFFFFF',
+      fontWeight: '700',
     },
     scrollContent: {
-      paddingBottom: 90 * scale,
+      flexGrow: 1,
     },
-    imageContainer: {
+    heroContainer: {
+      width: '100%',
       position: 'relative',
-      width: '100%',
-      height: 453 * scale,
-      backgroundColor: colors.surfaceMuted,
+      backgroundColor: '#E2E8F0',
     },
-    mainCastleImage: {
-      width: '100%',
-      height: '100%',
-    },
-    backButtonPill: {
+    backButtonSafeArea: {
       position: 'absolute',
-      top: 48 * scale,
-      left: 23 * scale,
-      width: 49 * scale,
-      height: 25 * scale,
-      borderRadius: 12.5 * scale,
-      backgroundColor: 'rgba(255, 255, 255, 0.85)',
+      top: 10 * scale,
+      left: 18 * scale,
+      zIndex: 10,
+    },
+    // WCAG: minWidth i minHeight 48dp dla spełnienia standardu Touch Target
+    backPill: {
+      width: 48 * scale,
+      height: 48 * scale,
+      minWidth: 48,
+      minHeight: 48,
+      borderRadius: 24 * scale,
+      backgroundColor: 'rgba(255, 255, 255, 0.94)',
       justifyContent: 'center',
       alignItems: 'center',
-    },
-    thumbnailsGroup: {
-      position: 'absolute',
-      top: 385 * scale,
-      left: 67 * scale,
-      flexDirection: 'row',
-      gap: 7 * scale,
-      zIndex: 2,
-    },
-    thumbnailFrame: {
-      width: 58.78 * scale,
-      height: 58 * scale,
-      borderRadius: 20 * scale,
-      borderWidth: 3 * scale,
-      borderColor: colors.white,
-      overflow: 'hidden',
-      backgroundColor: colors.surfaceMuted,
       shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.18,
-      shadowRadius: 5,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
       elevation: 4,
     },
-    // Wyróżnienie aktywnej miniatury kolorem głównym aplikacji
-    thumbnailFrameActive: {
-      borderColor: colors.primary,
-      borderWidth: 3 * scale,
-      transform: [{ scale: 1.05 }],
+    highContrastBorder: {
+      borderWidth: 2.5,
+      borderColor: '#000000',
     },
-    thumbnailImage: {
-      width: '100%',
-      height: '100%',
+    dotsWrapper: {
+      position: 'absolute',
+      bottom: 40 * scale,
+      left: 0,
+      right: 0,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 6 * scale,
+      zIndex: 5,
     },
-    infoContainer: {
-      paddingHorizontal: 23 * scale,
-      paddingTop: 16 * scale,
-      backgroundColor: colors.white,
+    dot: {
+      width: 8 * scale,
+      height: 8 * scale,
+      borderRadius: 4 * scale,
+      backgroundColor: 'rgba(255, 255, 255, 0.55)',
     },
-    title: {
-      fontSize: 20 * scale,
+    dotActive: {
+      width: 20 * scale,
+      backgroundColor: '#FFFFFF',
+    },
+    contentCard: {
+      flex: 1,
+      marginTop: -26 * scale,
+      borderTopLeftRadius: 32 * scale,
+      borderTopRightRadius: 32 * scale,
+      paddingTop: 24 * scale,
+      paddingHorizontal: 20 * scale,
+      paddingBottom: 40 * scale,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    highContrastContentCard: {
+      borderTopWidth: 3,
+      borderTopColor: '#000000',
+    },
+    mainTitle: {
       fontWeight: '600',
-      color: colors.textPrimary,
-      marginBottom: 16 * scale,
+      textAlign: 'center',
+      fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+      letterSpacing: -0.5,
+      marginBottom: 6 * scale,
     },
     locationRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 24 * scale,
-    },
-    locationIcon: {
-      marginRight: 6 * scale,
+      justifyContent: 'center',
+      gap: 6 * scale,
+      marginBottom: 18 * scale,
+      minHeight: 28 * scale,
     },
     locationText: {
-      fontSize: 15 * scale,
-      fontWeight: '400',
-      color: colors.textSecondary,
-      textDecorationLine: 'underline',
+      fontWeight: '700',
     },
-    description: {
-      width: 344 * scale,
-      fontSize: 15 * scale,
-      lineHeight: 21 * scale,
-      fontWeight: '400',
-      color: colors.textPrimary,
-    },
-    bottomBarWrapper: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: colors.white,
-    },
-    bottomBar: {
+    mapButton: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: 23 * scale,
-      paddingVertical: 12 * scale,
-      gap: 5 * scale,
-    },
-    startButton: {
-      width: 296 * scale,
-      height: 45 * scale,
+      justifyContent: 'center',
+      gap: 8 * scale,
+      borderWidth: 1.5,
       borderRadius: 20 * scale,
-      backgroundColor: colors.primary,
-      borderWidth: 1,
-      borderColor: colors.borderLight,
+      paddingHorizontal: 16 * scale,
+      paddingVertical: 10 * scale,
+      minHeight: 48 * scale,
+      alignSelf: 'center',
+      marginBottom: 16 * scale,
+    },
+    highContrastMapButton: {
+      borderWidth: 2.5,
+      borderColor: '#000000',
+      backgroundColor: '#FFFFFF',
+    },
+    mapButtonText: {
+      fontWeight: '700',
+    },
+    infoSectionHeader: {
+      position: 'relative',
+      flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
+      marginBottom: 14 * scale,
+      minHeight: 48 * scale,
     },
-    startButtonText: {
-      color: colors.white,
-      fontSize: 16 * scale,
+    sectionTitle: {
       fontWeight: '600',
+      textAlign: 'center',
+      fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
     },
-    favoriteButton: {
-      width: 33 * scale,
-      height: 30 * scale,
-      borderRadius: 6 * scale,
-      borderWidth: 2.06 * scale,
-      borderColor: colors.borderMuted,
-      justifyContent: 'center',
+    audioBtn: {
+      position: 'absolute',
+      right: 0,
+    },
+    descriptionText: {
+      lineHeight: 24 * scale,
+      textAlign: 'left',
+      marginBottom: 24 * scale,
+    },
+    roomsSection: {
+      marginTop: 6 * scale,
+    },
+    roomsSectionTitle: {
+      fontWeight: '600',
+      marginBottom: 14 * scale,
+      fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    },
+    roomsScrollTrack: {
+      paddingRight: 20 * scale,
+    },
+    roomCard: {
+      borderRadius: 18 * scale,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: '#E2E8F0',
+      minHeight: 48 * scale,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 6,
+      elevation: 2,
+    },
+    roomImage: {
+      width: '100%',
+      height: 120 * scale,
+      backgroundColor: '#E2E8F0',
+    },
+    roomInfo: {
+      padding: 12 * scale,
+    },
+    roomHeaderRow: {
+      flexDirection: 'row',
       alignItems: 'center',
-      marginLeft: 5 * scale,
+      justifyContent: 'space-between',
+      marginBottom: 4 * scale,
     },
-    favoriteButtonActive: {
-      borderColor: colors.danger,
+    roomTitle: {
+      flex: 1,
+      fontWeight: '700',
+      marginRight: 6 * scale,
+    },
+    roomDescription: {
+      lineHeight: 16 * scale,
     },
   });

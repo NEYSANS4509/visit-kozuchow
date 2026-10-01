@@ -6,6 +6,7 @@ node_modules/
 # Expo
 .expo/
 dist/
+dist*/
 web-build/
 expo-env.d.ts
 
@@ -21,19 +22,23 @@ expo-env.d.ts
 # Metro
 .metro-health-check*
 
-# debug
+# debug & logs
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
 
-# macOS
+# macOS & OS
 .DS_Store
+Thumbs.db
 *.pem
 
-# local env files
-.env*.local
+# Environment variables
+.env
+.env.*
+!.env.example
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 
 # generated native folders

@@ -2,7 +2,7 @@
 
 /**
  * Główna baza danych obiektów historycznych i turystycznych w Kożuchowie.
- * Wszystkie zasoby graficzne są ładowane lokalnie w formacie PNG.
+ * Wszystkie zasoby graficzne są ładowane lokalnie w formacie PNG / JPG.
  */
 export const PLACES = [
   {
@@ -13,49 +13,275 @@ export const PLACES = [
     shortDescription:
       'Zabytkowy zamek wybudowany w XIII–XIV w. przez Piastów głogowsko-żagańskich.',
     fullDescription:
-      'Zamek w Kożuchowie – zabytkowy zamek w Kożuchowie. Zamek wybudowany w XIII–XIV w. w miejscu starszego drewniano-ziemnego grodu przez Piastów głogowsko-żagańskich; położony w północno-zachodniej części Kożuchowa.',
+      'Zamek w Kożuchowie – zabytkowa warownia wzniesiona w XIII–XIV w. w miejscu dawnego drewniano-ziemnego grodu przez Piastów głogowsko-żagańskich. Obiekt wybudowano na podwyższeniu i palach w podmokłym terenie, a wewnątrz jego skrzydeł ukryty jest XIV-wieczny cylindryczny stołp z lochami głodowymi. Rezydował tu książę Zygmunt Jagiellończyk (późniejszy król Zygmunt I Stary). Zamek przetrwał wielki pożar miasta w 1488 r. i do dziś stanowi serce militarnej historii regionu.',
     location: {
-      latitude: 51.7458,
-      longitude: 15.5947,
-      address: 'Klasztorna',
+      latitude: 51.747178839175255,   
+      longitude: 15.594875300472978, 
+      address: 'ul. Klasztorna',
     },
-    openingHours: 'Całodobowo / 09:00 - 17:00',
-    visitDurationMin: 30,
-
-    // Główne zdjęcie zabytku
+    openingHours: 'Całodobowo / Wnętrza: 09:00 - 17:00',
+    visitDurationMin: 45,
     imageUri: require('../../assets/places/zamek_main.png'),
-
-    // Galeria 4 miniatur
     galleryImages: [
       require('../../assets/places/zamek1.png'),
       require('../../assets/places/zamek2.png'),
       require('../../assets/places/zamek3.png'),
       require('../../assets/places/zamek4.png'),
     ],
-
     audioGuideUrl: null,
     isWheelchairAccessible: true,
+    rooms: [
+      {
+        id: 'room_01',
+        qrCode: 'KZ-01-ROOM',
+        title: 'Sala Rycerska',
+        shortDescription: 'Główna sala reprezentacyjna z wystawą oręża i herbów rycerskich.',
+        fullDescription:
+          'Sala Rycerska w Zamku Kożuchowskim to reprezentacyjna przestrzeń przywołująca czasy militarnej potęgi dawnego Księstwa Głogowskiego oraz piastowskich tradycji obronnych. To właśnie tutaj koncentrowała się pamięć o garnizonie księcia Zygmunta Jagiellończyka, który z ramienia korony twardą ręką zwalczał grasujące w regionie bandy rycerzy-rozbójników. Ekspozycja łączy tradycje orężne, repliki dawnego uzbrojenia, pancerze, tarcze herbowe oraz historię niezłomnej obrony murów zamkowych podczas krwawego oblężenia przez wojska księcia Jana II Szalonego w 1488 roku.',
+        imageUri: require('../../assets/places/zamek1.png'),
+        galleryImages: [],
+        location: {
+          address: 'Zamek – I piętro',
+        },
+      },
+      {
+        id: 'room_02',
+        qrCode: 'KZ-02-ROOM',
+        title: 'Izba Regionalna',
+        shortDescription: 'Zbiory muzealne i pamiątki dawnych mieszkańców miasta.',
+        fullDescription:
+          'Izba Regionalna gromadzi zabytki kultury materialnej Kożuchowa i okolic: dawne dokumenty miejskie, unikalne narzędzia rzemieślnicze, relikty mennicy bijącej kożuchowskie halerze oraz przedwojenne kroniki.',
+        imageUri: require('../../assets/places/zamek2.png'),
+        galleryImages: [],
+        location: {
+          address: 'Zamek – Skrzydło wschodnie',
+        },
+      },
+    ],
   },
   {
     id: 'place_02',
     qrCode: 'KZ-02-PLACE',
-    title: 'Rynek miejski',
+    title: 'Kościół pw. Matki Boskiej Gromnicznej',
     category: 'Architektura',
-    shortDescription: 'Zabytkowy rynek z ratuszem i kamienicami z różnych epok.',
+    shortDescription: 'Monumentalna XIII-wieczna świątynia z kamienną głową i żaglowcami na suficie.',
     fullDescription:
-      'Zabytkowy układ urbanistyczny rynku miejskiego w Kożuchowie z zachowanym czworobocznym planem i ratuszem.',
+      'Kościół pw. Matki Boskiej Gromnicznej (dawniej św. Jana Chrzciciela) to najstarsza budowla sakralna w Kożuchowie, wzniesiona w XIII wieku z romańskich ciosów kamiennych, a następnie rozbudowywana w stylach gotyckim i barokowym. W zewnętrzną ścianę prezbiterium wmurowana jest tajemnicza, wczesnośredniowieczna kamienna rzeźba – „Głowa w murze”, według podań przedstawiająca zmarłego murarza bądź dawnego pogańskiego idola. Po pożarze w połowie XVII stulecia świątynia otrzymała wspaniałe barokowe sklepienie kolebkowe z lunetami, na którym umieszczono niezwykłe jak na obiekt śródlądowy sztukaterie przedstawiające morskie okręty żaglowe i sceny żeglarskie. W zewnętrzne mury wtopiono również liczne renesansowe oraz barokowe płyty nagrobne dawnej szlachty i patrycjatu.',
     location: {
-      latitude: 51.748,
-      longitude: 15.596,
-      address: 'Rynek',
+      latitude: 51.74578702547194, 
+      longitude: 15.593527151481563, 
+      address: 'Plac Matejki',
     },
-    openingHours: 'Całodobowo',
-    visitDurationMin: 45,
-
-    // Tymczasowe użycie głównego zdjęcia zamku (.png)
-    imageUri: require('../../assets/places/zamek_main.png'),
+    openingHours: 'Dni powszednie: 08:00 – 18:00\nNiedziele: 07:30 – 19:00',
+    visitDurationMin: 35,
+    imageUri: require('../../assets/places/church.png'),
     galleryImages: [],
     audioGuideUrl: null,
     isWheelchairAccessible: false,
+  },
+  {
+    id: 'place_03',
+    qrCode: 'KZ-03-PLACE',
+    title: 'Baszta Krośnieńska',
+    category: 'Zabytki',
+    shortDescription: 'Średniowieczna baszta bramna z XIV wieku o wysokości ponad 20 metrów.',
+    fullDescription:
+      'Baszta Krośnieńska to jedyna ocalała część z dawnych trzech potężnych zespołów bramnych Kożuchowa – rozebranych bram Żagańskiej oraz Głogowskiej. Wzniesiona w XIV wieku w ciągu kamiennych murów obronnych, osiąga ponad 20 metrów wysokości i zachowała oryginalne strzelnice kluczowe oraz szczelinowe. Przed całkowitą rozbiórką w XIX stuleciu uchroniło ją przekształcenie wnętrz na cele mieszkalne. Obiekt stanowił kluczowy element obrony północno-zachodniego odcinka fortyfikacji, a współcześnie służy celom wystawienniczym i mieści zbiory Izby Regionalnej.',
+    location: {
+      latitude: 51.746859, 
+      longitude: 15.593184, 
+      address: 'ul. Zielonogórska 8',
+    },
+    openingHours: 'Dostępna z zewnątrz całodobowo',
+    visitDurationMin: 20,
+    imageUri: require('../../assets/places/Baszta.png'),
+    galleryImages: [],
+    audioGuideUrl: null,
+    isWheelchairAccessible: true,
+  },
+  {
+    id: 'place_04',
+    qrCode: 'KZ-04-PLACE',
+    title: 'Mury obronne i fosa',
+    category: 'Zabytki',
+    shortDescription: 'Jeden z najlepiej zachowanych pełnych pierścieni fortyfikacji w Europie.',
+    fullDescription:
+      'Średniowieczne mury miejskie w Kożuchowie z końca XIII wieku to jeden z najpełniej zachowanych zespołów obwarowań w Polsce. Wzniesione z głazów narzutowych i łupku na zaprawie wapiennej. Obwód pierścienia wynosił ok. 1050 m (z kompleksem zamkowym aż 1300 m), a mury osiągały pierwotnie 8 m wysokości i niemal 2 m grubości. Miasto otaczała fosa o szerokości od 10 do 20 metrów, która po osuszeniu w XIX w. nie została zabetonowana i stanowi dziś malowniczy park spacerowy wzdłuż wałów. Na przełomie XV i XVI w. dodano drugi pas murów z bastejami przystosowanymi do broni palnej.',
+    location: {
+      latitude: 51.74598252356093, 
+      longitude: 15.593171537301748,
+      address: 'ul. Bolesława Krzywoustego',
+    },
+    openingHours: 'Dostępne całodobowo (park miejski)',
+    visitDurationMin: 40,
+    imageUri: require('../../assets/places/Mury.jpg'),
+    galleryImages: [],
+    audioGuideUrl: null,
+    isWheelchairAccessible: true,
+  },
+  {
+    id: 'place_05',
+    qrCode: 'KZ-05-PLACE',
+    title: 'Domek kata',
+    category: 'Zabytki',
+    shortDescription: 'Średniowieczna baszta czatownicza wkomponowana w ciąg murów.',
+    fullDescription:
+      '„Domek kata” to dawna baszta wykuszowa w południowo-zachodniej linii murów miejskich (rejon ul. Szprotawskiej). Pierwotnie była to prostokątna, trzykondygnacyjna czatownia z kamienia polnego z otwartą ścianą od strony miasta, którą później zabudowano i przystosowano do celów mieszkalnych. Tradycja miejska łączy obiekt z mieszkaniem lub pracownią miejskiego kata, który ze względu na swój zawód musiał mieszkać w odosobnieniu na skraju grodu. Obiekt został poddany pracom rewitalizacyjnym, posiada m.in. makietę i ścieżkę dojściową.',
+    location: {
+      latitude: 51.7443, 
+      longitude: 15.5966,
+      address: 'ul. Szprotawska',
+    },
+    openingHours: 'Widoczny z zewnątrz całodobowo',
+    visitDurationMin: 15,
+    imageUri: require('../../assets/places/DomekKata.jpg'),
+    galleryImages: [],
+    audioGuideUrl: null,
+    isWheelchairAccessible: true,
+  },
+  {
+    id: 'place_06',
+    qrCode: 'KZ-06-PLACE',
+    title: 'Rynek i Ratusz',
+    category: 'Architektura',
+    shortDescription: 'Średniowieczny rynek szachownicowy i ratusz łączący 4 epoki stylu.',
+    fullDescription:
+      'Kożuchowski Rynek zachował nienaruszony XIII-wieczny szachownicowy układ urbanistyczny z czasów lokacji miejskiej. W centrum wznosi się Ratusz wzniesiony pierwotnie w 1489 roku po wielkim pożarze miasta. Po kolejnych zniszczeniach został przebudowany w XIX w. w stylu nawiązującym do szkoły Karla Friedricha Schinkla, a po wojnie odbudowany z wyeksponowaniem gotyckich partii: smukłej wieży, ostrołukowych portali oraz gotyckich piwnic. Otaczające rynek kamienice kryją w sobie wielopoziomowe renesansowe i gotyckie piwnice, w których niegdyś leżakowało słynne piwo kożuchowskie.',
+    location: {
+      latitude: 51.745283, 
+      longitude: 15.594627,
+      address: 'Rynek',
+    },
+    openingHours: 'Całodobowo (przestrzeń publiczna)',
+    visitDurationMin: 30,
+    imageUri: require('../../assets/places/R.jpg'),
+    galleryImages: [],
+    audioGuideUrl: null,
+    isWheelchairAccessible: true,
+  },
+  {
+    id: 'place_07',
+    qrCode: 'KZ-07-PLACE',
+    title: 'Lapidarium rzeźby nagrobnej',
+    category: 'Miejsca pamięci',
+    shortDescription: 'Unikatowa w skali Polski nekropolia z prawie 200 renesansowymi i barokowymi płytami.',
+    fullDescription:
+      'Lapidarium w Kożuchowie – dawny cmentarz ewangelicki założony w XVII w. przy ul. 1 Maja. Należy do najwspanialszych i najlepiej zachowanych tego typu zabytków w Polsce. W mur obwodowy oraz ściany kaplic wmurowano niemal 200 zabytkowych płyt nagrobnych i epitafiów z XVI, XVII, XVIII i XIX stulecia. Miejsce zachwyca niezwykłym bogactwem ornamentyki, detali kamieniarskich i symboliki wanitatywnej, m.in. klepsydr, czaszek oraz personifikacji śmierci. Zwiedzanie możliwe jest po wcześniejszym umówieniu z przewodnikiem Centrum Kultury „Zamek”.',
+    location: {
+      latitude: 51.743668, 
+      longitude: 15.589487,
+      address: 'ul. 1 Maja (przy Cmentarzu Komunalnym)',
+    },
+    openingHours: 'Po uzgodnieniu z przewodnikiem CK „Zamek” (tel. 68 355 35 36)',
+    visitDurationMin: 35,
+    imageUri: require('../../assets/places/Lapidarium.jpg'),
+    galleryImages: [require('../../assets/places/Lapidarium_gal1.jpg')],
+    audioGuideUrl: null,
+    isWheelchairAccessible: true,
+  },
+  {
+    id: 'place_08',
+    qrCode: 'KZ-08-PLACE',
+    title: 'Barokowy portyk i Park Miejski',
+    category: 'Parki i Przyroda',
+    shortDescription: 'Zabytkowy portyk pałacowy z 1780 r. z rzeźbami herm oraz pomnik filozofa S. Maimona.',
+    fullDescription:
+      'Barokowy portyk filarowy w Parku Miejskim to jedyna ocalała część klasycystyczno-barokowego pałacu wzniesionego w 1780 roku przez arystokratyczną rodzinę von Kalckreuth. Cztery masywne filary wieńczy profilowany gzyms podtrzymywany przez kunsztownie wykute kamienne rzeźby czterech herm. W otaczającym malowniczym parku dworskim znajduje się pomnik Salomona Maimona – wybitnego filozofa, komentatora Immanuela Kanta, który spędził tu ostatnie lata życia – a także liczne wiekowe pomniki przyrody: platany, dęby, buki czerwonolistne i cisy.',
+    location: {
+      latitude: 51.747194,
+      longitude: 15.598859,
+      address: 'Park Miejski (od ul. Spacerowej)',
+    },
+    openingHours: 'Dostępny całodobowo (park miejski)',
+    visitDurationMin: 30,
+    imageUri: require('../../assets/places/BarokowyPortal.jpg'),
+    galleryImages: [
+      require('../../assets/places/ParkPortyk.jpg'),
+      require('../../assets/places/PomnikFilozofa.jpg'),
+    ],
+    audioGuideUrl: null,
+    isWheelchairAccessible: true,
+  },
+  {
+    id: 'place_09',
+    qrCode: 'KZ-09-PLACE',
+    title: 'Zabytkowa fasada kamienicy',
+    category: 'Architektura',
+    shortDescription: 'Ocalała rokokowo-barokowa fasada z XVIII w. z płaskorzeźbami św. Piotra i Pawła.',
+    fullDescription:
+      'Unikalna, wolnostojąca fasada mieszczańskiej kamienicy z XVIII wieku, zlokalizowana przy ulicy Klasztornej wiodącej z Rynku pod bramę Zamku. Sam budynek uległ zniszczeniu po II wojnie światowej i został rozebrany w 1959 roku, pozostawiając jedynie kunsztowną ścianę frontową. Elewację zdobią stiukowe płaskorzeźby przedstawiające św. Piotra z kluczami oraz św. Pawła z mieczem, których aureole uformowano w kształt wielkich muszli. Fryz dekorują subtelne motywy fal nawiązujące do chrztu. Fasada została poddana gruntownej renowacji w 2006 roku.',
+    location: {
+      latitude: 51.74665,
+      longitude: 15.59542,
+      address: 'ul. Klasztorna',
+    },
+    openingHours: 'Widoczna z zewnątrz całodobowo',
+    visitDurationMin: 15,
+    imageUri: require('../../assets/places/KlasztornaFasada.jpg'),
+    galleryImages: [],
+    audioGuideUrl: null,
+    isWheelchairAccessible: true,
+  },
+  {
+    id: 'place_10',
+    qrCode: 'KZ-10-PLACE',
+    title: 'Kościół pw. Św. Ducha',
+    category: 'Architektura',
+    shortDescription: 'Gotycka świątynia szpitalna z XIV w. ze sklepieniem sieciowym.',
+    fullDescription:
+      'Kościół filialny pw. Świętego Ducha to cenna gotycka świątynia ufundowana na przełomie XIII i XIV wieku (pierwsza wzmianka z 1320 r.) jako kościół szpitalny przy ówczesnym przytułku dla chorych i ubogich na przedmieściu żagańskim. Jest to jedyny zachowany w całym regionie obiekt ściśle powiązany ze średniowiecznym szpitalnictwem. Wzniesiony z kamienia polnego i cegły, w XVI wieku otrzymał w prezbiterium wspaniałe późnogotyckie sklepienie sieciowe oraz ozdobny szczyt wschodni z blendami.',
+    location: {
+      latitude: 51.74452,
+      longitude: 15.59158,
+      address: 'ul. 1 Maja 34',
+    },
+    openingHours: 'Dostępny z zewnątrz całodobowo / Wnętrza podczas nabożeństw',
+    visitDurationMin: 20,
+    imageUri: require('../../assets/places/KosciolSwDucha.jpg'),
+    galleryImages: [],
+    audioGuideUrl: null,
+    isWheelchairAccessible: false,
+  },
+  {
+    id: 'place_11',
+    qrCode: 'KZ-11-PLACE',
+    title: 'Wieża kościoła ewangelickiego',
+    category: 'Zabytki',
+    shortDescription: 'Historyczna wieża z 1826 r. – relikt ewangelickiego Kościoła Łaski z XVIII w.',
+    fullDescription:
+      'Wieża na Placu Ewangelickim to jedyna ocalała pozostałość jednego z sześciu śląskich Kościołów Łaski, na których budowę zezwolił cesarz Józef I Habsburg w 1709 roku na mocy ugody altransztadzkiej. Sama świątynia była szachulcową budowlą wzniesioną w latach 1709–1710, a wysoką wieżę dobudowano w 1826 roku. Po II wojnie światowej świątynia popadła w ruinę i została rozebrana w latach 60./70. XX wieku, a ocalałą wieżę zabezpieczono jako trwałą pamiątkę protestanckiej przeszłości Kożuchowa.',
+    location: {
+      latitude: 51.743083,
+      longitude: 15.59325,
+      address: 'Plac Ewangelicki',
+    },
+    openingHours: 'Widoczna z zewnątrz całodobowo',
+    visitDurationMin: 20,
+    imageUri: require('../../assets/places/WiezaEwangelicka.jpg'),
+    galleryImages: [],
+    audioGuideUrl: null,
+    isWheelchairAccessible: true,
+  },
+  {
+    id: 'place_12',
+    qrCode: 'KZ-12-PLACE',
+    title: 'Wieża ciśnień',
+    category: 'Zabytki',
+    shortDescription: 'Zabytkowa wieża wodociągowa z 1908 r. na najwyższym wzniesieniu miasta.',
+    fullDescription:
+      'Kożuchowska wieża ciśnień to monumentalny zabytek techniki wzniesiony w 1908 roku w najwyższym punkcie topograficznym miasta (ok. 112 m n.p.m.). Mierząca blisko 39 metrów budowla z czerwonej cegły klinkierowej łączy formy neogotyckie z motywami wczesnej secesji. Posiada stalowy zbiornik wodny typu Intze oraz stożkowy dach kryty ceramiczną dachówką. W ozdobnym tympanonie wejściowym umieszczono płaskorzeźbę herbu Kożuchowa oraz datę wzniesienia. Wieża do dziś stanowi charakterystyczną dominantę w sylwecie miasta.',
+    location: {
+      latitude: 51.74175,
+      longitude: 15.596444,
+      address: 'ul. Szprotawska',
+    },
+    openingHours: 'Widoczna z zewnątrz całodobowo',
+    visitDurationMin: 15,
+    imageUri: require('../../assets/places/WiezaCisnien.jpg'),
+    galleryImages: [
+      require('../../assets/places/231.jpg'),
+    ],
+    audioGuideUrl: null,
+    isWheelchairAccessible: true,
   },
 ];

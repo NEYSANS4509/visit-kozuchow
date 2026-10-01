@@ -1,38 +1,81 @@
 // App.js
+// Główny komponent nawigacyjny aplikacji Visit Kożuchów.
 import React from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Importy widoków
-import WelcomeScreen from './src/screens/WelcomeScreen'; // Ekran powitalny[cite: 7]
-import AuthScreen from './src/screens/AuthScreen';       // Ekran logowania/rejestracji[cite: 7, 10]
-import DevHubScreen from './src/screens/DevHubScreen';   // Hub do swobodnego testowania ekranów
-import CastleDetailScreen from './src/screens/CastleDetailScreen'; // Nowy ekran Zamku
+// Kontekst dostępności cyfrowej (WCAG 2.1 AA)
+import { AccessibilityProvider } from './src/context/AccessibilityContext';
+
+// Import ekranów aplikacji
+import WelcomeScreen from './src/screens/WelcomeScreen';
+import ExploreScreen from './src/screens/ExploreScreen';
+import MapScreen from './src/screens/MapScreen';
+import QRScannerScreen from './src/screens/QRScannerScreen';
+import CastleDetailScreen from './src/screens/CastleDetailScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator();
 
+/**
+ * Główny komponent aplikacji konfigurujący stos nawigacji i dostawców kontekstu.
+ */
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Welcome"
-        screenOptions={{
-          headerShown: false,
-          animation: 'fade',
-        }}
-      >
-        {/* 1. Ekran startowy */}
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+    <SafeAreaProvider>
+      <AccessibilityProvider>
+        <StatusBar style="dark" />
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Welcome"
+            screenOptions={{
+              headerShown: false,
+              animation: 'slide_from_right',
+            }}
+          >
+            {/* Ekran powitalny / animowany splash */}
+            <Stack.Screen
+              name="Welcome"
+              component={WelcomeScreen}
+              options={{ animation: 'fade' }}
+            />
 
-        {/* 2. Menu wyboru widoków (Dev Hub) */}
-        <Stack.Screen name="DevHub" component={DevHubScreen} />
+            {/* Główny katalog zabytków i rekomendacji */}
+            <Stack.Screen
+              name="Explore"
+              component={ExploreScreen}
+              options={{ animation: 'fade' }}
+            />
 
-        {/* 3. Karta Zamku Kożuchów */}
-        <Stack.Screen name="CastleDetail" component={CastleDetailScreen} />
+            {/* Interaktywna mapa miasta z lokalizacją GPS */}
+            <Stack.Screen
+              name="Map"
+              component={MapScreen}
+            />
 
-        {/* 4. Ekran rejestracji / logowania */}
-        <Stack.Screen name="Auth" component={AuthScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+            {/* Skaner kodów QR przy zabytkach */}
+            <Stack.Screen
+              name="QRScanner"
+              component={QRScannerScreen}
+              options={{ animation: 'fade_from_bottom' }}
+            />
+
+            {/* Uniwersalna karta szczegółów zabytku lub sali */}
+            <Stack.Screen
+              name="CastleDetail"
+              component={CastleDetailScreen}
+            />
+
+            {/* Ekran ustawień i ułatwień dostępu (WCAG 2.1 AA) */}
+            <Stack.Screen
+              name="Settings"
+              component={SettingsScreen}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </AccessibilityProvider>
+    </SafeAreaProvider>
   );
 }

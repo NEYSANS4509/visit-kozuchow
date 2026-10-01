@@ -1,200 +1,232 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+// src/screens/WelcomeScreen.js
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  Image,
-  SafeAreaView,
-  useWindowDimensions,
   Animated,
-  Easing,
+  StatusBar,
+  TouchableWithoutFeedback,
+  AccessibilityInfo,
 } from 'react-native';
-import { colors } from '../theme/colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useScaledStyles } from '../hooks/useScale';
 
-
+/**
+ * Ekran powitalny (splash screen) aplikacji Visit Kożuchów.
+ * Prezentuje animowaną sekwencję wejścia logo i automatycznie przekierowuje do katalogu 'Explore'.
+ * Obsługuje wytyczne WCAG 2.3.3 (Reduce Motion) dla osób z nadwrażliwością na ruch.
+ *
+ * @param {object} navigation - Obiekt nawigacji React Navigation
+ */
 export default function WelcomeScreen({ navigation }) {
-  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const scale = windowWidth / 390;
+  const { scale, styles } = useScaledStyles(createStyles);
 
-  const styles = useMemo(
-    () => createStyles(scale, windowHeight),
-    [scale, windowHeight]
-  );
+  // Wartości animacji wyjścia całego ekranu
+  const screenOpacity = useRef(new Animated.Value(1)).current;
 
-  // Wartości referencyjne dla animacji
-  const cardOpacity = useRef(new Animated.Value(0)).current;
-  const cardTranslateY = useRef(new Animated.Value(40)).current;
-  const floatAnim = useRef(new Animated.Value(0)).current;
+  // Wartości animacji górnego elementu (1.png - pineska z zamkiem)
+  const pinOpacity = useRef(new Animated.Value(0)).current;
+  const pinTranslateY = useRef(new Animated.Value(-30)).current;
+  const pinScale = useRef(new Animated.Value(0.85)).current;
+
+  // Wartości animacji dolnego elementu (2.png - napis Visit Kożuchów)
+  const textOpacity = useRef(new Animated.Value(0)).current;
+  const textTranslateY = useRef(new Animated.Value(25)).current;
+
+  // Płynne przejście do głównej części aplikacji
+  const proceedToApp = () => {
+    Animated.timing(screenOpacity, {
+      toValue: 0,
+      duration: 350,
+      useNativeDriver: true,
+    }).start(() => {
+      navigation.replace('Explore');
+    });
+  };
 
   useEffect(() => {
-    // 1. Płynne wejście karty (fade-in oraz przesunięcie z dołu)
-    Animated.parallel([
-      Animated.timing(cardOpacity, {
-        toValue: 1,
-        duration: 700,
-        useNativeDriver: true,
-      }),
-      Animated.spring(cardTranslateY, {
-        toValue: 0,
-        friction: 7,
-        tension: 40,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    let isMounted = true;
+    let exitTimer = null;
 
-    // 2. Zapętlona animacja lewitacji logo w osi Y
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(floatAnim, {
-          toValue: -8,
-          duration: 1800,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.timing(floatAnim, {
-          toValue: 0,
-          duration: 1800,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, [cardOpacity, cardTranslateY, floatAnim]);
+    // WCAG 2.3.3: Sprawdzanie systemowego ograniczenia ruchu
+    AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
+      if (!isMounted) return;
+
+      if (reduceMotion) {
+        // Natychmiastowe wyświetlenie obu grafik bez ruchu
+        pinOpacity.setValue(1);
+        pinTranslateY.setValue(0);
+        pinScale.setValue(1);
+        textOpacity.setValue(1);
+        textTranslateY.setValue(0);
+        exitTimer = setTimeout(proceedToApp, 1600);
+      } else {
+        // Płynna sekwencja kaskadowa: najpierw pineska, chwilę po niej napis
+        Animated.sequence([
+          // 1. Wejście pineski (górna grafika)
+          Animated.parallel([
+            Animated.timing(pinOpacity, {
+              toValue: 1,
+              duration: 550,
+              useNativeDriver: true,
+            }),
+            Animated.spring(pinTranslateY, {
+              toValue: 0,
+              friction: 6,
+              tension: 45,
+              useNativeDriver: true,
+            }),
+            Animated.spring(pinScale, {
+              toValue: 1,
+              friction: 5,
+              tension: 40,
+              useNativeDriver: true,
+            }),
+          ]),
+          // 2. Wejście napisu z dołu (dolna grafika)
+          Animated.parallel([
+            Animated.timing(textOpacity, {
+              toValue: 1,
+              duration: 450,
+              useNativeDriver: true,
+            }),
+            Animated.spring(textTranslateY, {
+              toValue: 0,
+              friction: 7,
+              tension: 50,
+              useNativeDriver: true,
+            }),
+          ]),
+        ]).start(() => {
+          // 3. Krótka pauza na zapoznanie się z ekranem i płynne przejście
+          if (isMounted) {
+            exitTimer = setTimeout(proceedToApp, 1400);
+          }
+        });
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      if (exitTimer) clearTimeout(exitTimer);
+    };
+  }, []);
 
   return (
-    <View style={styles.container}>
-      {/* Elementy tła: górna i dolna grafika */}
-      <Image
-        source={require('../../assets/fly.png')}
-        style={styles.earthTop}
-        resizeMode="contain"
-      />
-      <Image
-        source={require('../../assets/fly.png')}
-        style={styles.earthBottom}
-        resizeMode="contain"
-      />
+    <TouchableWithoutFeedback onPress={proceedToApp} accessible={false}>
+      <Animated.View style={[styles.container, { opacity: screenOpacity }]}>
+        <StatusBar barStyle="light-content" backgroundColor="#0D6EFD" translucent />
 
-      <SafeAreaView style={styles.safeArea}>
-        {/* Główna karta z animacją pojawiania się */}
-        <Animated.View
-          style={[
-            styles.card,
-            {
-              opacity: cardOpacity,
-              transform: [{ translateY: cardTranslateY }],
-            },
-          ]}
-        >
-          {/* Kontener z lewitującym logo */}
-          <View style={styles.logoWrapper}>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.logoGroup}>
+            {/* 1.png: Górna grafika z ilustracją zamku / pineską */}
             <Animated.Image
-              source={require('../../assets/logo.png')}
+              source={require('../../assets/1.png')}
               style={[
-                styles.logo,
+                styles.pinImage,
                 {
-                  transform: [{ translateY: floatAnim }],
+                  opacity: pinOpacity,
+                  transform: [{ translateY: pinTranslateY }, { scale: pinScale }],
                 },
               ]}
               resizeMode="contain"
+              accessible={true}
+              accessibilityRole="image"
+              accessibilityLabel="Ilustracja Zamku w Kożuchowie"
+            />
+
+            {/* 2.png: Dolna grafika z typografią Visit Kożuchów */}
+            <Animated.Image
+              source={require('../../assets/2.png')}
+              style={[
+                styles.textImage,
+                {
+                  opacity: textOpacity,
+                  transform: [{ translateY: textTranslateY }],
+                },
+              ]}
+              resizeMode="contain"
+              accessible={true}
+              accessibilityRole="image"
+              accessibilityLabel="Visit Kożuchów"
             />
           </View>
 
-          {/* Główny przycisk nawigacji */}
-          <TouchableOpacity
-            style={styles.startButton}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('DevHub')}
+          {/* Podpis informujący o wersji testowej */}
+          <Animated.View
+            style={[styles.disclaimerContainer, { opacity: textOpacity }]}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel="Wersja testowa aplikacji. Funkcje oraz treści mogą ulec zmianie."
           >
-            <Text style={styles.startButtonText}>Start</Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </SafeAreaView>
-    </View>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>WERSJA TESTOWA</Text>
+            </View>
+            <Text style={styles.disclaimerText}>
+              Aplikacja w fazie rozwoju — funkcje oraz treści mogą ulec zmianie.
+            </Text>
+          </Animated.View>
+        </SafeAreaView>
+      </Animated.View>
+    </TouchableWithoutFeedback>
   );
 }
 
-const createStyles = (scale, windowHeight) =>
+const createStyles = (scale) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colors.primary,
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    // Górna grafika tła (Figma: ion:earth)
-    earthTop: {
-      position: 'absolute',
-      width: 441 * scale,
-      height: 387 * scale,
-      top: -125 * scale,
-      left: 201 * scale,
-      tintColor: '#FFFFFF',
-      opacity: 0.18,
-      zIndex: 0,
-    },
-    // Dolna grafika tła
-    earthBottom: {
-      position: 'absolute',
-      width: 441 * scale,
-      height: 387 * scale,
-      bottom: -100 * scale,
-      left: -100 * scale,
-      tintColor: '#FFFFFF',
-      opacity: 0.18,
-      zIndex: 0,
+      backgroundColor: '#0D6EFD',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     safeArea: {
       flex: 1,
+      justifyContent: 'center',
       alignItems: 'center',
-      zIndex: 1,
-    },
-    // Główna biała karta
-    card: {
-      width: 342 * scale,
-      height: Math.min(609 * scale, windowHeight * 0.78),
-      marginTop: 35 * scale,
-      backgroundColor: colors.white,
-      borderRadius: 24 * scale,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: 24 * scale,
-      paddingHorizontal: 16 * scale,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 10 * scale },
-      shadowOpacity: 0.12,
-      shadowRadius: 20 * scale,
-      elevation: 8,
-    },
-    logoWrapper: {
-      flex: 1,
       width: '100%',
+    },
+    logoGroup: {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    logo: {
-      width: 334 * scale,
-      height: 362 * scale,
+    pinImage: {
+      width: 175 * scale,
+      height: 195 * scale,
+      marginBottom: -12 * scale,
     },
-    startButton: {
-      width: 300 * scale,
-      height: 50 * scale,
-      backgroundColor: colors.primary,
-      borderRadius: 25 * scale,
+    textImage: {
+      width: 250 * scale,
+      height: 110 * scale,
+    },
+    disclaimerContainer: {
+      position: 'absolute',
+      bottom: 24 * scale,
+      left: 20 * scale,
+      right: 20 * scale,
       alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 8 * scale,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 4 * scale },
-      shadowOpacity: 0.3,
-      shadowRadius: 8 * scale,
-      elevation: 4,
     },
-    startButtonText: {
-      color: colors.white,
-      fontSize: 18 * scale,
+    badge: {
+      backgroundColor: 'rgba(255, 255, 255, 0.18)',
+      borderColor: 'rgba(255, 255, 255, 0.4)',
+      borderWidth: 1,
+      paddingHorizontal: 10 * scale,
+      paddingVertical: 3 * scale,
+      borderRadius: 10 * scale,
+      marginBottom: 6 * scale,
+    },
+    badgeText: {
+      color: '#FFFFFF',
+      fontSize: 10 * scale,
       fontWeight: '700',
-      letterSpacing: 0.5 * scale,
+      letterSpacing: 0.8,
+    },
+    disclaimerText: {
+      color: 'rgba(255, 255, 255, 0.8)',
+      fontSize: 11 * scale,
+      lineHeight: 15 * scale,
+      textAlign: 'center',
+      fontWeight: '500',
     },
   });

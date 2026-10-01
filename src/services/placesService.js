@@ -3,42 +3,46 @@ import { PLACES } from '../data/places';
 
 /**
  * Stała reprezentująca brak filtrowania (wszystkie kategorie).
- * Należy jej używać również w komponentach interfejsu użytkownika (np. w filtrach).
+ * Używana w komponentach interfejsu użytkownika (np. filtrach i listach wyboru).
  */
 export const ALL_CATEGORIES = 'Wszystkie';
 
 /**
  * Czas symulowanego opóźnienia sieciowego w milisekundach.
- * Przydatny do testowania stanów ładowania (ActivityIndicator) w UI.
+ * Przydatny do testowania stanów ładowania (ActivityIndicator) w interfejsie użytkownika.
  */
 const NETWORK_DELAY_MS = 100;
 
 /**
- * Pomocnicza funkcja symulująca asynchroniczne zapytanie sieciowe.
- * @param {*} data - Dane do zwrócenia
- * @param {number} delay - Czas oczekiwania w ms
+ * Pomocnicza funkcja symulująca asynchroniczne zapytanie sieciowe (mock API).
+ *
+ * @param {*} data - Dane do zwrócenia po upływie zadanego czasu
+ * @param {number} delay - Czas oczekiwania w milisekundach
  * @returns {Promise<*>}
  */
 const mockFetch = (data, delay = NETWORK_DELAY_MS) =>
   new Promise((resolve) => setTimeout(() => resolve(data), delay));
 
 /**
- * Warstwa serwisowa (Wzorzec Repository) do obsługi danych o lokacjach.
+ * Warstwa serwisowa (Wzorzec Repository) do obsługi bazy danych o zabytkach i salach ekspozycyjnych.
  */
 export const placesService = {
   /**
-   * Pobiera pełną kopię listy wszystkich miejsc.
-   * @returns {Promise<Array>}
+   * Pobiera pełną kopię listy wszystkich głównych miejsc turystycznych.
+   *
+   * @returns {Promise<Array>} Lista obiektów historycznych
    */
   getAllPlaces: () => {
     return mockFetch([...PLACES]);
   },
 
   /**
-   * Wyszukuje miejsce po kodzie z QR-skanera.
-   * Odporne na spacje oraz różnice w wielkości liter (case-insensitive).
-   * @param {string} rawQrCode - Surowa wartość z kamery
-   * @returns {Promise<Object|null>}
+   * Wyszukuje miejsce lub salę na podstawie odczytanego kodu QR.
+   * Odporne na białe znaki oraz różnice w wielkości liter (case-insensitive).
+   * Przeszukuje zarówno obiekty główne, jak i sale wewnętrzne (rooms).
+   *
+   * @param {string} rawQrCode - Surowa wartość odczytana z kamery lub skanera
+   * @returns {Promise<Object|null>} Znaleziony obiekt lub null
    */
   getPlaceByQrCode: (rawQrCode) => {
     const sanitizedCode = rawQrCode?.trim().toLowerCase();
@@ -47,27 +51,63 @@ export const placesService = {
       return mockFetch(null);
     }
 
-    const foundPlace = PLACES.find(
+    // 1. Sprawdzenie głównych obiektów
+    let foundPlace = PLACES.find(
       (item) => item.qrCode?.trim().toLowerCase() === sanitizedCode
     );
 
+    // 2. Jeśli nie znaleziono na liście głównej, sprawdzenie sal wewnętrznych (rooms)
+    if (!foundPlace) {
+      for (const place of PLACES) {
+        if (Array.isArray(place.rooms)) {
+          const matchingRoom = place.rooms.find(
+            (room) => room.qrCode?.trim().toLowerCase() === sanitizedCode
+          );
+          if (matchingRoom) {
+            foundPlace = { ...matchingRoom, parentPlaceId: place.id };
+            break;
+          }
+        }
+      }
+    }
+
     return mockFetch(foundPlace ? { ...foundPlace } : null);
   },
 
   /**
-   * Pobiera szczegółowe dane miejsca na podstawie unikalnego ID.
-   * @param {string} id - Identyfikator rekordu
-   * @returns {Promise<Object|null>}
+   * Pobiera szczegółowe dane miejsca lub sali na podstawie unikalnego ID.
+   * Przeszukuje zarówno obiekty nadrzędne, jak i podrzędne ekspozycje.
+   *
+   * @param {string} id - Identyfikator rekordu (np. 'place_01' lub 'room_01')
+   * @returns {Promise<Object|null>} Znaleziony rekord lub null
    */
   getPlaceById: (id) => {
-    const foundPlace = PLACES.find((item) => item.id === id);
+    if (!id) return mockFetch(null);
+
+    // 1. Sprawdzenie głównych obiektów
+    let foundPlace = PLACES.find((item) => item.id === id);
+
+    // 2. Sprawdzenie sal ekspozycyjnych
+    if (!foundPlace) {
+      for (const place of PLACES) {
+        if (Array.isArray(place.rooms)) {
+          const matchingRoom = place.rooms.find((room) => room.id === id);
+          if (matchingRoom) {
+            foundPlace = { ...matchingRoom, parentPlaceId: place.id };
+            break;
+          }
+        }
+      }
+    }
+
     return mockFetch(foundPlace ? { ...foundPlace } : null);
   },
 
   /**
-   * Zwraca miejsca przefiltrowane według kategorii.
-   * @param {string} category - Wybrana kategoria lub ALL_CATEGORIES
-   * @returns {Promise<Array>}
+   * Zwraca obiekty przefiltrowane według wybranej kategorii tematycznej.
+   *
+   * @param {string} category - Nazwa wybranej kategorii lub stała ALL_CATEGORIES
+   * @returns {Promise<Array>} Przefiltrowana lista obiektów
    */
   getPlacesByCategory: (category) => {
     if (!category || category === ALL_CATEGORIES) {
