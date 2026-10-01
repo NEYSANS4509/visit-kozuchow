@@ -18,6 +18,7 @@ import MapScreen from './src/screens/MapScreen';
 import QRScannerScreen from './src/screens/QRScannerScreen';
 import CastleDetailScreen from './src/screens/CastleDetailScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import AIChatScreen from './src/screens/AIChatScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -79,6 +80,15 @@ function AppNavigator() {
           <Stack.Screen
             name="Settings"
             component={SettingsScreen}
+          />
+
+          {/* Asystent i inteligentny przewodnik turystyczny AI */}
+          <Stack.Screen
+            name="AIChat"
+            component={AIChatScreen}
+            options={{
+              animation: 'slide_from_bottom',
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>

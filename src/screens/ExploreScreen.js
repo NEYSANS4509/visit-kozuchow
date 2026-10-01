@@ -20,7 +20,6 @@ import { useLanguage } from '../context/LanguageContext';
 import { useScaledStyles } from '../hooks/useScale';
 import { getImageSource } from '../utils/imageSource';
 import LegalModal from '../components/LegalModal';
-import AIChatModal from '../components/AIChatModal';
 import CalmPressable from '../components/CalmPressable';
 import FadeInView from '../components/FadeInView';
 import { DARK_MAP_STYLE } from '../theme/mapStyles';
@@ -144,7 +143,6 @@ export default function ExploreScreen({ navigation }) {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [legalModalVisible, setLegalModalVisible] = useState(false);
-  const [aiModalVisible, setAiModalVisible] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'favorites'
 
   const { isFavorite, toggleFavorite, favoriteCount } = useFavorites();
@@ -637,16 +635,16 @@ export default function ExploreScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
 
-        {/* Przycisk otwierający okno Asystenta AI */}
+        {/* Przycisk otwierający ekran Asystenta AI */}
         <TouchableOpacity
           style={styles.navItem}
           activeOpacity={0.7}
-          onPress={() => setAiModalVisible(true)}
+          onPress={() => navigation.navigate('AIChat')}
           hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}
           accessible={true}
-          accessibilityRole="button"
+          accessibilityRole="tab"
           accessibilityLabel={t('chat.title')}
-          accessibilityHint="Otwiera okno dialogowe z przewodnikiem AI"
+          accessibilityHint="Otwiera inteligentnego przewodnika turystycznego AI"
         >
           <Ionicons
             name="sparkles"
@@ -672,11 +670,6 @@ export default function ExploreScreen({ navigation }) {
       <LegalModal
         visible={legalModalVisible}
         onClose={() => setLegalModalVisible(false)}
-      />
-
-      <AIChatModal
-        visible={aiModalVisible}
-        onClose={() => setAiModalVisible(false)}
       />
     </SafeAreaView>
   );
