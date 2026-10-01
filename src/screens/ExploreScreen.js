@@ -1,5 +1,5 @@
 // src/screens/ExploreScreen.js
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  FlatList,
+  Platform,
   Image,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,6 +32,76 @@ const KOZUCHOW_REGION = {
   latitudeDelta: 0.009,
   longitudeDelta: 0.009,
 };
+
+/**
+ * Zoptymalizowany komponent pojedynczej karty zabytku (React.memo).
+ * Eliminuje nadmiarowe przerenderowania kart przy wpisywaniu tekstu w wyszukiwarce.
+ */
+const PlaceCardItem = memo(function PlaceCardItem({
+  item,
+  onPress,
+  scale,
+  colors,
+  highContrast,
+  getScaledFontSize,
+  styles,
+}) {
+  return (
+    <CalmPressable
+      style={[
+        styles.placeCard,
+        { backgroundColor: colors.white },
+        highContrast && styles.highContrastCard,
+      ]}
+      onPress={() => onPress(item.id)}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={`Obiekt: ${item.title}, kategoria: ${item.category}, adres: ${item.location?.address || 'Kożuchów'}. Dotknij, aby przejść do szczegółów.`}
+      accessibilityHint="Przenosi do karty zabytku z audioprzewodnikiem i galerią"
+    >
+      <View style={styles.cardImageWrapper}>
+        <Image
+          source={getImageSource(item.imageUri)}
+          style={styles.cardImage}
+          resizeMode="cover"
+          accessible={true}
+          accessibilityRole="image"
+          accessibilityLabel={`Zdjęcie obiektu: ${item.title}`}
+        />
+        <View
+          style={styles.cardBookmark}
+          accessible={false}
+          importantForAccessibility="no"
+        >
+          <Ionicons name="bookmark-outline" size={16 * scale} color="#FFFFFF" />
+        </View>
+      </View>
+
+      <View style={styles.cardContent}>
+        <Text
+          style={[
+            styles.cardTitle,
+            { color: colors.textDark, fontSize: getScaledFontSize(16 * scale) },
+          ]}
+          numberOfLines={2}
+          allowFontScaling={true}
+        >
+          {item.title}
+        </Text>
+        <Text
+          style={[
+            styles.cardSubtitle,
+            { color: colors.textMuted, fontSize: getScaledFontSize(12 * scale) },
+          ]}
+          numberOfLines={1}
+          allowFontScaling={true}
+        >
+          {item.location?.address}
+        </Text>
+      </View>
+    </CalmPressable>
+  );
+});
 
 /**
  * Główny ekran katalogowy i pulpit turystyczny (ExploreScreen).
@@ -60,6 +132,43 @@ export default function ExploreScreen({ navigation }) {
         p.location?.address?.toLowerCase().includes(q)
     );
   }, [searchQuery]);
+
+  // Stabilna referencja do nawigacji do karty zabytku
+  const handleCardPress = useCallback(
+    (placeId) => {
+      navigation.navigate('CastleDetail', { placeId });
+    },
+    [navigation]
+  );
+
+  // Zoptymalizowana funkcja renderowania pojedynczego elementu listy FlatList
+  const renderPlaceCard = useCallback(
+    ({ item }) => (
+      <PlaceCardItem
+        item={item}
+        onPress={handleCardPress}
+        scale={scale}
+        colors={colors}
+        highContrast={highContrast}
+        getScaledFontSize={getScaledFontSize}
+        styles={styles}
+      />
+    ),
+    [handleCardPress, scale, colors, highContrast, getScaledFontSize, styles]
+  );
+
+  const placeKeyExtractor = useCallback((item) => item.id, []);
+
+  // Obliczenie stałego układu wymiarów karty (szerokość 220dp + odstęp 16dp)
+  const cardItemWidth = Math.round(236 * scale);
+  const getCardItemLayout = useCallback(
+    (_data, index) => ({
+      length: cardItemWidth,
+      offset: cardItemWidth * index,
+      index,
+    }),
+    [cardItemWidth]
+  );
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.backgroundLight }]} edges={['top']}>
@@ -181,68 +290,19 @@ export default function ExploreScreen({ navigation }) {
           </View>
         ) : (
           <FadeInView key={`${searchQuery}_${filteredPlaces.length}`} duration={160}>
-            <ScrollView
+            <FlatList
               horizontal
+              data={filteredPlaces}
+              renderItem={renderPlaceCard}
+              keyExtractor={placeKeyExtractor}
+              getItemLayout={getCardItemLayout}
+              initialNumToRender={4}
+              maxToRenderPerBatch={4}
+              windowSize={3}
+              removeClippedSubviews={Platform.OS === 'android'}
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.cardsScroll}
-            >
-              {filteredPlaces.map((item) => (
-                <CalmPressable
-                  key={item.id}
-                  style={[
-                    styles.placeCard,
-                    { backgroundColor: colors.white },
-                    highContrast && styles.highContrastCard,
-                  ]}
-                  onPress={() => navigation.navigate('CastleDetail', { placeId: item.id })}
-                  accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Obiekt: ${item.title}, kategoria: ${item.category}, adres: ${item.location?.address || 'Kożuchów'}. Dotknij, aby przejść do szczegółów.`}
-                  accessibilityHint="Przenosi do karty zabytku z audioprzewodnikiem i galerią"
-                >
-                  <View style={styles.cardImageWrapper}>
-                    <Image
-                      source={getImageSource(item.imageUri)}
-                      style={styles.cardImage}
-                      resizeMode="cover"
-                      accessible={true}
-                      accessibilityRole="image"
-                      accessibilityLabel={`Zdjęcie obiektu: ${item.title}`}
-                    />
-                    <View
-                      style={styles.cardBookmark}
-                      accessible={false}
-                      importantForAccessibility="no"
-                    >
-                      <Ionicons name="bookmark-outline" size={16 * scale} color="#FFFFFF" />
-                    </View>
-                  </View>
-
-                  <View style={styles.cardContent}>
-                    <Text
-                      style={[
-                        styles.cardTitle,
-                        { color: colors.textDark, fontSize: getScaledFontSize(16 * scale) },
-                      ]}
-                      numberOfLines={2}
-                      allowFontScaling={true}
-                    >
-                      {item.title}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.cardSubtitle,
-                        { color: colors.textMuted, fontSize: getScaledFontSize(12 * scale) },
-                      ]}
-                      numberOfLines={1}
-                      allowFontScaling={true}
-                    >
-                      {item.location?.address}
-                    </Text>
-                  </View>
-                </CalmPressable>
-              ))}
-            </ScrollView>
+            />
           </FadeInView>
         )}
 

@@ -249,8 +249,8 @@ export default function MapScreen({ route, navigation }) {
             setSelectedPlace(closest);
           }
         }
-      } catch (err) {
-        console.warn('Informacja o geolokalizacji:', err);
+      } catch (_err) {
+        // Cicha obsługa w przypadku braku uprawnień lub niedostępności GPS
       }
     })();
 
@@ -334,8 +334,8 @@ export default function MapScreen({ route, navigation }) {
           );
           return;
         }
-      } catch (err) {
-        console.warn('Błąd geolokalizacji:', err);
+      } catch (_err) {
+        // Cicha obsługa w przypadku odmowy uprawnień geolokalizacyjnych
       }
     }
 

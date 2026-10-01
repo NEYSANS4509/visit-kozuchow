@@ -58,8 +58,6 @@ async function callGroqModel(model, messages, options = {}, timeoutMs = 8000) {
     clearTimeout(timer);
 
     if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      console.warn(`Model Groq ${model} zwrócił status HTTP ${response.status}:`, errText);
       return null;
     }
 
@@ -67,16 +65,12 @@ async function callGroqModel(model, messages, options = {}, timeoutMs = 8000) {
     const content = data.choices?.[0]?.message?.content?.trim();
 
     if (!content) {
-      console.warn(
-        `Model ${model} zwrócił pustą treść (finish_reason: ${data.choices?.[0]?.finish_reason})`
-      );
       return null;
     }
 
     return content;
-  } catch (error) {
+  } catch (_error) {
     clearTimeout(timer);
-    console.warn(`Błąd wywołania modelu Groq (${model}):`, error.name === 'AbortError' ? 'Przekroczono limit czasu' : error.message);
     return null;
   }
 }
@@ -123,7 +117,6 @@ export async function sendChatMessage(userText, previousMessages = [], userLocat
 
     // 2. W przypadku niepowodzenia lub pustej treści — natychmiastowy fallback do modelu zapasowego
     if (!answer) {
-      console.log(`Przełączanie na zapasowy model językowy: ${FALLBACK_MODEL}...`);
       answer = await callGroqModel(
         FALLBACK_MODEL,
         conversationMessages,
@@ -134,13 +127,11 @@ export async function sendChatMessage(userText, previousMessages = [], userLocat
 
     // 3. Jeśli oba modele sieciowe zawiodły (np. brak sieci, limit API) — użycie lokalnej bazy wiedzy offline
     if (!answer) {
-      console.log('Uruchamianie lokalnego silnika odpowiedzi awaryjnych (Offline Fallback Engine)...');
       answer = generateOfflineFallbackResponse(userText, userLocation);
     }
 
     return answer;
-  } catch (error) {
-    console.warn('Nieoczekiwany wyjątek w sendChatMessage, użycie awaryjnego silnika offline:', error);
+  } catch (_error) {
     return generateOfflineFallbackResponse(userText, userLocation);
   }
 }

@@ -93,8 +93,8 @@ export default function AIChatModal({ visible, onClose }) {
               });
             }
           }
-        } catch (e) {
-          console.log('GPS w czacie niedostępny:', e);
+        } catch (_e) {
+          // Brak uprawnień lub niedostępność sygnału GPS - cicha obsługa awaryjna
         }
       })();
     } else {
@@ -103,6 +103,7 @@ export default function AIChatModal({ visible, onClose }) {
 
     return () => {
       isMounted = false;
+      Speech.stop();
     };
   }, [visible]);
 

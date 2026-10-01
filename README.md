@@ -198,9 +198,7 @@ visit-kozuchow/
 
 ---
 
-
 ## Licencja i Prawa Autorskie / License
 
 Wszelkie prawa zastrzeżone (All rights reserved).  
 Kod źródłowy, architektura oraz materiały projektu „Visit Kożuchów” są własnością autora. Kopiowanie, modyfikowanie, dystrybucja lub wykorzystanie komercyjne bez pisemnej zgody autora są zabronione.
-
