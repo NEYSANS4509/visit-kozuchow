@@ -361,6 +361,7 @@ export default function AIChatModal({ visible, onClose }) {
                   key={`sug_${idx}`}
                   style={[
                     styles.chip,
+                    { backgroundColor: colors.surfaceMuted, borderColor: colors.borderLight },
                     highContrast && styles.highContrastChip,
                   ]}
                   onPress={() => handleSend(item)}
@@ -401,7 +402,7 @@ export default function AIChatModal({ visible, onClose }) {
                     styles.bubble,
                     isUser
                       ? [styles.userBubble, { backgroundColor: colors.primary }]
-                      : [styles.aiBubble, { backgroundColor: colors.white }, highContrast && styles.highContrastBubble],
+                      : [styles.aiBubble, { backgroundColor: colors.white, borderColor: colors.borderLight }, highContrast && styles.highContrastBubble],
                   ]}
                   accessible={true}
                   accessibilityRole="text"
@@ -564,7 +565,7 @@ export default function AIChatModal({ visible, onClose }) {
             <TextInput
               style={[
                 styles.input,
-                { color: colors.textDark, fontSize: getScaledFontSize(14) },
+                { backgroundColor: colors.surfaceMuted, color: colors.textDark, fontSize: getScaledFontSize(14) },
               ]}
               placeholder={t('chat.placeholder')}
               placeholderTextColor={colors.textMuted}

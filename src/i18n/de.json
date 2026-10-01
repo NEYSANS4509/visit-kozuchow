@@ -117,6 +117,11 @@
   },
   "settings": {
     "title": "Einstellungen",
+    "themeSection": "Erscheinungsbild & Design",
+    "themeDesc": "Wählen Sie Ihr bevorzugtes App-Design:",
+    "themeSystem": "System",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
     "languageSection": "App-Sprache",
     "languageDesc": "Wählen Sie die Sprache für Oberfläche, Audioguide und KI-Assistenten:",
     "languages": {
@@ -124,22 +129,20 @@
       "en": "English (Englisch)",
       "de": "Deutsch"
     },
-    "accessibilitySection": "Barrierefreiheit (WCAG 2.1)",
+    "accessibilitySection": "Digitale Barrierefreiheit (WCAG 2.1)",
     "colorBlind": "Modus für Farbenblinde",
-    "colorBlindDesc": "Ersetzt Rot-Grün-Kontraste durch barrierefreie Paletten und Statusbeschriftungen.",
+    "colorBlindDesc": "Ersetzt kritische Farbkombinationen durch barrierefreie Paletten.",
     "highContrast": "Hoher Kontrast",
-    "highContrastDesc": "Textkontrast über 7:1 (WCAG AAA) und klare Rahmen.",
+    "highContrastDesc": "Erhöhter Textkontrast (WCAG AAA) und klare Begrenzungslinien.",
     "largeText": "Größerer Text",
     "largeTextDesc": "Vergrößert die Grundschriftart in der gesamten App um 25 %.",
     "reduceMotion": "Reduzierte Bewegung",
-    "reduceMotionDesc": "Deaktiviert Animationen und Übergänge für maximalen Komfort bei Reisekrankheit.",
-    "previewTitle": "Vorschau der Barrierefreiheit:",
-    "previewSafe": "Status: Farboptimiert",
-    "previewAccessible": "Status: Barrierefrei",
-    "previewButton": "Beispiel-Schaltfläche",
-    "resetBtn": "Auf Standard zurücksetzen",
-    "footerBuild": "Visit Kożuchów • Version 1.0 (Mehrsprachige Version)",
-    "footerStandard": "Entwickelt nach den WCAG 2.1 Richtlinien auf Stufe AA"
+    "reduceMotionDesc": "Ruhigere Bildwechsel für Personen mit Kinetose.",
+    "resetBtn": "Barrierefreiheit zurücksetzen",
+    "infoSection": "Über die App",
+    "appTagline": "Offizieller mobiler Reiseführer für Kożuchów",
+    "footerBuild": "Visit Kożuchów • Version 1.0",
+    "footerStandard": "Entwickelt nach den Richtlinien WCAG 2.1 Stufe AA"
   },
   "chat": {
     "title": "KI-Reiseführer",

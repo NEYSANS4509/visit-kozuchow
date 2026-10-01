@@ -45,11 +45,11 @@ export default function LegalModal({ visible, onClose, initialTab = 'privacy' })
       <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]}>
         {/* Nagłówek okna modalnego z przełącznikiem zakładek (min. 48x48 dp) */}
         <View style={[styles.header, highContrast && styles.highContrastHeader]}>
-          <View style={styles.tabButtons} accessible={true} accessibilityRole="tablist">
+          <View style={[styles.tabButtons, { backgroundColor: colors.surfaceMuted }]} accessible={true} accessibilityRole="tablist">
             <TouchableOpacity
               style={[
                 styles.tabBtn,
-                tab === 'privacy' && styles.tabBtnActive,
+                tab === 'privacy' && [styles.tabBtnActive, { backgroundColor: colors.white }],
                 highContrast && tab === 'privacy' && styles.highContrastActiveTab,
               ]}
               onPress={() => setTab('privacy')}
@@ -62,7 +62,7 @@ export default function LegalModal({ visible, onClose, initialTab = 'privacy' })
               <Text
                 style={[
                   styles.tabText,
-                  tab === 'privacy' && styles.tabTextActive,
+                  { color: tab === 'privacy' ? colors.primaryAccessible : colors.textMuted },
                   { fontSize: getScaledFontSize(13) },
                 ]}
                 allowFontScaling={true}
@@ -74,7 +74,7 @@ export default function LegalModal({ visible, onClose, initialTab = 'privacy' })
             <TouchableOpacity
               style={[
                 styles.tabBtn,
-                tab === 'terms' && styles.tabBtnActive,
+                tab === 'terms' && [styles.tabBtnActive, { backgroundColor: colors.white }],
                 highContrast && tab === 'terms' && styles.highContrastActiveTab,
               ]}
               onPress={() => setTab('terms')}
@@ -87,7 +87,7 @@ export default function LegalModal({ visible, onClose, initialTab = 'privacy' })
               <Text
                 style={[
                   styles.tabText,
-                  tab === 'terms' && styles.tabTextActive,
+                  { color: tab === 'terms' ? colors.primaryAccessible : colors.textMuted },
                   { fontSize: getScaledFontSize(13) },
                 ]}
                 allowFontScaling={true}

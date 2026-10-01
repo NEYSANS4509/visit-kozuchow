@@ -16,8 +16,12 @@ import { useLanguage } from '../context/LanguageContext';
 import { useScaledStyles } from '../hooks/useScale';
 
 /**
- * Ekran ustawień aplikacji (SettingsScreen) z zaawansowaną konfiguracją dostępności cyfrowej (WCAG 2.1 AA)
- * oraz wielojęzycznością (i18n: Polski, Angielski, Niemiecki).
+ * Ekran ustawień aplikacji (SettingsScreen).
+ * Zapewnia spójną, minimalistyczną konfigurację:
+ * 1. Motywu wyglądu (Systemowy / Jasny / Ciemny)
+ * 2. Języka aplikacji (Polski, English, Deutsch)
+ * 3. Ułatwień dostępu (WCAG 2.1 AA)
+ * 4. Informacji o wersji przewodnika
  *
  * @param {object} navigation - Obiekt nawigacji React Navigation
  */
@@ -25,6 +29,9 @@ export default function SettingsScreen({ navigation }) {
   const { scale, styles } = useScaledStyles(createStyles);
   const { language, setLanguage, t } = useLanguage();
   const {
+    themeMode,
+    isDarkMode,
+    setThemeMode,
     colorBlindMode,
     highContrast,
     largeText,
@@ -38,10 +45,48 @@ export default function SettingsScreen({ navigation }) {
     getScaledFontSize,
   } = useAccessibility();
 
+  // Opcje motywu do wyboru w segmencie
+  const themeOptions = [
+    {
+      id: 'system',
+      label: t('settings.themeSystem'),
+      icon: 'phone-portrait-outline',
+    },
+    {
+      id: 'light',
+      label: t('settings.themeLight'),
+      icon: 'sunny-outline',
+    },
+    {
+      id: 'dark',
+      label: t('settings.themeDark'),
+      icon: 'moon-outline',
+    },
+  ];
+
+  // Lista dostępnych języków
+  const languageOptions = [
+    { code: 'pl', name: t('settings.languages.pl'), flag: '🇵🇱' },
+    { code: 'en', name: t('settings.languages.en'), flag: '🇬🇧' },
+    { code: 'de', name: t('settings.languages.de'), flag: '🇩🇪' },
+  ];
+
+  // Flaga informująca, czy jakiekolwiek opcje dostępności są aktywne
+  const hasCustomA11y = colorBlindMode || highContrast || largeText || reduceMotion;
+
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.backgroundLight }]} edges={['top']}>
-      {/* Pasek nagłówka z przyciskiem powrotu */}
-      <View style={[styles.header, highContrast && styles.highContrastHeader]}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: colors.backgroundLight }]}
+      edges={['top']}
+    >
+      {/* Pasek nagłówka */}
+      <View
+        style={[
+          styles.header,
+          { borderBottomColor: colors.borderLight },
+          highContrast && styles.highContrastHeader,
+        ]}
+      >
         <TouchableOpacity
           style={styles.backButton}
           activeOpacity={0.7}
@@ -50,7 +95,7 @@ export default function SettingsScreen({ navigation }) {
           accessible={true}
           accessibilityRole="button"
           accessibilityLabel={t('common.back')}
-          accessibilityHint="Wraca do głównego widoku aplikacji"
+          accessibilityHint="Wraca do głównego widoku"
         >
           <Ionicons name="arrow-back" size={24 * scale} color={colors.textDark} />
         </TouchableOpacity>
@@ -58,7 +103,7 @@ export default function SettingsScreen({ navigation }) {
         <Text
           style={[
             styles.headerTitle,
-            { color: colors.textDark, fontSize: getScaledFontSize(22 * scale) },
+            { color: colors.textDark, fontSize: getScaledFontSize(20 * scale) },
           ]}
           accessible={true}
           accessibilityRole="header"
@@ -74,55 +119,103 @@ export default function SettingsScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         {/* =========================================================================
-            INFORMACYJNA PLAKIETKA: EKRAN W FAZIE ROZWOJU
-            Wyraźne powiadomienie użytkownika o trwających pracach nad rozbudową funkcji.
+            SEKCJA 1: MOTYW I WYGLĄD (THEME / APPEARANCE)
            ========================================================================= */}
+        <View style={styles.sectionHeaderRow}>
+          <Ionicons name="color-palette-outline" size={18 * scale} color={colors.primaryAccessible} />
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
+            ]}
+            accessible={true}
+            accessibilityRole="header"
+          >
+            {t('settings.themeSection')}
+          </Text>
+        </View>
+
         <View
           style={[
-            styles.developmentBanner,
-            highContrast && styles.highContrastBanner,
+            styles.cardContainer,
+            { backgroundColor: colors.white, borderColor: colors.borderLight },
+            highContrast && styles.highContrastCard,
           ]}
-          accessible={true}
-          accessibilityRole="alert"
-          accessibilityLabel="Uwaga: Ekran w fazie rozwoju. Funkcjonalność aplikacji będzie stale rozwijana i wzbogacana o nowe moduły turystyczne."
         >
-          <View style={styles.bannerIconBox}>
-            <Ionicons name="construct" size={22 * scale} color="#B45309" />
-          </View>
-          <View style={styles.bannerTextBox}>
-            <View style={styles.bannerTitleRow}>
-              <Text
-                style={[
-                  styles.bannerTitle,
-                  { fontSize: getScaledFontSize(14 * scale) },
-                ]}
-              >
-                Ekran w fazie rozwoju
-              </Text>
-              <View style={styles.betaBadge}>
-                <Text style={styles.betaBadgeText}>BETA</Text>
-              </View>
-            </View>
-            <Text
-              style={[
-                styles.bannerDescription,
-                { fontSize: getScaledFontSize(12 * scale) },
-              ]}
-            >
-              Pracujemy nad kolejnymi funkcjami przewodnika. Dostępność cyfrowa i moduły personalizacji są stale udoskonalane.
-            </Text>
+          <Text
+            style={[
+              styles.cardDescription,
+              { color: colors.textSecondary, fontSize: getScaledFontSize(13 * scale) },
+            ]}
+          >
+            {t('settings.themeDesc')}
+          </Text>
+
+          {/* 3-segmentowy przełącznik motywu */}
+          <View
+            style={[
+              styles.segmentedBar,
+              { backgroundColor: colors.surfaceMuted, borderColor: colors.borderLight },
+            ]}
+            accessible={true}
+            accessibilityRole="radiogroup"
+            accessibilityLabel={t('settings.themeSection')}
+          >
+            {themeOptions.map((opt) => {
+              const isSelected = themeMode === opt.id;
+              return (
+                <TouchableOpacity
+                  key={opt.id}
+                  style={[
+                    styles.segmentButton,
+                    isSelected && [
+                      styles.segmentButtonActive,
+                      {
+                        backgroundColor: isDarkMode ? colors.primaryLight : colors.white,
+                        borderColor: isDarkMode ? colors.primary : colors.borderLight,
+                      },
+                    ],
+                    highContrast && isSelected && styles.highContrastSegmentActive,
+                  ]}
+                  onPress={() => setThemeMode(opt.id)}
+                  activeOpacity={0.7}
+                  accessible={true}
+                  accessibilityRole="radio"
+                  accessibilityLabel={`${opt.label}. ${isSelected ? 'Aktywny' : 'Wybierz'}`}
+                  accessibilityState={{ selected: isSelected }}
+                >
+                  <Ionicons
+                    name={opt.icon}
+                    size={18 * scale}
+                    color={isSelected ? colors.primaryAccessible : colors.textMuted}
+                  />
+                  <Text
+                    style={[
+                      styles.segmentText,
+                      {
+                        color: isSelected ? colors.primaryAccessible : colors.textSecondary,
+                        fontSize: getScaledFontSize(13 * scale),
+                        fontWeight: isSelected ? '700' : '500',
+                      },
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
         {/* =========================================================================
-            SEKCJA: JĘZYK APLIKACJI (LANGUAGE SELECTION / i18n)
+            SEKCJA 2: JĘZYK APLIKACJI (LANGUAGE SELECTION)
            ========================================================================= */}
         <View style={styles.sectionHeaderRow}>
-          <Ionicons name="globe-outline" size={20 * scale} color={colors.primary} />
+          <Ionicons name="globe-outline" size={18 * scale} color={colors.primaryAccessible} />
           <Text
             style={[
               styles.sectionTitle,
-              { color: colors.textDark, fontSize: getScaledFontSize(18 * scale) },
+              { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
             ]}
             accessible={true}
             accessibilityRole="header"
@@ -134,88 +227,75 @@ export default function SettingsScreen({ navigation }) {
         <View
           style={[
             styles.cardContainer,
-            { backgroundColor: colors.white },
+            { backgroundColor: colors.white, borderColor: colors.borderLight },
             highContrast && styles.highContrastCard,
           ]}
         >
-          <Text
-            style={[
-              styles.languageSelectHint,
-              { color: colors.textSecondary, fontSize: getScaledFontSize(12 * scale) },
-            ]}
-          >
-            {t('settings.languageDesc')}
-          </Text>
+          {languageOptions.map((langItem, index) => {
+            const isSelected = language === langItem.code;
+            const isLast = index === languageOptions.length - 1;
 
-          <View style={styles.languageOptionsGrid}>
-            {[
-              { code: 'pl', name: t('settings.languages.pl'), flag: '🇵🇱' },
-              { code: 'en', name: t('settings.languages.en'), flag: '🇬🇧' },
-              { code: 'de', name: t('settings.languages.de'), flag: '🇩🇪' },
-            ].map((langItem) => {
-              const isSelected = language === langItem.code;
-              return (
-                <TouchableOpacity
-                  key={langItem.code}
+            return (
+              <TouchableOpacity
+                key={langItem.code}
+                style={[
+                  styles.languageRow,
+                  !isLast && {
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                    borderBottomColor: colors.borderLight,
+                  },
+                  isSelected && {
+                    backgroundColor: isDarkMode ? colors.primaryLight : '#F0F9FF',
+                  },
+                  highContrast && isSelected && styles.highContrastLanguageSelected,
+                ]}
+                onPress={() => setLanguage(langItem.code)}
+                activeOpacity={0.65}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={`${langItem.name}. ${isSelected ? 'Aktywny' : 'Wybierz'}`}
+                accessibilityState={{ selected: isSelected }}
+              >
+                <Text style={styles.languageFlag}>{langItem.flag}</Text>
+                <Text
                   style={[
-                    styles.languageOptionRow,
-                    isSelected && {
-                      backgroundColor: colorBlindMode ? '#E0F2FE' : colors.primaryLight,
+                    styles.languageName,
+                    {
+                      color: isSelected ? colors.primaryAccessible : colors.textDark,
+                      fontSize: getScaledFontSize(14 * scale),
+                      fontWeight: isSelected ? '700' : '500',
                     },
-                    highContrast && isSelected && styles.highContrastLanguageSelected,
                   ]}
-                  onPress={() => setLanguage(langItem.code)}
-                  activeOpacity={0.7}
-                  accessible={true}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${langItem.name}. ${isSelected ? 'Aktywny' : 'Wybierz'}`}
-                  accessibilityState={{ selected: isSelected }}
                 >
-                  <Text style={styles.languageFlag}>{langItem.flag}</Text>
-                  <Text
-                    style={[
-                      styles.languageName,
-                      {
-                        color: isSelected
-                          ? colorBlindMode
-                            ? '#0284C7'
-                            : colors.primary
-                          : colors.textDark,
-                        fontSize: getScaledFontSize(14 * scale),
-                        fontWeight: isSelected ? '800' : '600',
-                      },
-                    ]}
-                  >
-                    {langItem.name}
-                  </Text>
-                  {isSelected ? (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={20 * scale}
-                      color={colorBlindMode ? '#0284C7' : colors.primary}
-                    />
-                  ) : (
-                    <Ionicons
-                      name="ellipse-outline"
-                      size={20 * scale}
-                      color={colors.borderMuted || '#CBD5E1'}
-                    />
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+                  {langItem.name}
+                </Text>
+                {isSelected ? (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={20 * scale}
+                    color={colors.primaryAccessible}
+                  />
+                ) : (
+                  <Ionicons
+                    name="ellipse-outline"
+                    size={18 * scale}
+                    color={colors.borderMuted}
+                  />
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* =========================================================================
-            SEKCJA: DOSTĘPNOŚĆ (ACCESSIBILITY / WCAG 2.1 AA)
+            SEKCJA 3: DOSTĘPNOŚĆ CYFROWA (WCAG 2.1 AA)
            ========================================================================= */}
         <View style={styles.sectionHeaderRow}>
-          <Ionicons name="body" size={20 * scale} color={colors.primary} />
+          <Ionicons name="accessibility-outline" size={18 * scale} color={colors.primaryAccessible} />
           <Text
             style={[
               styles.sectionTitle,
-              { color: colors.textDark, fontSize: getScaledFontSize(18 * scale) },
+              { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
             ]}
             accessible={true}
             accessibilityRole="header"
@@ -227,42 +307,40 @@ export default function SettingsScreen({ navigation }) {
         <View
           style={[
             styles.cardContainer,
-            { backgroundColor: colors.white },
+            { backgroundColor: colors.white, borderColor: colors.borderLight },
             highContrast && styles.highContrastCard,
           ]}
         >
-          {/* 1. Przełącznik: Tryb dla daltonistów */}
+          {/* 1. Daltonizm */}
           <View
             style={[
               styles.settingRow,
+              { borderBottomColor: colors.borderLight },
               highContrast && styles.highContrastDivider,
             ]}
           >
-            <View style={styles.settingIconContainer}>
+            <View
+              style={[
+                styles.iconBadge,
+                { backgroundColor: colors.surfaceMuted },
+              ]}
+            >
               <Ionicons
                 name="color-filter-outline"
-                size={22 * scale}
-                color={colors.primary}
+                size={20 * scale}
+                color={colors.primaryAccessible}
               />
             </View>
 
             <View style={styles.settingInfo}>
-              <View style={styles.settingTitleRow}>
-                <Text
-                  style={[
-                    styles.settingTitle,
-                    { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
-                  ]}
-                >
-                  {t('settings.colorBlind')}
-                </Text>
-                {colorBlindMode && (
-                  <View style={styles.statusIndicatorActive}>
-                    <Ionicons name="checkmark-circle" size={14 * scale} color="#0284C7" />
-                    <Text style={styles.statusIndicatorText}>Aktywny</Text>
-                  </View>
-                )}
-              </View>
+              <Text
+                style={[
+                  styles.settingTitle,
+                  { color: colors.textDark, fontSize: getScaledFontSize(14 * scale) },
+                ]}
+              >
+                {t('settings.colorBlind')}
+              </Text>
               <Text
                 style={[
                   styles.settingDescription,
@@ -277,8 +355,12 @@ export default function SettingsScreen({ navigation }) {
               <Switch
                 value={colorBlindMode}
                 onValueChange={toggleColorBlindMode}
-                trackColor={{ false: '#CBD5E1', true: colors.primary }}
+                trackColor={{
+                  false: isDarkMode ? '#334155' : '#CBD5E1',
+                  true: colors.primary,
+                }}
                 thumbColor={colors.white}
+                ios_backgroundColor={isDarkMode ? '#334155' : '#CBD5E1'}
                 accessible={true}
                 accessibilityRole="switch"
                 accessibilityLabel={t('settings.colorBlind')}
@@ -287,38 +369,36 @@ export default function SettingsScreen({ navigation }) {
             </View>
           </View>
 
-          {/* 2. Przełącznik: Wysoki kontrast */}
+          {/* 2. Wysoki kontrast */}
           <View
             style={[
               styles.settingRow,
+              { borderBottomColor: colors.borderLight },
               highContrast && styles.highContrastDivider,
             ]}
           >
-            <View style={styles.settingIconContainer}>
+            <View
+              style={[
+                styles.iconBadge,
+                { backgroundColor: colors.surfaceMuted },
+              ]}
+            >
               <Ionicons
                 name="contrast-outline"
-                size={22 * scale}
-                color={colors.primary}
+                size={20 * scale}
+                color={colors.primaryAccessible}
               />
             </View>
 
             <View style={styles.settingInfo}>
-              <View style={styles.settingTitleRow}>
-                <Text
-                  style={[
-                    styles.settingTitle,
-                    { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
-                  ]}
-                >
-                  {t('settings.highContrast')}
-                </Text>
-                {highContrast && (
-                  <View style={styles.statusIndicatorActive}>
-                    <Ionicons name="checkmark-circle" size={14 * scale} color="#004B87" />
-                    <Text style={styles.statusIndicatorText}>Aktywny</Text>
-                  </View>
-                )}
-              </View>
+              <Text
+                style={[
+                  styles.settingTitle,
+                  { color: colors.textDark, fontSize: getScaledFontSize(14 * scale) },
+                ]}
+              >
+                {t('settings.highContrast')}
+              </Text>
               <Text
                 style={[
                   styles.settingDescription,
@@ -333,8 +413,12 @@ export default function SettingsScreen({ navigation }) {
               <Switch
                 value={highContrast}
                 onValueChange={toggleHighContrast}
-                trackColor={{ false: '#CBD5E1', true: colors.primary }}
+                trackColor={{
+                  false: isDarkMode ? '#334155' : '#CBD5E1',
+                  true: colors.primary,
+                }}
                 thumbColor={colors.white}
+                ios_backgroundColor={isDarkMode ? '#334155' : '#CBD5E1'}
                 accessible={true}
                 accessibilityRole="switch"
                 accessibilityLabel={t('settings.highContrast')}
@@ -343,38 +427,36 @@ export default function SettingsScreen({ navigation }) {
             </View>
           </View>
 
-          {/* 3. Przełącznik: Większy tekst */}
+          {/* 3. Większy tekst */}
           <View
             style={[
               styles.settingRow,
+              { borderBottomColor: colors.borderLight },
               highContrast && styles.highContrastDivider,
             ]}
           >
-            <View style={styles.settingIconContainer}>
+            <View
+              style={[
+                styles.iconBadge,
+                { backgroundColor: colors.surfaceMuted },
+              ]}
+            >
               <Ionicons
                 name="text-outline"
-                size={22 * scale}
-                color={colors.primary}
+                size={20 * scale}
+                color={colors.primaryAccessible}
               />
             </View>
 
             <View style={styles.settingInfo}>
-              <View style={styles.settingTitleRow}>
-                <Text
-                  style={[
-                    styles.settingTitle,
-                    { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
-                  ]}
-                >
-                  {t('settings.largeText')}
-                </Text>
-                {largeText && (
-                  <View style={styles.statusIndicatorActive}>
-                    <Ionicons name="checkmark-circle" size={14 * scale} color="#0D6EFD" />
-                    <Text style={styles.statusIndicatorText}>Aktywny</Text>
-                  </View>
-                )}
-              </View>
+              <Text
+                style={[
+                  styles.settingTitle,
+                  { color: colors.textDark, fontSize: getScaledFontSize(14 * scale) },
+                ]}
+              >
+                {t('settings.largeText')}
+              </Text>
               <Text
                 style={[
                   styles.settingDescription,
@@ -389,8 +471,12 @@ export default function SettingsScreen({ navigation }) {
               <Switch
                 value={largeText}
                 onValueChange={toggleLargeText}
-                trackColor={{ false: '#CBD5E1', true: colors.primary }}
+                trackColor={{
+                  false: isDarkMode ? '#334155' : '#CBD5E1',
+                  true: colors.primary,
+                }}
                 thumbColor={colors.white}
+                ios_backgroundColor={isDarkMode ? '#334155' : '#CBD5E1'}
                 accessible={true}
                 accessibilityRole="switch"
                 accessibilityLabel={t('settings.largeText')}
@@ -399,33 +485,30 @@ export default function SettingsScreen({ navigation }) {
             </View>
           </View>
 
-          {/* 4. Przełącznik: Ograniczenie animacji (Bezpieczne dla błędnika / Kinetoza) */}
+          {/* 4. Ograniczenie animacji */}
           <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
-            <View style={styles.settingIconContainer}>
+            <View
+              style={[
+                styles.iconBadge,
+                { backgroundColor: colors.surfaceMuted },
+              ]}
+            >
               <Ionicons
-                name="pause-circle-outline"
-                size={22 * scale}
-                color={colors.primary}
+                name="pulse-outline"
+                size={20 * scale}
+                color={colors.primaryAccessible}
               />
             </View>
 
             <View style={styles.settingInfo}>
-              <View style={styles.settingTitleRow}>
-                <Text
-                  style={[
-                    styles.settingTitle,
-                    { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
-                  ]}
-                >
-                  {t('settings.reduceMotion')}
-                </Text>
-                {reduceMotion && (
-                  <View style={styles.statusIndicatorActive}>
-                    <Ionicons name="checkmark-circle" size={14 * scale} color="#0D6EFD" />
-                    <Text style={styles.statusIndicatorText}>Aktywny</Text>
-                  </View>
-                )}
-              </View>
+              <Text
+                style={[
+                  styles.settingTitle,
+                  { color: colors.textDark, fontSize: getScaledFontSize(14 * scale) },
+                ]}
+              >
+                {t('settings.reduceMotion')}
+              </Text>
               <Text
                 style={[
                   styles.settingDescription,
@@ -440,8 +523,12 @@ export default function SettingsScreen({ navigation }) {
               <Switch
                 value={reduceMotion}
                 onValueChange={toggleReduceMotion}
-                trackColor={{ false: '#CBD5E1', true: colors.primary }}
+                trackColor={{
+                  false: isDarkMode ? '#334155' : '#CBD5E1',
+                  true: colors.primary,
+                }}
                 thumbColor={colors.white}
+                ios_backgroundColor={isDarkMode ? '#334155' : '#CBD5E1'}
                 accessible={true}
                 accessibilityRole="switch"
                 accessibilityLabel={t('settings.reduceMotion')}
@@ -451,125 +538,25 @@ export default function SettingsScreen({ navigation }) {
           </View>
         </View>
 
-        {/* =========================================================================
-            PODGLĄD NA ŻYWO (LIVE ACCESSIBILITY PREVIEW)
-            Pokazuje użytkownikowi w czasie rzeczywistym, jak wybrane ustawienia
-            wpływają na czytelność elementów, przycisków i etykiet stanu.
-           ========================================================================= */}
-        <View style={styles.previewSection}>
-          <Text
-            style={[
-              styles.previewSectionTitle,
-              { color: colors.textDark, fontSize: getScaledFontSize(14 * scale) },
-            ]}
-          >
-            Podgląd wybranych ułatwień dostępu:
-          </Text>
-
-          <View
-            style={[
-              styles.previewCard,
-              { backgroundColor: colors.white },
-              highContrast && styles.highContrastCard,
-            ]}
-          >
-            <View style={styles.previewBadgeRow}>
-              <View
-                style={[
-                  styles.previewBadge,
-                  {
-                    backgroundColor: colorBlindMode ? '#E0F2FE' : '#DCFCE7',
-                    borderColor: colorBlindMode ? '#0284C7' : '#16A34A',
-                    borderWidth: highContrast ? 2 : 1,
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={colorBlindMode ? 'information-circle' : 'checkmark-circle'}
-                  size={14 * scale}
-                  color={colorBlindMode ? '#0284C7' : '#16A34A'}
-                />
-                <Text
-                  style={[
-                    styles.previewBadgeText,
-                    {
-                      color: colorBlindMode ? '#0369A1' : '#15803D',
-                      fontSize: getScaledFontSize(11 * scale),
-                    },
-                  ]}
-                >
-                  {colorBlindMode ? 'Status: Bezpieczny dla wzroku' : 'Status: Dostępny'}
-                </Text>
-              </View>
-
-              <View
-                style={[
-                  styles.previewBadge,
-                  {
-                    backgroundColor: colorBlindMode ? '#FAE8FF' : '#FEE2E2',
-                    borderColor: colorBlindMode ? '#C026D3' : '#EF4444',
-                    borderWidth: highContrast ? 2 : 1,
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={colorBlindMode ? 'alert-circle' : 'close-circle'}
-                  size={14 * scale}
-                  color={colorBlindMode ? '#C026D3' : '#DC2626'}
-                />
-                <Text
-                  style={[
-                    styles.previewBadgeText,
-                    {
-                      color: colorBlindMode ? '#86198F' : '#B91C1C',
-                      fontSize: getScaledFontSize(11 * scale),
-                    },
-                  ]}
-                >
-                  {colorBlindMode ? 'Informacja: Ostrzeżenie' : 'Status: Błąd'}
-                </Text>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={[
-                styles.previewButton,
-                { backgroundColor: colors.primary },
-                highContrast && styles.highContrastButton,
-              ]}
-              activeOpacity={0.85}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel={`${t('settings.previewButton')} demonstracyjny`}
-            >
-              <Ionicons name="eye-outline" size={18 * scale} color={colors.white} />
-              <Text
-                style={[
-                  styles.previewButtonText,
-                  { fontSize: getScaledFontSize(14 * scale) },
-                ]}
-              >
-                {t('settings.previewButton')} ({highContrast ? 'WCAG AAA' : 'Standard'})
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Przycisk resetowania ustawień dostępności */}
-        {(colorBlindMode || highContrast || largeText || reduceMotion) && (
+        {/* Przycisk resetowania opcji dostępności (widoczny tylko po zmianie) */}
+        {hasCustomA11y && (
           <TouchableOpacity
             style={[
               styles.resetButton,
+              {
+                backgroundColor: isDarkMode ? '#2D1515' : '#FEE2E2',
+                borderColor: colors.danger,
+              },
               highContrast && styles.highContrastResetButton,
             ]}
             onPress={resetAccessibilitySettings}
-            activeOpacity={0.8}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            activeOpacity={0.75}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessible={true}
             accessibilityRole="button"
             accessibilityLabel={t('settings.resetBtn')}
           >
-            <Ionicons name="refresh-outline" size={18 * scale} color={colors.danger} />
+            <Ionicons name="refresh-outline" size={17 * scale} color={colors.danger} />
             <Text
               style={[
                 styles.resetButtonText,
@@ -581,19 +568,29 @@ export default function SettingsScreen({ navigation }) {
           </TouchableOpacity>
         )}
 
-        {/* Informacje o wersji i certyfikacji */}
-        <View style={styles.footerInfo}>
+        {/* =========================================================================
+            SEKCJA 4: INFORMACJE O APLIKACJI (ABOUT & CERTIFICATION)
+           ========================================================================= */}
+        <View style={styles.aboutContainer}>
           <Text
             style={[
-              styles.footerText,
-              { color: colors.textMuted, fontSize: getScaledFontSize(11 * scale) },
+              styles.aboutAppName,
+              { color: colors.textDark, fontSize: getScaledFontSize(14 * scale) },
             ]}
           >
             {t('settings.footerBuild')}
           </Text>
           <Text
             style={[
-              styles.footerSubText,
+              styles.aboutAppTagline,
+              { color: colors.textMuted, fontSize: getScaledFontSize(11 * scale) },
+            ]}
+          >
+            {t('settings.appTagline')}
+          </Text>
+          <Text
+            style={[
+              styles.aboutStandard,
               { color: colors.textMuted, fontSize: getScaledFontSize(10 * scale) },
             ]}
           >
@@ -616,8 +613,7 @@ const createStyles = (scale) =>
       justifyContent: 'space-between',
       paddingHorizontal: 16 * scale,
       paddingVertical: 12 * scale,
-      borderBottomWidth: 1,
-      borderBottomColor: '#E2E8F0',
+      borderBottomWidth: StyleSheet.hairlineWidth,
     },
     highContrastHeader: {
       borderBottomWidth: 2,
@@ -631,235 +627,154 @@ const createStyles = (scale) =>
       alignItems: 'center',
     },
     headerTitle: {
-      fontWeight: '800',
-      letterSpacing: -0.3,
+      fontWeight: '700',
+      letterSpacing: -0.2,
     },
     headerSpacer: {
       width: 48 * scale,
       height: 48 * scale,
     },
     scrollContent: {
-      paddingHorizontal: 18 * scale,
+      paddingHorizontal: 16 * scale,
       paddingTop: 16 * scale,
       paddingBottom: 40 * scale,
-    },
-    developmentBanner: {
-      flexDirection: 'row',
-      backgroundColor: '#FEF3C7',
-      borderRadius: 16 * scale,
-      padding: 14 * scale,
-      marginBottom: 20 * scale,
-      borderWidth: 1.5,
-      borderColor: '#F59E0B',
-      gap: 12 * scale,
-      alignItems: 'flex-start',
-    },
-    highContrastBanner: {
-      backgroundColor: '#FFFBEB',
-      borderColor: '#000000',
-      borderWidth: 2.5,
-    },
-    bannerIconBox: {
-      width: 36 * scale,
-      height: 36 * scale,
-      borderRadius: 18 * scale,
-      backgroundColor: '#FDE68A',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 2 * scale,
-    },
-    bannerTextBox: {
-      flex: 1,
-    },
-    bannerTitleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8 * scale,
-      marginBottom: 4 * scale,
-    },
-    bannerTitle: {
-      fontWeight: '800',
-      color: '#92400E',
-    },
-    betaBadge: {
-      backgroundColor: '#D97706',
-      paddingHorizontal: 6 * scale,
-      paddingVertical: 2 * scale,
-      borderRadius: 6 * scale,
-    },
-    betaBadgeText: {
-      color: '#FFFFFF',
-      fontSize: 9 * scale,
-      fontWeight: '900',
-      letterSpacing: 0.6,
-    },
-    bannerDescription: {
-      color: '#78350F',
-      lineHeight: 18 * scale,
-      fontWeight: '500',
+      gap: 4 * scale,
     },
     sectionHeaderRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8 * scale,
-      marginBottom: 12 * scale,
+      gap: 6 * scale,
+      marginTop: 12 * scale,
+      marginBottom: 8 * scale,
       paddingHorizontal: 4 * scale,
     },
     sectionTitle: {
-      fontWeight: '800',
-      letterSpacing: -0.3,
+      fontWeight: '700',
+      letterSpacing: -0.2,
     },
     cardContainer: {
-      borderRadius: 18 * scale,
+      borderRadius: 16 * scale,
       borderWidth: 1,
-      borderColor: '#E2E8F0',
       overflow: 'hidden',
-      marginBottom: 20 * scale,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.04,
-      shadowRadius: 6,
-      elevation: 2,
+      marginBottom: 12 * scale,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 4,
+        },
+        android: {
+          elevation: 1.5,
+        },
+      }),
     },
     highContrastCard: {
-      borderWidth: 2.5,
+      borderWidth: 2,
       borderColor: '#000000',
-      shadowOpacity: 0,
       elevation: 0,
+      shadowOpacity: 0,
     },
-    languageSelectHint: {
+    cardDescription: {
       paddingHorizontal: 16 * scale,
       paddingTop: 14 * scale,
-      paddingBottom: 8 * scale,
+      paddingBottom: 10 * scale,
       lineHeight: 18 * scale,
     },
-    languageOptionsGrid: {
-      paddingHorizontal: 10 * scale,
-      paddingBottom: 10 * scale,
-      gap: 6 * scale,
+    segmentedBar: {
+      flexDirection: 'row',
+      marginHorizontal: 12 * scale,
+      marginBottom: 12 * scale,
+      borderRadius: 12 * scale,
+      padding: 4 * scale,
+      gap: 4 * scale,
+      borderWidth: StyleSheet.hairlineWidth,
     },
-    languageOptionRow: {
+    segmentButton: {
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 12 * scale,
-      paddingHorizontal: 14 * scale,
-      borderRadius: 12 * scale,
-      gap: 12 * scale,
+      justifyContent: 'center',
+      paddingVertical: 10 * scale,
+      minHeight: 42 * scale,
+      borderRadius: 9 * scale,
+      gap: 6 * scale,
+    },
+    segmentButtonActive: {
+      borderWidth: 1,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.08,
+          shadowRadius: 2,
+        },
+        android: {
+          elevation: 2,
+        },
+      }),
+    },
+    highContrastSegmentActive: {
+      borderWidth: 2,
+      borderColor: '#000000',
+    },
+    segmentText: {
+      letterSpacing: -0.1,
+    },
+    languageRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 13 * scale,
+      paddingHorizontal: 16 * scale,
       minHeight: 48 * scale,
+      gap: 12 * scale,
     },
     languageFlag: {
-      fontSize: 22 * scale,
+      fontSize: 20 * scale,
     },
     languageName: {
       flex: 1,
     },
     highContrastLanguageSelected: {
-      borderWidth: 2,
+      borderWidth: 1.5,
       borderColor: '#000000',
     },
     settingRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 16 * scale,
-      minHeight: 64 * scale,
-      borderBottomWidth: 1,
-      borderBottomColor: '#F1F5F9',
+      paddingVertical: 12 * scale,
+      paddingHorizontal: 16 * scale,
+      minHeight: 56 * scale,
+      borderBottomWidth: StyleSheet.hairlineWidth,
       gap: 12 * scale,
     },
     highContrastDivider: {
       borderBottomWidth: 1.5,
       borderBottomColor: '#000000',
     },
-    settingIconContainer: {
-      width: 40 * scale,
-      height: 40 * scale,
-      borderRadius: 20 * scale,
-      backgroundColor: '#F1F5F9',
+    iconBadge: {
+      width: 36 * scale,
+      height: 36 * scale,
+      borderRadius: 10 * scale,
       justifyContent: 'center',
       alignItems: 'center',
     },
     settingInfo: {
       flex: 1,
-    },
-    settingTitleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8 * scale,
-      marginBottom: 3 * scale,
+      gap: 2 * scale,
     },
     settingTitle: {
-      fontWeight: '700',
-    },
-    statusIndicatorActive: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 3 * scale,
-      backgroundColor: '#F0F9FF',
-      paddingHorizontal: 6 * scale,
-      paddingVertical: 1.5 * scale,
-      borderRadius: 6 * scale,
-    },
-    statusIndicatorText: {
-      fontSize: 10 * scale,
-      fontWeight: '700',
-      color: '#0284C7',
+      fontWeight: '600',
+      letterSpacing: -0.1,
     },
     settingDescription: {
-      lineHeight: 17 * scale,
+      lineHeight: 16 * scale,
     },
     switchWrapper: {
       minWidth: 48 * scale,
       minHeight: 48 * scale,
       justifyContent: 'center',
       alignItems: 'center',
-    },
-    previewSection: {
-      marginBottom: 20 * scale,
-    },
-    previewSectionTitle: {
-      fontWeight: '700',
-      marginBottom: 8 * scale,
-      paddingHorizontal: 4 * scale,
-    },
-    previewCard: {
-      borderRadius: 16 * scale,
-      padding: 16 * scale,
-      borderWidth: 1,
-      borderColor: '#E2E8F0',
-      gap: 12 * scale,
-    },
-    previewBadgeRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8 * scale,
-    },
-    previewBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5 * scale,
-      paddingHorizontal: 10 * scale,
-      paddingVertical: 5 * scale,
-      borderRadius: 8 * scale,
-    },
-    previewBadgeText: {
-      fontWeight: '700',
-    },
-    previewButton: {
-      minHeight: 48 * scale,
-      borderRadius: 14 * scale,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8 * scale,
-      paddingHorizontal: 16 * scale,
-    },
-    highContrastButton: {
-      borderWidth: 2.5,
-      borderColor: '#000000',
-    },
-    previewButtonText: {
-      color: '#FFFFFF',
-      fontWeight: '700',
     },
     resetButton: {
       flexDirection: 'row',
@@ -868,26 +783,33 @@ const createStyles = (scale) =>
       gap: 6 * scale,
       minHeight: 48 * scale,
       paddingVertical: 10 * scale,
+      paddingHorizontal: 16 * scale,
       borderRadius: 12 * scale,
-      backgroundColor: '#FEE2E2',
-      marginBottom: 24 * scale,
+      borderWidth: 1,
+      marginTop: 4 * scale,
+      marginBottom: 16 * scale,
     },
     highContrastResetButton: {
       borderWidth: 2,
       borderColor: '#991B1B',
     },
     resetButtonText: {
-      fontWeight: '700',
-    },
-    footerInfo: {
-      alignItems: 'center',
-      gap: 4 * scale,
-      marginTop: 8 * scale,
-    },
-    footerText: {
       fontWeight: '600',
     },
-    footerSubText: {
+    aboutContainer: {
+      alignItems: 'center',
+      paddingVertical: 16 * scale,
+      gap: 4 * scale,
+    },
+    aboutAppName: {
+      fontWeight: '700',
+      letterSpacing: -0.1,
+    },
+    aboutAppTagline: {
       textAlign: 'center',
+    },
+    aboutStandard: {
+      textAlign: 'center',
+      opacity: 0.8,
     },
   });

@@ -517,12 +517,12 @@ export default function ExploreScreen({ navigation }) {
             </MapView>
           </View>
 
-          <View style={styles.mapInfoBar} pointerEvents="none">
+          <View style={[styles.mapInfoBar, { backgroundColor: colors.white }]} pointerEvents="none">
             <View style={styles.mapInfoTextWrapper}>
               <Text
                 style={[
                   styles.mapInfoTitle,
-                  { fontSize: getScaledFontSize(14 * scale) },
+                  { color: colors.textDark, fontSize: getScaledFontSize(14 * scale) },
                 ]}
                 allowFontScaling={true}
               >
@@ -531,7 +531,7 @@ export default function ExploreScreen({ navigation }) {
               <Text
                 style={[
                   styles.mapInfoSubtitle,
-                  { fontSize: getScaledFontSize(11 * scale) },
+                  { color: colors.textMuted, fontSize: getScaledFontSize(11 * scale) },
                 ]}
                 allowFontScaling={true}
               >

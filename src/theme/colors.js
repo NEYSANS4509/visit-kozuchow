@@ -1,7 +1,7 @@
 // src/theme/colors.js
 /**
- * Główna paleta kolorystyczna aplikacji Visit Kożuchów.
- * Zawiera kolory podstawowe, odcienie tekstu, tła oraz barwy stanu.
+ * Główna paleta kolorystyczna aplikacji Visit Kożuchów (Tryb Jasny).
+ * Zawiera kolory podstawowe, odcienie tekstu, tła oraz barwy stanu (WCAG 2.1 AA).
  */
 export const colors = {
   primary: '#408DD4',
@@ -21,4 +21,29 @@ export const colors = {
   danger: '#EF4444',
   dangerSoft: '#FEE2E2',
   dangerText: '#DC2626',
+};
+
+/**
+ * Nowoczesna paleta kolorystyczna dla trybu ciemnego (Dark Mode).
+ * Zapewnia doskonałą czytelność (WCAG 2.1 AA), redukuje zmęczenie wzroku
+ * oraz nadaje aplikacji elegancki, stonowany wygląd.
+ */
+export const darkColors = {
+  primary: '#38BDF8', // Sky-400: świeży, wyrazisty błękit o doskonałej widoczności
+  primaryLight: '#0F2847', // Głębokie podświetlenie aktywnego elementu
+  primaryAccessible: '#38BDF8',
+  white: '#1E293B', // Slate-800: wyniesione tło kart, modalnych okien i nawigacji
+
+  textPrimary: '#F1F5F9', // Slate-100: wysoki kontrast tekstu
+  textSecondary: '#94A3B8', // Slate-400: elegancki tekst pomocniczy
+  textDark: '#FFFFFF', // Czysta biel dla nagłówków
+  textMuted: '#64748B', // Slate-500: dyskretne podpisy
+
+  borderLight: '#334155', // Slate-700: subtelne linie oddzielające i obramowania
+  borderMuted: '#475569', // Slate-600: krawędzie elementów
+  surfaceMuted: '#0F172A', // Slate-900: tło podrzędnych paneli
+  backgroundLight: '#0B0F19', // Głębokie, aksamitne tło ekranu
+  danger: '#F87171',
+  dangerSoft: '#450A0A',
+  dangerText: '#FCA5A5',
 };
