@@ -10,6 +10,7 @@ import {
   Platform,
   Modal,
   ScrollView,
+  Share,
 } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -406,6 +407,22 @@ export default function MapScreen({ route, navigation }) {
     setCurrentRouteStopIndex(0);
   };
 
+  // Udostępnienie wyznaczonej trasy turystycznej przez natywny moduł Share
+  const handleShareActiveRoute = async () => {
+    if (activeRoutePlaces.length === 0) return;
+    try {
+      const stops = activeRoutePlaces
+        .map((p, idx) => `${idx + 1}. ${p.title} (${p.location?.address || 'Kożuchów'})`)
+        .join('\n');
+      const distText = formatDistance(activeRouteStats.distanceMeters) || '';
+      const shareMsg = `🗺️ Szlak turystyczny po Kożuchowie (${activeRoutePlaces.length} punktów, dystans ${distText}):\n\n${stops}\n\nAplikacja Visit Kożuchów`;
+      await Share.share({
+        title: 'Szlak po Kożuchowie',
+        message: shareMsg,
+      });
+    } catch (_e) {}
+  };
+
   // Dodanie / usunięcie zabytku w roboczym kreatorze trasy
   const togglePlaceInDraft = (placeId) => {
     setDraftCustomIds((prev) => {
@@ -655,6 +672,17 @@ export default function MapScreen({ route, navigation }) {
               >
                 <Text style={styles.activeRouteNextText}>Następny</Text>
                 <Ionicons name="arrow-forward" size={14 * scale} color="#FFFFFF" />
+              </CalmPressable>
+
+              <CalmPressable
+                style={styles.activeRouteShareBtn}
+                onPress={handleShareActiveRoute}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel="Udostępnij zaplanowaną trasę znajomym"
+              >
+                <Ionicons name="share-social-outline" size={18 * scale} color={colors.textDark} />
               </CalmPressable>
 
               <CalmPressable
@@ -1236,6 +1264,15 @@ const createStyles = (scale) =>
       padding: 4 * scale,
       minWidth: 44 * scale,
       minHeight: 44 * scale,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    activeRouteShareBtn: {
+      padding: 4 * scale,
+      minWidth: 40 * scale,
+      minHeight: 40 * scale,
+      borderRadius: 20 * scale,
+      backgroundColor: '#F1F5F9',
       justifyContent: 'center',
       alignItems: 'center',
     },

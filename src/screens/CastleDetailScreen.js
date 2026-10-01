@@ -11,11 +11,13 @@ import {
   Platform,
   AccessibilityInfo,
   findNodeHandle,
+  Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { placesService } from '../services/placesService';
 import { useAccessibility } from '../context/AccessibilityContext';
+import { useFavorites } from '../context/FavoritesContext';
 import { useScaledStyles } from '../hooks/useScale';
 import { getImageSource } from '../utils/imageSource';
 import AudioGuideButton from '../components/AudioGuideButton';
@@ -40,11 +42,33 @@ export default function CastleDetailScreen({ route, navigation }) {
   const placeDataParam = route?.params?.placeData || null;
 
   const { scale, styles, windowWidth, windowHeight } = useScaledStyles(createStyles);
-  const { colors, highContrast, getScaledFontSize } = useAccessibility();
+  const { colors, highContrast, colorBlindMode, getScaledFontSize } = useAccessibility();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const [place, setPlace] = useState(placeDataParam);
   const [loading, setLoading] = useState(!placeDataParam);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const isFav = place ? isFavorite(place.id) : false;
+
+  // Funkcja udostępnienia zabytku za pomocą natywnego modułu Share
+  const handleSharePlace = async () => {
+    if (!place) return;
+    try {
+      const mapsUrl = place.location?.latitude && place.location?.longitude
+        ? `https://maps.google.com/?q=${place.location.latitude},${place.location.longitude}`
+        : 'https://visit-kozuchow.pl';
+
+      const shareMessage = `🏰 Odkryj ${place.title} w Kożuchowie!\n\n${
+        place.shortDescription || ''
+      }\n\n📍 Adres: ${place.location?.address || 'Kożuchów'}\n🗺️ Zobacz na mapie: ${mapsUrl}\n\nAplikacja Visit Kożuchów`;
+
+      await Share.share({
+        title: place.title,
+        message: shareMessage,
+      });
+    } catch (_e) {}
+  };
 
   const galleryRef = useRef(null);
   const titleRef = useRef(null);
@@ -211,7 +235,7 @@ export default function CastleDetailScreen({ route, navigation }) {
           )}
 
           {/* =========================================================================
-              WCAG / DOSTĘPNOŚĆ: PRZYCISK POWROTU
+              WCAG / DOSTĘPNOŚĆ: GÓRNY PASEK AKCJI (POWRÓT + ULUBIONE + UDOSTĘPNIJ)
               1. minWidth i minHeight >= 48dp (Touch Target)
               2. accessibilityRole="button"
               3. accessibilityLabel i accessibilityHint
@@ -228,6 +252,48 @@ export default function CastleDetailScreen({ route, navigation }) {
             >
               <Ionicons name="arrow-back" size={22 * scale} color="#1C1C1E" />
             </CalmPressable>
+
+            <View style={styles.heroRightActions}>
+              {/* Przycisk dodania do ulubionych (Feature 2) */}
+              <CalmPressable
+                style={[
+                  styles.backPill,
+                  isFav && {
+                    backgroundColor: colorBlindMode ? '#0284C7' : '#D97706',
+                  },
+                  highContrast && styles.highContrastBorder,
+                ]}
+                onPress={() => toggleFavorite(place.id)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isFav
+                    ? `Usuń ${place.title} z ulubionych`
+                    : `Zapisz ${place.title} w ulubionych`
+                }
+                accessibilityState={{ selected: isFav }}
+              >
+                <Ionicons
+                  name={isFav ? 'bookmark' : 'bookmark-outline'}
+                  size={20 * scale}
+                  color={isFav ? '#FFFFFF' : '#1C1C1E'}
+                />
+              </CalmPressable>
+
+              {/* Przycisk udostępnienia zabytku (Feature 4) */}
+              <CalmPressable
+                style={[styles.backPill, highContrast && styles.highContrastBorder]}
+                onPress={handleSharePlace}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={`Udostępnij zabytek ${place.title}`}
+                accessibilityHint="Otwiera menu udostępniania ze szczegółami i linkiem do mapy"
+              >
+                <Ionicons name="share-social-outline" size={20 * scale} color="#1C1C1E" />
+              </CalmPressable>
+            </View>
           </SafeAreaView>
 
           {/* WCAG: Ukrycie czysto dekoracyjnych kropek paginacji przed czytnikiem */}
@@ -483,7 +549,16 @@ const createStyles = (scale) =>
       position: 'absolute',
       top: 10 * scale,
       left: 18 * scale,
+      right: 18 * scale,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       zIndex: 10,
+    },
+    heroRightActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10 * scale,
     },
     // WCAG: minWidth i minHeight 48dp dla spełnienia standardu Touch Target
     backPill: {

@@ -6,8 +6,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Kontekst dostępności cyfrowej (WCAG 2.1 AA)
+// Kontekst dostępności cyfrowej (WCAG 2.1 AA) oraz ulubionych miejsc
 import { AccessibilityProvider } from './src/context/AccessibilityContext';
+import { FavoritesProvider } from './src/context/FavoritesContext';
 
 // Import ekranów aplikacji
 import WelcomeScreen from './src/screens/WelcomeScreen';
@@ -26,8 +27,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <AccessibilityProvider>
-        <StatusBar style="dark" />
-        <NavigationContainer>
+        <FavoritesProvider>
+          <StatusBar style="dark" />
+          <NavigationContainer>
           <Stack.Navigator
             initialRouteName="Welcome"
             screenOptions={{
@@ -75,6 +77,7 @@ export default function App() {
             />
           </Stack.Navigator>
         </NavigationContainer>
+        </FavoritesProvider>
       </AccessibilityProvider>
     </SafeAreaProvider>
   );

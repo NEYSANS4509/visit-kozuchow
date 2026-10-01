@@ -22,6 +22,7 @@ import LegalModal from '../components/LegalModal';
 import AIChatModal from '../components/AIChatModal';
 import CalmPressable from '../components/CalmPressable';
 import FadeInView from '../components/FadeInView';
+import { useFavorites } from '../context/FavoritesContext';
 
 /**
  * Domyślny wycinek mapy wycentrowany na historyczne centrum Kożuchowa.
@@ -40,9 +41,12 @@ const KOZUCHOW_REGION = {
 const PlaceCardItem = memo(function PlaceCardItem({
   item,
   onPress,
+  isFav,
+  onToggleFavorite,
   scale,
   colors,
   highContrast,
+  colorBlindMode,
   getScaledFontSize,
   styles,
 }) {
@@ -68,13 +72,31 @@ const PlaceCardItem = memo(function PlaceCardItem({
           accessibilityRole="image"
           accessibilityLabel={`Zdjęcie obiektu: ${item.title}`}
         />
-        <View
-          style={styles.cardBookmark}
-          accessible={false}
-          importantForAccessibility="no"
+        <CalmPressable
+          style={[
+            styles.cardBookmark,
+            isFav && {
+              backgroundColor: colorBlindMode ? '#0284C7' : '#D97706',
+            },
+            highContrast && styles.highContrastSmallBorder,
+          ]}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          onPress={() => onToggleFavorite(item.id)}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={
+            isFav
+              ? `Usuń ${item.title} z ulubionych`
+              : `Dodaj ${item.title} do ulubionych`
+          }
+          accessibilityState={{ selected: isFav }}
         >
-          <Ionicons name="bookmark-outline" size={16 * scale} color="#FFFFFF" />
-        </View>
+          <Ionicons
+            name={isFav ? 'bookmark' : 'bookmark-outline'}
+            size={16 * scale}
+            color="#FFFFFF"
+          />
+        </CalmPressable>
       </View>
 
       <View style={styles.cardContent}>
@@ -120,18 +142,25 @@ export default function ExploreScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [legalModalVisible, setLegalModalVisible] = useState(false);
   const [aiModalVisible, setAiModalVisible] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'favorites'
 
-  // Dynamiczne filtrowanie obiektów po nazwie, adresie i kategorii
+  const { isFavorite, toggleFavorite, favoriteCount } = useFavorites();
+
+  // Dynamiczne filtrowanie obiektów po nazwie, adresie, kategorii oraz filtrze ulubionych
   const filteredPlaces = useMemo(() => {
-    if (!searchQuery.trim()) return PLACES;
+    let list = PLACES;
+    if (activeFilter === 'favorites') {
+      list = list.filter((p) => isFavorite(p.id));
+    }
+    if (!searchQuery.trim()) return list;
     const q = searchQuery.toLowerCase().trim();
-    return PLACES.filter(
+    return list.filter(
       (p) =>
         p.title?.toLowerCase().includes(q) ||
         p.category?.toLowerCase().includes(q) ||
         p.location?.address?.toLowerCase().includes(q)
     );
-  }, [searchQuery]);
+  }, [searchQuery, activeFilter, isFavorite]);
 
   // Stabilna referencja do nawigacji do karty zabytku
   const handleCardPress = useCallback(
@@ -147,14 +176,17 @@ export default function ExploreScreen({ navigation }) {
       <PlaceCardItem
         item={item}
         onPress={handleCardPress}
+        isFav={isFavorite(item.id)}
+        onToggleFavorite={toggleFavorite}
         scale={scale}
         colors={colors}
         highContrast={highContrast}
+        colorBlindMode={colorBlindMode}
         getScaledFontSize={getScaledFontSize}
         styles={styles}
       />
     ),
-    [handleCardPress, scale, colors, highContrast, getScaledFontSize, styles]
+    [handleCardPress, isFavorite, toggleFavorite, scale, colors, highContrast, colorBlindMode, getScaledFontSize, styles]
   );
 
   const placeKeyExtractor = useCallback((item) => item.id, []);
@@ -275,18 +307,106 @@ export default function ExploreScreen({ navigation }) {
           </View>
         </View>
 
-        {/* 3. Pozioma lista kart polecanych miejsc */}
-        {filteredPlaces.length === 0 ? (
-          <View style={styles.emptyContainer} accessible={true} accessibilityRole="text">
+        {/* Przełącznik filtrów: Wszystkie / Ulubione */}
+        <View style={styles.filterPillsRow}>
+          <CalmPressable
+            style={[
+              styles.filterPill,
+              { backgroundColor: activeFilter === 'all' ? colors.primary : colors.white },
+              activeFilter === 'all' && styles.filterPillActive,
+              highContrast && styles.highContrastFilterPill,
+            ]}
+            onPress={() => setActiveFilter('all')}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeFilter === 'all' }}
+            accessibilityLabel={`Wszystkie obiekty (${PLACES.length})`}
+          >
             <Text
               style={[
-                styles.emptyText,
-                { color: colors.textMuted, fontSize: getScaledFontSize(14 * scale) },
+                styles.filterPillText,
+                {
+                  color: activeFilter === 'all' ? colors.white : colors.textDark,
+                  fontSize: getScaledFontSize(13 * scale),
+                },
               ]}
               allowFontScaling={true}
             >
-              Nie znaleziono pasujących miejsc
+              Wszystkie ({PLACES.length})
             </Text>
+          </CalmPressable>
+
+          <CalmPressable
+            style={[
+              styles.filterPill,
+              {
+                backgroundColor:
+                  activeFilter === 'favorites'
+                    ? colorBlindMode
+                      ? '#0284C7'
+                      : '#D97706'
+                    : colors.white,
+              },
+              activeFilter === 'favorites' && styles.filterPillActive,
+              highContrast && styles.highContrastFilterPill,
+            ]}
+            onPress={() => setActiveFilter('favorites')}
+            accessible={true}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeFilter === 'favorites' }}
+            accessibilityLabel={`Ulubione obiekty (${favoriteCount})`}
+          >
+            <Ionicons
+              name={activeFilter === 'favorites' ? 'bookmark' : 'bookmark-outline'}
+              size={15 * scale}
+              color={activeFilter === 'favorites' ? colors.white : colors.textDark}
+            />
+            <Text
+              style={[
+                styles.filterPillText,
+                {
+                  color: activeFilter === 'favorites' ? colors.white : colors.textDark,
+                  fontSize: getScaledFontSize(13 * scale),
+                },
+              ]}
+              allowFontScaling={true}
+            >
+              Ulubione ({favoriteCount})
+            </Text>
+          </CalmPressable>
+        </View>
+
+        {/* 3. Pozioma lista kart polecanych miejsc */}
+        {filteredPlaces.length === 0 ? (
+          <View style={styles.emptyContainer} accessible={true} accessibilityRole="text">
+            <Ionicons
+              name={activeFilter === 'favorites' ? 'bookmark-outline' : 'search-outline'}
+              size={36 * scale}
+              color={colors.textMuted}
+              style={{ marginBottom: 8 * scale }}
+            />
+            <Text
+              style={[
+                styles.emptyText,
+                { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
+              ]}
+              allowFontScaling={true}
+            >
+              {activeFilter === 'favorites'
+                ? 'Brak zapisanych ulubionych'
+                : 'Nie znaleziono pasujących miejsc'}
+            </Text>
+            {activeFilter === 'favorites' && (
+              <Text
+                style={[
+                  styles.emptySubText,
+                  { color: colors.textMuted, fontSize: getScaledFontSize(13 * scale) },
+                ]}
+                allowFontScaling={true}
+              >
+                Dotknij ikonę zakładki na dowolnym zabytku, aby dodać go do swojego planu.
+              </Text>
+            )}
           </View>
         ) : (
           <FadeInView key={`${searchQuery}_${filteredPlaces.length}`} duration={160}>
@@ -633,8 +753,47 @@ const createStyles = (scale) =>
       justifyContent: 'center',
     },
     emptyText: {
-      fontWeight: '500',
+      fontWeight: '700',
       textAlign: 'center',
+      marginBottom: 6 * scale,
+    },
+    emptySubText: {
+      textAlign: 'center',
+      lineHeight: 18 * scale,
+      paddingHorizontal: 20 * scale,
+    },
+    filterPillsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20 * scale,
+      marginBottom: 16 * scale,
+      gap: 10 * scale,
+    },
+    filterPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6 * scale,
+      paddingHorizontal: 14 * scale,
+      paddingVertical: 8 * scale,
+      borderRadius: 18 * scale,
+      minHeight: 40 * scale,
+      borderWidth: 1,
+      borderColor: '#E2E8F0',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 3,
+      elevation: 2,
+    },
+    filterPillActive: {
+      borderColor: 'transparent',
+    },
+    filterPillText: {
+      fontWeight: '700',
+    },
+    highContrastFilterPill: {
+      borderWidth: 2,
+      borderColor: '#000000',
     },
     cardsScroll: {
       paddingLeft: 20 * scale,
@@ -668,12 +827,17 @@ const createStyles = (scale) =>
       position: 'absolute',
       top: 10 * scale,
       right: 10 * scale,
-      width: 32 * scale,
-      height: 32 * scale,
-      borderRadius: 16 * scale,
-      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+      width: 36 * scale,
+      height: 36 * scale,
+      borderRadius: 18 * scale,
+      backgroundColor: 'rgba(0, 0, 0, 0.45)',
       alignItems: 'center',
       justifyContent: 'center',
+      zIndex: 5,
+    },
+    highContrastSmallBorder: {
+      borderWidth: 2,
+      borderColor: '#000000',
     },
     cardContent: {
       flex: 1,
