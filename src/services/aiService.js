@@ -101,12 +101,12 @@ async function callGroqModel(model, messages, options = {}, timeoutMs = 10000) {
  * @param {object|null} userLocation - Współrzędne GPS użytkownika ({ latitude, longitude })
  * @returns {Promise<string>} Odpowiedź wygenerowana przez przewodnika AI
  */
-export async function sendChatMessage(userText, previousMessages = [], userLocation = null) {
+export async function sendChatMessage(userText, previousMessages = [], userLocation = null, language = 'pl') {
   if (!userText || !userText.trim()) return null;
 
   try {
-    // Generowanie zoptymalizowanego promptu systemowego z bazą wiedzy oraz aktualnymi odległościami GPS
-    const systemPrompt = generateSystemPrompt(userLocation);
+    // Generowanie zoptymalizowanego promptu systemowego z bazą wiedzy, językiem oraz odległościami GPS
+    const systemPrompt = generateSystemPrompt(userLocation, language);
 
     // Ograniczenie historii do ostatnich 4 wypowiedzi w celu ochrony budżetu tokenów i zachowania kontekstu
     const formattedHistory = (previousMessages || []).slice(-4).map((msg) => ({
@@ -140,11 +140,11 @@ export async function sendChatMessage(userText, previousMessages = [], userLocat
 
     // 3. Jeśli oba modele sieciowe zawiodły (np. brak sieci, limit API) — użycie lokalnej bazy wiedzy offline
     if (!answer) {
-      answer = generateOfflineFallbackResponse(userText, userLocation);
+      answer = generateOfflineFallbackResponse(userText, userLocation, language);
     }
 
     return answer;
   } catch (_error) {
-    return generateOfflineFallbackResponse(userText, userLocation);
+    return generateOfflineFallbackResponse(userText, userLocation, language);
   }
 }

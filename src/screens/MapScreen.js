@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { PLACES } from '../data/places';
 import { useAccessibility } from '../context/AccessibilityContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useScaledStyles } from '../hooks/useScale';
 import { getImageSource } from '../utils/imageSource';
 import CalmPressable from '../components/CalmPressable';
@@ -134,6 +135,7 @@ export default function MapScreen({ route, navigation }) {
 
   const { scale, styles } = useScaledStyles(createStyles);
   const { colors, highContrast, colorBlindMode, getScaledFontSize } = useAccessibility();
+  const { t, translatePlace } = useLanguage();
 
   const mapRef = useRef(null);
 
@@ -260,12 +262,13 @@ export default function MapScreen({ route, navigation }) {
     };
   }, []);
 
-  // Obiekty aktywnej trasy w kolejności przystanków
+  // Obiekty aktywnej trasy w kolejności przystanków z dynamicznym tłumaczeniem
   const activeRoutePlaces = useMemo(() => {
     return activeRouteIds
       .map((id) => PLACES.find((p) => p.id === id))
-      .filter((p) => Boolean(p && p.location?.latitude && p.location?.longitude));
-  }, [activeRouteIds]);
+      .filter((p) => Boolean(p && p.location?.latitude && p.location?.longitude))
+      .map((p) => translatePlace(p));
+  }, [activeRouteIds, translatePlace]);
 
   // Współrzędne dla linii Polyline na mapie
   const routeCoordinates = useMemo(() => {
@@ -467,6 +470,11 @@ export default function MapScreen({ route, navigation }) {
     );
   }, [userLocation, selectedPlace]);
 
+  // Dynamicznie przetłumaczone zaznaczone miejsce
+  const currentPlace = useMemo(() => {
+    return selectedPlace ? translatePlace(selectedPlace) : null;
+  }, [selectedPlace, translatePlace]);
+
   return (
     <View style={styles.container}>
       {/* Interaktywna mapa satelitarna z nazwami ulic i obiektami (mapType="hybrid") */}
@@ -498,7 +506,8 @@ export default function MapScreen({ route, navigation }) {
         )}
 
         {/* Pinezki wszystkich 12 zabytków na mapie Kożuchowa */}
-        {PLACES.map((place) => {
+        {PLACES.map((rawPlace) => {
+          const place = translatePlace(rawPlace);
           if (!place.location?.latitude || !place.location?.longitude) return null;
 
           const isSelected = selectedPlace?.id === place.id;
@@ -512,7 +521,7 @@ export default function MapScreen({ route, navigation }) {
                 latitude: place.location.latitude,
                 longitude: place.location.longitude,
               }}
-              onPress={() => handleMarkerPress(place)}
+              onPress={() => handleMarkerPress(rawPlace)}
               tracksInfoWindowChanges={false}
               accessible={true}
               accessibilityRole="button"
@@ -568,7 +577,7 @@ export default function MapScreen({ route, navigation }) {
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Wróć do poprzedniego ekranu"
+            accessibilityLabel={t('common.back')}
           >
             <Ionicons name="arrow-back" size={22 * scale} color={colors.textDark} />
           </CalmPressable>
@@ -588,8 +597,8 @@ export default function MapScreen({ route, navigation }) {
             accessibilityRole="button"
             accessibilityLabel={
               activeRoutePlaces.length > 0
-                ? `Aktywna trasa z ${activeRoutePlaces.length} przystankami. Otwórz menu trasy.`
-                : 'Utwórz trasę dla siebie lub wybierz szlak AI'
+                ? `${t('map.activeRouteTitle')} (${activeRoutePlaces.length} ${t('map.routePts')})`
+                : t('map.openRoutePlanner')
             }
           >
             <Ionicons
@@ -606,8 +615,8 @@ export default function MapScreen({ route, navigation }) {
               allowFontScaling={true}
             >
               {activeRoutePlaces.length > 0
-                ? `Trasa (${activeRoutePlaces.length} pkt)`
-                : 'Utwórz trasę'}
+                ? `${t('map.activeRouteTitle')} (${activeRoutePlaces.length} ${t('map.routePts')})`
+                : t('map.openRoutePlanner')}
             </Text>
           </CalmPressable>
         </View>
@@ -622,11 +631,10 @@ export default function MapScreen({ route, navigation }) {
             ]}
             accessible={true}
             accessibilityRole="summary"
-            accessibilityLabel={`Aktywny szlak. Przystanek ${currentRouteStopIndex + 1} z ${
-              activeRoutePlaces.length
-            }: ${activeRoutePlaces[currentRouteStopIndex]?.title}. Całkowity dystans: ${formatDistance(
-              activeRouteStats.distanceMeters
-            )}.`}
+            accessibilityLabel={`${t('map.activeRouteTitle')}. ${t('map.routeStop', {
+              current: currentRouteStopIndex + 1,
+              total: activeRoutePlaces.length,
+            })}: ${activeRoutePlaces[currentRouteStopIndex]?.title}.`}
           >
             <View style={styles.activeRouteInfo}>
               <View style={styles.activeRouteBadgeRow}>
@@ -644,7 +652,10 @@ export default function MapScreen({ route, navigation }) {
                   allowFontScaling={true}
                   numberOfLines={1}
                 >
-                  PUNKT {currentRouteStopIndex + 1} Z {activeRoutePlaces.length}
+                  {t('map.routeStop', {
+                    current: currentRouteStopIndex + 1,
+                    total: activeRoutePlaces.length,
+                  })}
                 </Text>
               </View>
               <Text
@@ -669,9 +680,9 @@ export default function MapScreen({ route, navigation }) {
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel="Przejdź do kolejnego przystanku na trasie"
+                accessibilityLabel={t('map.nextStop')}
               >
-                <Text style={styles.activeRouteNextText}>Następny</Text>
+                <Text style={styles.activeRouteNextText}>{t('map.nextStop')}</Text>
                 <Ionicons name="arrow-forward" size={14 * scale} color="#FFFFFF" />
               </CalmPressable>
 
@@ -681,7 +692,7 @@ export default function MapScreen({ route, navigation }) {
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel="Udostępnij zaplanowaną trasę znajomym"
+                accessibilityLabel={t('map.shareRoute')}
               >
                 <Ionicons name="share-social-outline" size={18 * scale} color={colors.textDark} />
               </CalmPressable>
@@ -692,7 +703,7 @@ export default function MapScreen({ route, navigation }) {
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel="Zakończ trasę turystyczną"
+                accessibilityLabel={t('map.endRoute')}
               >
                 <Ionicons name="close-circle-outline" size={24 * scale} color={colors.textMuted} />
               </CalmPressable>
@@ -730,7 +741,7 @@ export default function MapScreen({ route, navigation }) {
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Wycentruj mapę na mojej pozycji GPS"
+          accessibilityLabel={t('map.myLocation')}
         >
           <Ionicons
             name={hasLocationPermission ? 'locate' : 'locate-outline'}
@@ -743,7 +754,7 @@ export default function MapScreen({ route, navigation }) {
       {/* =========================================================================
           DOLNA KARTA WYBRANEGO ZABYTKU (BOTTOM SHEET)
           ========================================================================= */}
-      {selectedPlace && (
+      {currentPlace && (
         <FadeInView style={styles.bottomSheet} duration={160}>
           <SafeAreaView edges={['bottom']}>
             <CalmPressable
@@ -754,21 +765,21 @@ export default function MapScreen({ route, navigation }) {
               ]}
               targetScale={0.985}
               onPress={() =>
-                navigation.navigate('CastleDetail', { placeId: selectedPlace.id })
+                navigation.navigate('CastleDetail', { placeId: currentPlace.id })
               }
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel={`Szczegóły: ${selectedPlace.title}, kategoria ${selectedPlace.category}, odległość: ${
+              accessibilityLabel={`Szczegóły: ${currentPlace.title}, kategoria ${currentPlace.category}, odległość: ${
                 formatDistance(currentDistance) || 'brak danych'
               }. Dotknij, aby przejść do opisu.`}
             >
               <Image
-                source={getImageSource(selectedPlace.imageUri)}
+                source={getImageSource(currentPlace.imageUri)}
                 style={styles.cardImage}
                 resizeMode="cover"
                 accessible={true}
                 accessibilityRole="image"
-                accessibilityLabel={`Fotografia: ${selectedPlace.title}`}
+                accessibilityLabel={`Fotografia: ${currentPlace.title}`}
               />
 
               <View style={styles.cardDetails}>
@@ -787,7 +798,7 @@ export default function MapScreen({ route, navigation }) {
                       ]}
                       allowFontScaling={true}
                     >
-                      {selectedPlace.category}
+                      {currentPlace.category}
                     </Text>
                   </View>
 
@@ -815,7 +826,7 @@ export default function MapScreen({ route, navigation }) {
                   numberOfLines={1}
                   allowFontScaling={true}
                 >
-                  {selectedPlace.title}
+                  {currentPlace.title}
                 </Text>
 
                 <Text
@@ -826,7 +837,7 @@ export default function MapScreen({ route, navigation }) {
                   numberOfLines={1}
                   allowFontScaling={true}
                 >
-                  {selectedPlace.location?.address}
+                  {currentPlace.location?.address}
                 </Text>
               </View>
 
@@ -862,7 +873,7 @@ export default function MapScreen({ route, navigation }) {
                 ]}
                 allowFontScaling={true}
               >
-                Planowanie trasy
+                {t('map.openRoutePlanner')}
               </Text>
             </View>
             <CalmPressable
@@ -871,7 +882,7 @@ export default function MapScreen({ route, navigation }) {
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel="Zamknij kreator trasy"
+              accessibilityLabel={t('common.close')}
             >
               <Ionicons name="close" size={26 * scale} color={colors.textDark} />
             </CalmPressable>
@@ -902,7 +913,7 @@ export default function MapScreen({ route, navigation }) {
                 ]}
                 allowFontScaling={true}
               >
-                Własna trasa ({draftCustomIds.length})
+                {t('map.customRouteTab')} ({draftCustomIds.length})
               </Text>
             </TouchableOpacity>
 
@@ -929,7 +940,7 @@ export default function MapScreen({ route, navigation }) {
                 ]}
                 allowFontScaling={true}
               >
-                Szlaki AI (Gotowe trasy)
+                {t('map.aiRoutesTab')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -950,7 +961,7 @@ export default function MapScreen({ route, navigation }) {
                     <View style={styles.routeStatItem}>
                       <Ionicons name="pin" size={16 * scale} color={colors.primary} />
                       <Text style={[styles.routeStatVal, { color: colors.textDark }]}>
-                        {draftCustomIds.length} przystanków
+                        {draftCustomIds.length} {t('map.stops')}
                       </Text>
                     </View>
                     <View style={styles.routeStatItem}>
@@ -967,17 +978,17 @@ export default function MapScreen({ route, navigation }) {
                     </View>
                   </View>
                   <Text style={[styles.routeSummaryDesc, { color: colors.textMuted }]}>
-                    Wybierz z listy obiekty, które chcesz odwiedzić w Kożuchowie. Na mapie zostanie
-                    wyznaczona przejrzysta ścieżka z ponumerowanymi punktami.
+                    {t('map.selectPlacesDesc')}
                   </Text>
                 </View>
 
                 {/* Lista wszystkich 12 obiektów do wyboru */}
                 <Text style={[styles.modalSectionTitle, { color: colors.textDark }]}>
-                  Wybierz miejsca do odwiedzenia:
+                  {t('map.selectPlacesTitle')}
                 </Text>
 
-                {PLACES.map((p) => {
+                {PLACES.map((rawP) => {
+                  const p = translatePlace(rawP);
                   const isChecked = draftCustomIds.includes(p.id);
                   const orderNum = draftCustomIds.indexOf(p.id) + 1;
 
@@ -1045,7 +1056,7 @@ export default function MapScreen({ route, navigation }) {
               /* Zakładka Szlaków AI */
               <View>
                 <Text style={[styles.modalSectionTitle, { color: colors.textDark }]}>
-                  Gotowe szlaki turystyczne przygotowane przez AI:
+                  {t('map.aiPresetsTitle')}
                 </Text>
 
                 {AI_ROUTE_PRESETS.map((preset) => (
@@ -1065,7 +1076,7 @@ export default function MapScreen({ route, navigation }) {
                     <View style={styles.presetTopRow}>
                       <View style={styles.presetBadge}>
                         <Ionicons name="sparkles" size={13 * scale} color="#8B5CF6" />
-                        <Text style={styles.presetBadgeText}>Asystent AI</Text>
+                        <Text style={styles.presetBadgeText}>{t('chat.title')}</Text>
                       </View>
                       <Text style={[styles.presetDuration, { color: colors.primary }]}>
                         ~{preset.durationMinutes} min
@@ -1088,7 +1099,8 @@ export default function MapScreen({ route, navigation }) {
 
                     <View style={styles.presetStopsList}>
                       {preset.placeIds.map((pId, idx) => {
-                        const targetP = PLACES.find((item) => item.id === pId);
+                        const targetRaw = PLACES.find((item) => item.id === pId);
+                        const targetP = targetRaw ? translatePlace(targetRaw) : null;
                         return (
                           <Text key={pId} style={styles.presetStopItem} numberOfLines={1}>
                             {idx + 1}. {targetP?.title || pId}
@@ -1099,7 +1111,7 @@ export default function MapScreen({ route, navigation }) {
 
                     <View style={[styles.presetApplyBtn, { backgroundColor: colors.primaryLight }]}>
                       <Text style={[styles.presetApplyText, { color: colors.primary }]}>
-                        Wczytaj tę trasę na mapę
+                        {t('map.loadRoute')}
                       </Text>
                       <Ionicons name="arrow-forward" size={16 * scale} color={colors.primary} />
                     </View>
@@ -1123,7 +1135,7 @@ export default function MapScreen({ route, navigation }) {
                 onPress={() => applyRoute(draftCustomIds)}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel="Zatwierdź i pokaż trasę na mapie"
+                accessibilityLabel={t('map.applyRoute')}
                 accessibilityState={{ disabled: draftCustomIds.length === 0 }}
               >
                 <Ionicons name="map-outline" size={20 * scale} color="#FFFFFF" />
@@ -1134,7 +1146,7 @@ export default function MapScreen({ route, navigation }) {
                   ]}
                   allowFontScaling={true}
                 >
-                  Zatwierdź trasę ({draftCustomIds.length} pkt)
+                  {t('map.applyRoute')} ({draftCustomIds.length} {t('map.routePts')})
                 </Text>
               </CalmPressable>
             </View>

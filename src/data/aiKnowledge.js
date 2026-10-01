@@ -85,7 +85,7 @@ export function formatMeters(meters) {
  * @param {object|null} userLocation - Współrzędne GPS turysty ({ latitude, longitude })
  * @returns {string} Kompletna instrukcja systemowa dla modelu AI
  */
-export function generateSystemPrompt(userLocation) {
+export function generateSystemPrompt(userLocation, language = 'pl') {
   const safePlaces = Array.isArray(PLACES) ? PLACES : [];
 
   // Katalog miejsc z unikalnymi identyfikatorami ID i ekspozycjami
@@ -140,20 +140,53 @@ ZASADA GPS: Jeśli turysta pyta "gdzie mam najbliżej zjeść" lub "jaki jest na
 `;
   }
 
-  return `Jesteś oficjalnym, inteligentnym przewodnikiem turystycznym po Kożuchowie (woj. lubuskie).
-Odpowiadaj turystom wyłącznie w języku polskim. Bądź konkretny, ciekawy i uprzejmy. Maksymalna długość odpowiedzi: 3-4 zdania.
-
-ŚCIŚLE PRZESTRZEGAJ PONIŻSZYCH ZASAD:
-1. FORMAT: Odpowiedź MUSI mieć maksymalnie 2 do 4 treściwych zdań (ok. 30–60 słów). Żadnego lania wody, zbędnych wstępów ("Oczywiście!", "Chętnie pomogę") ani sztucznych zakończeń. Przechodź od razu do sedna sprawy.
-2. GRAMATYKA I ODMIANA: Pisz naturalną polszczyzną. BEZWZGLĘDNIE odmieniaj nazwy własne, restauracje i zabytki przez przypadki (np. mów: "przy Zamku", "obok Baszty Krośnieńskiej", "w Kożuchowie", "udaj się do Restauracji Rycerskiej" lub "do Pizzerii Ciao Ciao" — NIGDY nie zostawiaj nazw w mianowniku, gdy kontekst wymaga dopełniacza czy miejscownika!).
+  let introText = `Jesteś oficjalnym, inteligentnym przewodnikiem turystycznym po Kożuchowie (woj. lubuskie).
+Odpowiadaj turystom wyłącznie w języku polskim. Bądź konkretny, ciekawy i uprzejmy. Maksymalna długość odpowiedzi: 3-4 zdania.`;
+  let rulesText = `ŚCIŚLE PRZESTRZEGAJ PONIŻSZYCH ZASAD:
+1. FORMAT: Odpowiedź MUSI mieć maksymalnie 2 do 4 treściwych zdań (ok. 30–60 słów). Żadnego lania wody, zbędnych wstępów ani sztucznych zakończeń. Przechodź od razu do sedna sprawy.
+2. GRAMATYKA: Pisz naturalną polszczyzną, odmieniaj nazwy własne i zabytki przez przypadki.
 3. DOMYKANIE MYŚLI: Zawsze kończ odpowiedź pełnym zdaniem z kropką.
 4. GPS: Jeśli turysta pyta "gdzie zjeść" lub "co jest najbliżej", podawaj pierwszy obiekt z listy GPS wraz z odległością w metrach.
 6. ZASADA CZYSTEJ NARRACJI I LINKOWANIA (BARDZO WAŻNE):
-- W samej treści odpowiedzi NIGDY nie wspominaj o linkach ani odnośnikach (BEZWZGLĘDNY ZAKAZ pisania słów: "oto link", "link poniżej", "zobacz w linku", "kliknij poniżej" itp.). Pisz wyłącznie naturalną, wciągającą opowieść historyczną.
+- W samej treści odpowiedzi NIGDY nie wspominaj o linkach ani odnośnikach (BEZWZGLĘDNY ZAKAZ pisania słów: "oto link", "link poniżej", "zobacz w linku", "kliknij poniżej" itp.). Pisz wyłącznie naturalną opowieść.
 - NIGDY nie wstawiaj znaczników [LINK:id] wewnątrz zdań ani w środku tekstu!
-- Jeśli Twoja odpowiedź dotyczy danego zabytku, dopisz znacznik [LINK:dokładne_id] WYŁĄCZNIE jako niewidoczny kod na samym końcu całej wypowiedzi (po kropce kończącej ostatnie zdanie). Aplikacja sama utworzy pod Twoją wypowiedzią interaktywny przycisk.
+- Jeśli Twoja odpowiedź dotyczy danego zabytku, dopisz znacznik [LINK:dokładne_id] WYŁĄCZNIE jako niewidoczny kod na samym końcu całej wypowiedzi (po kropce kończącej ostatnie zdanie).
 - Jeśli wspominasz o kilku zabytkach, dopisz ich znaczniki na samym końcu (np. "...To wyjątkowe miejsca. [LINK:place_01][LINK:place_04]").
-7. ZASADA PLANOWANIA TRASY: Jeśli turysta pyta o zaplanowanie trasy lub spaceru (np. "trasa na 2 godziny", "trasa na 1h", "zaplanuj wycieczkę", "jaki szlak"), zaproponuj kolejność zwiedzania i na samym końcu dopisz znacznik [ROUTE:id1,id2,id3] z identyfikatorami w kolejności marszu! (Np. [ROUTE:place_01,place_04,place_03,place_06]). Nie pisz "kliknij poniżej", przycisk pojawi się automatycznie.
+7. ZASADA PLANOWANIA TRASY: Jeśli turysta pyta o trasę lub spacer, zaproponuj kolejność zwiedzania i na samym końcu dopisz znacznik [ROUTE:id1,id2,id3] z identyfikatorami w kolejności marszu!`;
+
+  if (language === 'en') {
+    introText = `You are the official smart AI tourist guide for the historic town of Kożuchów (Poland).
+Respond to tourists exclusively in ENGLISH. Be concise, engaging, and courteous. Max response length: 2-4 sentences (approx. 30–60 words).`;
+    rulesText = `STRICTLY FOLLOW THESE GUIDELINES:
+1. FORMAT: Response MUST be concise (2 to 4 sentences, 30-60 words). No fluff, long greetings, or artificial conclusions. Get straight to the point.
+2. LANGUAGE: Write in natural, engaging English.
+3. PUNCTUATION: Always end with a complete sentence and period.
+4. GPS: If the tourist asks for the nearest food or sight, always recommend item #1 from the GPS list with exact distance.
+6. PURE NARRATION & LINKING RULE (CRITICAL):
+- In the response text itself, NEVER mention links or URLs (STRICTLY PROHIBITED: "here is a link", "link below", "click below", etc.). Just tell the history smoothly.
+- NEVER insert [LINK:id] tags inside sentences or in the middle of text!
+- Append the tag [LINK:exact_id] EXCLUSIVELY at the very end of your response after the final period as metadata. The app will automatically render an interactive card underneath.
+- If mentioning multiple monuments, append their tags at the very end (e.g. "...Memorable places to see. [LINK:place_01][LINK:place_04]").
+7. ROUTE PLANNING: Propose the visit sequence and append [ROUTE:id1,id2,id3] at the very end.`;
+  } else if (language === 'de') {
+    introText = `Du bist der offizielle intelligente KI-Reiseleiter für die historische Stadt Kożuchów (Freystadt in Niederschlesien, Polen).
+Antworte den Touristen ausschließlich auf DEUTSCH. Fasse dich kurz (2 bis 4 Sätze, ca. 30–60 Wörter), spannend und höflich.`;
+    rulesText = `BEFOLGE STRENG DIESE REGELN:
+1. FORMAT: Die Antwort MUSS prägnant sein (2 bis 4 Sätze, 30-60 Wörter). Keine Floskeln oder langen Einleitungen. Komm direkt zum Punkt.
+2. SPRACHE: Schreibe auf natürlichem, lebendigem Deutsch.
+3. SATZABSCHLUSS: Beende stets mit einem vollständigen Satz und Punkt.
+4. GPS: Bei Fragen nach Essen oder dem nächsten Ziel immer Objekt 1 der GPS-Liste mit Distanz nennen.
+6. REINE NARRATION & LINK-REGEL (WICHTIG):
+- Erwähne NIEMALS Links oder Verweise im Text (schreibe NICHT 'hier ist ein Link', 'klicke unten' etc.). Erzähle flüssig und fesselnd.
+- Setze NIEMALS [LINK:id] Tags mitten in Sätze!
+- Hänge [LINK:genaue_id] AUSSCHLIESSLICH ganz am Ende deiner Antwort nach dem Schlusspunkt an. Die App blendet darunter automatisch eine Schaltfläche ein.
+- Bei mehreren Objekten hänge die Tags am Ende an (z. B. "...Sehr sehenswerte Orte. [LINK:place_01][LINK:place_04]").
+7. ROUTENPLANUNG: Schlage die Besichtigungsfolge vor und hänge [ROUTE:id1,id2,id3] ganz am Ende an.`;
+  }
+
+  return `${introText}
+
+${rulesText}
 Oto dostępne znaczniki:
 ${linksHelp}
 
@@ -229,13 +262,66 @@ Jeśli turysta zapyta o cokolwiek spoza Kożuchowa, uprzejmie przypomnij, że je
  * @param {object|null} userLocation - Współrzędne GPS turysty
  * @returns {string} Precyzyjna odpowiedź przewodnika
  */
-export function generateOfflineFallbackResponse(userText, userLocation) {
+export function generateOfflineFallbackResponse(userText, userLocation, language = 'pl') {
   if (!userText || !userText.trim()) {
+    if (language === 'en') {
+      return 'How can I assist you during your visit to Kożuchów? Feel free to ask about the castle, medieval walls, lapidarium, or where to dine!';
+    }
+    if (language === 'de') {
+      return 'Wie kann ich Ihnen beim Besuch von Kożuchów helfen? Fragen Sie nach dem Schloss, der Stadtmauer oder Restaurants!';
+    }
     return 'W czym mogę Ci pomóc podczas zwiedzania Kożuchowa? Zapytaj o zamek, mury, lapidarium lub gdzie zjeść obiad!';
   }
 
   const query = userText.toLowerCase().trim();
 
+  // 1. Odpowiedzi awaryjne w języku angielskim (English fallback engine)
+  if (language === 'en') {
+    if (query.includes('route') || query.includes('trail') || query.includes('walk') || query.includes('tour') || query.includes('plan')) {
+      return 'Here is a recommended walking tour of Kożuchów (approx. 1.5h): Piast Castle → Defensive Walls & Moat → Krosno Gate Tower → Town Hall & Market Square. [ROUTE:place_01,place_04,place_03,place_06]';
+    }
+    if (query.includes('eat') || query.includes('food') || query.includes('dinner') || query.includes('lunch') || query.includes('restaurant') || query.includes('pizza') || query.includes('kebab')) {
+      return 'In the center of Kożuchów, I recommend Rycerska Restaurant and Pizzeria Ciao Ciao at Market Square 19, or Nasir Kebab & Burger at 32 22 Lipca Street.';
+    }
+    if (query.includes('castle') || query.includes('tower') || query.includes('keep') || query.includes('dungeon')) {
+      return 'Kożuchów Castle is a 13th-century Piast stronghold built on stilts in marshland. Its greatest mystery is a cylindrical stone keep with starvation dungeons completely enclosed within the building! [LINK:place_01]';
+    }
+    if (query.includes('wall') || query.includes('moat') || query.includes('fortif')) {
+      return 'The 14th-century medieval defensive walls in Kożuchów are exceptional in Europe – over 90% of the 1,000-meter stone-and-brick circuit survives with a scenic park in the former moat. [LINK:place_04]';
+    }
+    if (query.includes('church') || query.includes('gromniczn')) {
+      return 'The Church of Our Lady of Candlemas is a 13th-century temple featuring a stone head in the chancel wall and a ceiling decorated with sailing ships! [LINK:place_02]';
+    }
+    if (query.includes('lapidar') || query.includes('cemet') || query.includes('grave')) {
+      return 'The Sepulchral Art Lapidarium is a 17th-century former Protestant cemetery with nearly 200 historic tombstones displaying intricate vanitas symbolism. [LINK:place_07]';
+    }
+    return 'In Kożuchów, you should visit the Piast Castle, the medieval defensive walls with moat, the Sepulchral Lapidarium, and the historic Market Square. Feel free to ask about any site! [LINK:place_01][LINK:place_04][LINK:place_07][LINK:place_08][LINK:place_06]';
+  }
+
+  // 2. Odpowiedzi awaryjne w języku niemieckim (German fallback engine)
+  if (language === 'de') {
+    if (query.includes('route') || query.includes('weg') || query.includes('tour') || query.includes('plan') || query.includes('rundgang') || query.includes('spazier')) {
+      return 'Hier ist ein empfehlenswerter Rundgang durch Kożuchów (ca. 1,5 Std.): Piastenschloss → Stadtmauer & Graben → Crossener Torturm → Marktplatz & Rathaus. [ROUTE:place_01,place_04,place_03,place_06]';
+    }
+    if (query.includes('essen') || query.includes('mittag') || query.includes('restaurant') || query.includes('pizza') || query.includes('kebab') || query.includes('speis')) {
+      return 'Im Stadtzentrum empfehle ich das Restaurant Rycerska und die Pizzeria Ciao Ciao am Marktplatz 19 sowie Nasir Kebab & Burger in der 22 Lipca Str. 32.';
+    }
+    if (query.includes('schloss') || query.includes('burg') || query.includes('turm') || query.includes('verlies') || query.includes('bergfried')) {
+      return 'Das Schloss in Kożuchów ist eine piastische Wehranlage aus dem 13. Jahrhundert. Die größte Besonderheit ist der zylindrische Bergfried mit Hungerverlies, der vollständig im Inneren verborgen liegt! [LINK:place_01]';
+    }
+    if (query.includes('mauer') || query.includes('stadtmauer') || query.includes('graben') || query.includes('befestigung')) {
+      return 'Die mittelalterliche Stadtmauer von Kożuchów aus dem 14. Jahrhundert ist zu über 90 Prozent erhalten – eine der vollständigsten Stadtbefestigungen in ganz Mitteleuropa. [LINK:place_04]';
+    }
+    if (query.includes('kirche') || query.includes('lichtmess')) {
+      return 'Die Pfarrkirche Mariä Lichtmess stammt aus dem 13. Jahrhundert und birgt ein barockes Gewölbe mit maritimen Segelschiffen sowie den geheimnisvollen Steinkopf in der Mauer! [LINK:place_02]';
+    }
+    if (query.includes('lapidar') || query.includes('friedhof') || query.includes('grab')) {
+      return 'Das Lapidarium der Grabmalkunst ist ein ehemaliger evangelischer Friedhof von 1634 mit fast 200 kunstvollen Grabplatten und Vanitas-Symbolen. [LINK:place_07]';
+    }
+    return 'In Kożuchów lohnt sich ein Besuch des Piastenschlosses, der mittelalterlichen Stadtmauer, des Lapidariums der Grabmalkunst und des historischen Marktplatzes. [LINK:place_01][LINK:place_04][LINK:place_07][LINK:place_08][LINK:place_06]';
+  }
+
+  // 3. Odpowiedzi awaryjne w języku polskim (Polish fallback engine)
   // 0. Pytania o planowanie trasy / szlak turystyczny / spacer
   if (
     query.includes('tras') ||

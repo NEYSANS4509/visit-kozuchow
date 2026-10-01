@@ -12,16 +12,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAccessibility } from '../context/AccessibilityContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useScaledStyles } from '../hooks/useScale';
 
 /**
- * Ekran ustawień aplikacji (SettingsScreen) z zaawansowaną konfiguracją dostępności cyfrowej (WCAG 2.1 AA).
- * Umożliwia włączenie trybu dla osób z daltonizmem, wysokiego kontrastu oraz powiększonego tekstu.
+ * Ekran ustawień aplikacji (SettingsScreen) z zaawansowaną konfiguracją dostępności cyfrowej (WCAG 2.1 AA)
+ * oraz wielojęzycznością (i18n: Polski, Angielski, Niemiecki).
  *
  * @param {object} navigation - Obiekt nawigacji React Navigation
  */
 export default function SettingsScreen({ navigation }) {
   const { scale, styles } = useScaledStyles(createStyles);
+  const { language, setLanguage, t } = useLanguage();
   const {
     colorBlindMode,
     highContrast,
@@ -47,7 +49,7 @@ export default function SettingsScreen({ navigation }) {
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Wróć do poprzedniego ekranu"
+          accessibilityLabel={t('common.back')}
           accessibilityHint="Wraca do głównego widoku aplikacji"
         >
           <Ionicons name="arrow-back" size={24 * scale} color={colors.textDark} />
@@ -61,7 +63,7 @@ export default function SettingsScreen({ navigation }) {
           accessible={true}
           accessibilityRole="header"
         >
-          Ustawienia
+          {t('settings.title')}
         </Text>
 
         <View style={styles.headerSpacer} pointerEvents="none" />
@@ -113,6 +115,99 @@ export default function SettingsScreen({ navigation }) {
         </View>
 
         {/* =========================================================================
+            SEKCJA: JĘZYK APLIKACJI (LANGUAGE SELECTION / i18n)
+           ========================================================================= */}
+        <View style={styles.sectionHeaderRow}>
+          <Ionicons name="globe-outline" size={20 * scale} color={colors.primary} />
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: colors.textDark, fontSize: getScaledFontSize(18 * scale) },
+            ]}
+            accessible={true}
+            accessibilityRole="header"
+          >
+            {t('settings.languageSection')}
+          </Text>
+        </View>
+
+        <View
+          style={[
+            styles.cardContainer,
+            { backgroundColor: colors.white },
+            highContrast && styles.highContrastCard,
+          ]}
+        >
+          <Text
+            style={[
+              styles.languageSelectHint,
+              { color: colors.textSecondary, fontSize: getScaledFontSize(12 * scale) },
+            ]}
+          >
+            {t('settings.languageDesc')}
+          </Text>
+
+          <View style={styles.languageOptionsGrid}>
+            {[
+              { code: 'pl', name: t('settings.languages.pl'), flag: '🇵🇱' },
+              { code: 'en', name: t('settings.languages.en'), flag: '🇬🇧' },
+              { code: 'de', name: t('settings.languages.de'), flag: '🇩🇪' },
+            ].map((langItem) => {
+              const isSelected = language === langItem.code;
+              return (
+                <TouchableOpacity
+                  key={langItem.code}
+                  style={[
+                    styles.languageOptionRow,
+                    isSelected && {
+                      backgroundColor: colorBlindMode ? '#E0F2FE' : colors.primaryLight,
+                    },
+                    highContrast && isSelected && styles.highContrastLanguageSelected,
+                  ]}
+                  onPress={() => setLanguage(langItem.code)}
+                  activeOpacity={0.7}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${langItem.name}. ${isSelected ? 'Aktywny' : 'Wybierz'}`}
+                  accessibilityState={{ selected: isSelected }}
+                >
+                  <Text style={styles.languageFlag}>{langItem.flag}</Text>
+                  <Text
+                    style={[
+                      styles.languageName,
+                      {
+                        color: isSelected
+                          ? colorBlindMode
+                            ? '#0284C7'
+                            : colors.primary
+                          : colors.textDark,
+                        fontSize: getScaledFontSize(14 * scale),
+                        fontWeight: isSelected ? '800' : '600',
+                      },
+                    ]}
+                  >
+                    {langItem.name}
+                  </Text>
+                  {isSelected ? (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20 * scale}
+                      color={colorBlindMode ? '#0284C7' : colors.primary}
+                    />
+                  ) : (
+                    <Ionicons
+                      name="ellipse-outline"
+                      size={20 * scale}
+                      color={colors.borderMuted || '#CBD5E1'}
+                    />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* =========================================================================
             SEKCJA: DOSTĘPNOŚĆ (ACCESSIBILITY / WCAG 2.1 AA)
            ========================================================================= */}
         <View style={styles.sectionHeaderRow}>
@@ -125,7 +220,7 @@ export default function SettingsScreen({ navigation }) {
             accessible={true}
             accessibilityRole="header"
           >
-            Dostępność (WCAG 2.1)
+            {t('settings.accessibilitySection')}
           </Text>
         </View>
 
@@ -159,7 +254,7 @@ export default function SettingsScreen({ navigation }) {
                     { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
                   ]}
                 >
-                  Tryb dla daltonistów
+                  {t('settings.colorBlind')}
                 </Text>
                 {colorBlindMode && (
                   <View style={styles.statusIndicatorActive}>
@@ -174,7 +269,7 @@ export default function SettingsScreen({ navigation }) {
                   { color: colors.textSecondary, fontSize: getScaledFontSize(12 * scale) },
                 ]}
               >
-                Zastępuje problematyczne pary kolorów (np. czerwień–zieleń) bezpieczną paletą i dubluje statusy ikonami oraz tekstem.
+                {t('settings.colorBlindDesc')}
               </Text>
             </View>
 
@@ -186,8 +281,7 @@ export default function SettingsScreen({ navigation }) {
                 thumbColor={colors.white}
                 accessible={true}
                 accessibilityRole="switch"
-                accessibilityLabel="Tryb dla daltonistów"
-                accessibilityHint="Włącza lub wyłącza paletę bezpieczną dla osób z zaburzeniami rozpoznawania barw"
+                accessibilityLabel={t('settings.colorBlind')}
                 accessibilityState={{ checked: colorBlindMode }}
               />
             </View>
@@ -216,7 +310,7 @@ export default function SettingsScreen({ navigation }) {
                     { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
                   ]}
                 >
-                  Wysoki kontrast
+                  {t('settings.highContrast')}
                 </Text>
                 {highContrast && (
                   <View style={styles.statusIndicatorActive}>
@@ -231,7 +325,7 @@ export default function SettingsScreen({ navigation }) {
                   { color: colors.textSecondary, fontSize: getScaledFontSize(12 * scale) },
                 ]}
               >
-                Gwarantuje kontrast tekstu od 7:1 (standard WCAG AAA) oraz wyraźne, pogrubione krawędzie elementów interfejsu.
+                {t('settings.highContrastDesc')}
               </Text>
             </View>
 
@@ -243,8 +337,7 @@ export default function SettingsScreen({ navigation }) {
                 thumbColor={colors.white}
                 accessible={true}
                 accessibilityRole="switch"
-                accessibilityLabel="Wysoki kontrast"
-                accessibilityHint="Włącza lub wyłącza tryb maksymalnego kontrastu tekstu i obramowań"
+                accessibilityLabel={t('settings.highContrast')}
                 accessibilityState={{ checked: highContrast }}
               />
             </View>
@@ -273,7 +366,7 @@ export default function SettingsScreen({ navigation }) {
                     { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
                   ]}
                 >
-                  Większy tekst
+                  {t('settings.largeText')}
                 </Text>
                 {largeText && (
                   <View style={styles.statusIndicatorActive}>
@@ -288,7 +381,7 @@ export default function SettingsScreen({ navigation }) {
                   { color: colors.textSecondary, fontSize: getScaledFontSize(12 * scale) },
                 ]}
               >
-                Zwiększa bazowy rozmiar fontu w całej aplikacji o 25%, ułatwiając czytanie bez zniekształcania układu.
+                {t('settings.largeTextDesc')}
               </Text>
             </View>
 
@@ -300,8 +393,7 @@ export default function SettingsScreen({ navigation }) {
                 thumbColor={colors.white}
                 accessible={true}
                 accessibilityRole="switch"
-                accessibilityLabel="Większy tekst"
-                accessibilityHint="Powiększa rozmiar czcionek w całej aplikacji"
+                accessibilityLabel={t('settings.largeText')}
                 accessibilityState={{ checked: largeText }}
               />
             </View>
@@ -325,7 +417,7 @@ export default function SettingsScreen({ navigation }) {
                     { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
                   ]}
                 >
-                  Ograniczenie animacji
+                  {t('settings.reduceMotion')}
                 </Text>
                 {reduceMotion && (
                   <View style={styles.statusIndicatorActive}>
@@ -340,7 +432,7 @@ export default function SettingsScreen({ navigation }) {
                   { color: colors.textSecondary, fontSize: getScaledFontSize(12 * scale) },
                 ]}
               >
-                Wyłącza mikro-efekty i przejścia. Zapewnia maksymalny komfort osobom z chorobą lokomocyjną (kinetozą) i wrażliwym błędnikiem.
+                {t('settings.reduceMotionDesc')}
               </Text>
             </View>
 
@@ -352,8 +444,7 @@ export default function SettingsScreen({ navigation }) {
                 thumbColor={colors.white}
                 accessible={true}
                 accessibilityRole="switch"
-                accessibilityLabel="Ograniczenie animacji"
-                accessibilityHint="Wyłącza wszelkie animacje dla ochrony osób z zaburzeniami błędnika"
+                accessibilityLabel={t('settings.reduceMotion')}
                 accessibilityState={{ checked: reduceMotion }}
               />
             </View>
@@ -449,7 +540,7 @@ export default function SettingsScreen({ navigation }) {
               activeOpacity={0.85}
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel="Przykładowy przycisk demonstracyjny"
+              accessibilityLabel={`${t('settings.previewButton')} demonstracyjny`}
             >
               <Ionicons name="eye-outline" size={18 * scale} color={colors.white} />
               <Text
@@ -458,7 +549,7 @@ export default function SettingsScreen({ navigation }) {
                   { fontSize: getScaledFontSize(14 * scale) },
                 ]}
               >
-                Przykładowy przycisk ({highContrast ? 'Wysoki kontrast' : 'Standard'})
+                {t('settings.previewButton')} ({highContrast ? 'WCAG AAA' : 'Standard'})
               </Text>
             </TouchableOpacity>
           </View>
@@ -476,7 +567,7 @@ export default function SettingsScreen({ navigation }) {
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Przywróć domyślne ustawienia dostępności"
+            accessibilityLabel={t('settings.resetBtn')}
           >
             <Ionicons name="refresh-outline" size={18 * scale} color={colors.danger} />
             <Text
@@ -485,7 +576,7 @@ export default function SettingsScreen({ navigation }) {
                 { color: colors.danger, fontSize: getScaledFontSize(13 * scale) },
               ]}
             >
-              Przywróć domyślne ustawienia
+              {t('settings.resetBtn')}
             </Text>
           </TouchableOpacity>
         )}
@@ -498,7 +589,7 @@ export default function SettingsScreen({ navigation }) {
               { color: colors.textMuted, fontSize: getScaledFontSize(11 * scale) },
             ]}
           >
-            Visit Kożuchów • Wersja 1.0 (Kompilacja testowa)
+            {t('settings.footerBuild')}
           </Text>
           <Text
             style={[
@@ -506,7 +597,7 @@ export default function SettingsScreen({ navigation }) {
               { color: colors.textMuted, fontSize: getScaledFontSize(10 * scale) },
             ]}
           >
-            Projekt realizowany w oparciu o wytyczne WCAG 2.1 na poziomie AA
+            {t('settings.footerStandard')}
           </Text>
         </View>
       </ScrollView>
@@ -635,6 +726,36 @@ const createStyles = (scale) =>
       borderColor: '#000000',
       shadowOpacity: 0,
       elevation: 0,
+    },
+    languageSelectHint: {
+      paddingHorizontal: 16 * scale,
+      paddingTop: 14 * scale,
+      paddingBottom: 8 * scale,
+      lineHeight: 18 * scale,
+    },
+    languageOptionsGrid: {
+      paddingHorizontal: 10 * scale,
+      paddingBottom: 10 * scale,
+      gap: 6 * scale,
+    },
+    languageOptionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 12 * scale,
+      paddingHorizontal: 14 * scale,
+      borderRadius: 12 * scale,
+      gap: 12 * scale,
+      minHeight: 48 * scale,
+    },
+    languageFlag: {
+      fontSize: 22 * scale,
+    },
+    languageName: {
+      flex: 1,
+    },
+    highContrastLanguageSelected: {
+      borderWidth: 2,
+      borderColor: '#000000',
     },
     settingRow: {
       flexDirection: 'row',

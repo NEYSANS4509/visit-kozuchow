@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { placesService } from '../services/placesService';
 import { PLACES } from '../data/places';
 import { useAccessibility } from '../context/AccessibilityContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useScaledStyles } from '../hooks/useScale';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -31,13 +32,14 @@ const BARCODE_SETTINGS = {
  * Spełnia standardy dostępności WCAG 2.1 AA:
  * - Przyciski dotykowe o wymiarach min. 48x48 dp (Touch Target)
  * - Komunikaty głosowe dla czytników ekranu (announceForAccessibility)
- * - Etykiety i stany przycisków w języku polskim.
+ * - Etykiety i stany przycisków w języku wybranym przez użytkownika.
  *
  * @param {object} navigation - Obiekt nawigacji React Navigation
  */
 export default function QRScannerScreen({ navigation }) {
   const { scale, styles } = useScaledStyles(createStyles);
   const { colors, highContrast, getScaledFontSize } = useAccessibility();
+  const { t } = useLanguage();
 
   const [permission, requestPermission] = useCameraPermissions();
   const [torchEnabled, setTorchEnabled] = useState(false);
@@ -58,7 +60,7 @@ export default function QRScannerScreen({ navigation }) {
     isScanningRef.current = true;
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    AccessibilityInfo.announceForAccessibility('Pomyślnie zeskanowano kod QR');
+    AccessibilityInfo.announceForAccessibility(t('qr.scanSuccess'));
 
     const raw = String(data).trim();
 
@@ -98,11 +100,11 @@ export default function QRScannerScreen({ navigation }) {
         });
       } else {
         Alert.alert(
-          'Nie rozpoznano zabytku',
-          `Zeskanowano: "${raw}"\n\nKod nie pasuje do żadnego obiektu w Kożuchowie.`,
+          t('common.error'),
+          `${t('qr.scanFailed')}\n("${raw}")`,
           [
             {
-              text: 'Skanuj ponownie',
+              text: t('common.close'),
               onPress: () => {
                 isScanningRef.current = false;
               },
@@ -139,7 +141,7 @@ export default function QRScannerScreen({ navigation }) {
           ]}
           allowFontScaling={true}
         >
-          Wymagany dostęp do kamery
+          {t('qr.title')}
         </Text>
         <Text
           style={[
@@ -148,8 +150,7 @@ export default function QRScannerScreen({ navigation }) {
           ]}
           allowFontScaling={true}
         >
-          Aby skanować tabliczki informacyjne z kodami QR na terenie Kożuchowa, aplikacja
-          potrzebuje zgody na aparat.
+          {t('qr.cameraPermission')}
         </Text>
         <TouchableOpacity
           style={[styles.permissionButton, { backgroundColor: colors.primary }]}
@@ -158,7 +159,7 @@ export default function QRScannerScreen({ navigation }) {
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Zezwól na dostęp do aparatu"
+          accessibilityLabel={t('qr.grantPermission')}
         >
           <Text
             style={[
@@ -167,7 +168,7 @@ export default function QRScannerScreen({ navigation }) {
             ]}
             allowFontScaling={true}
           >
-            Zezwól na aparat
+            {t('qr.grantPermission')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -176,7 +177,7 @@ export default function QRScannerScreen({ navigation }) {
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Wróć do katalogu zabytków"
+          accessibilityLabel={t('common.back')}
         >
           <Text
             style={[
@@ -185,7 +186,7 @@ export default function QRScannerScreen({ navigation }) {
             ]}
             allowFontScaling={true}
           >
-            Wróć do katalogu
+            {t('common.back')}
           </Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -214,7 +215,7 @@ export default function QRScannerScreen({ navigation }) {
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Zamknij skaner kodów QR"
+            accessibilityLabel={t('common.close')}
             accessibilityHint="Zamyka aparat i wraca do poprzedniego widoku"
           >
             <Ionicons name="close" size={26 * scale} color="#FFFFFF" />
@@ -229,7 +230,7 @@ export default function QRScannerScreen({ navigation }) {
             accessibilityRole="header"
             allowFontScaling={true}
           >
-            Skaner QR
+            {t('nav.qr')}
           </Text>
 
           <TouchableOpacity
@@ -298,7 +299,7 @@ export default function QRScannerScreen({ navigation }) {
             ]}
             allowFontScaling={true}
           >
-            Skieruj aparat na tabliczkę z kodem QR przy zabytku
+            {t('qr.subtitle')}
           </Text>
         </View>
 

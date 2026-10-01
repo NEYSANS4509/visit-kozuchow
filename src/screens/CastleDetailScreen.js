@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { placesService } from '../services/placesService';
 import { useAccessibility } from '../context/AccessibilityContext';
 import { useFavorites } from '../context/FavoritesContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useScaledStyles } from '../hooks/useScale';
 import { getImageSource } from '../utils/imageSource';
 import AudioGuideButton from '../components/AudioGuideButton';
@@ -44,27 +45,33 @@ export default function CastleDetailScreen({ route, navigation }) {
   const { scale, styles, windowWidth, windowHeight } = useScaledStyles(createStyles);
   const { colors, highContrast, colorBlindMode, getScaledFontSize } = useAccessibility();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { t, translatePlace } = useLanguage();
 
   const [place, setPlace] = useState(placeDataParam);
   const [loading, setLoading] = useState(!placeDataParam);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
+  // Dynamicznie przetłumaczony zabytek
+  const displayPlace = useMemo(() => {
+    return place ? translatePlace(place) : null;
+  }, [place, translatePlace]);
+
   const isFav = place ? isFavorite(place.id) : false;
 
   // Funkcja udostępnienia zabytku za pomocą natywnego modułu Share
   const handleSharePlace = async () => {
-    if (!place) return;
+    if (!displayPlace) return;
     try {
-      const mapsUrl = place.location?.latitude && place.location?.longitude
-        ? `https://maps.google.com/?q=${place.location.latitude},${place.location.longitude}`
+      const mapsUrl = displayPlace.location?.latitude && displayPlace.location?.longitude
+        ? `https://maps.google.com/?q=${displayPlace.location.latitude},${displayPlace.location.longitude}`
         : 'https://visit-kozuchow.pl';
 
-      const shareMessage = `🏰 Odkryj ${place.title} w Kożuchowie!\n\n${
-        place.shortDescription || ''
-      }\n\n📍 Adres: ${place.location?.address || 'Kożuchów'}\n🗺️ Zobacz na mapie: ${mapsUrl}\n\nAplikacja Visit Kożuchów`;
+      const shareMessage = `🏰 ${displayPlace.title}\n\n${
+        displayPlace.shortDescription || ''
+      }\n\n📍 ${displayPlace.location?.address || 'Kożuchów'}\n🗺️ ${mapsUrl}\n\n${t('common.appName')}`;
 
       await Share.share({
-        title: place.title,
+        title: displayPlace.title,
         message: shareMessage,
       });
     } catch (_e) {}
@@ -163,7 +170,7 @@ export default function CastleDetailScreen({ route, navigation }) {
           ]}
           allowFontScaling={true}
         >
-          Nie znaleziono obiektu
+          {t('explore.noResults')}
         </Text>
         <TouchableOpacity
           style={[styles.errorBackButton, { backgroundColor: colors.primary }]}
@@ -171,7 +178,7 @@ export default function CastleDetailScreen({ route, navigation }) {
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Wróć do poprzedniego ekranu"
+          accessibilityLabel={t('common.back')}
         >
           <Ionicons name="arrow-back" size={20 * scale} color={colors.white} />
           <Text
@@ -181,16 +188,16 @@ export default function CastleDetailScreen({ route, navigation }) {
             ]}
             allowFontScaling={true}
           >
-            Wróć
+            {t('common.back')}
           </Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-  const audioText = `${place.title}. ${
-    place.location?.address ? `Ulica ${place.location.address}. ` : ''
-  }${place.fullDescription || place.shortDescription || ''}`;
+  const audioText = `${displayPlace.title}. ${
+    displayPlace.location?.address ? `${displayPlace.location.address}. ` : ''
+  }${displayPlace.fullDescription || displayPlace.shortDescription || ''}`;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.white }]}>
@@ -219,18 +226,18 @@ export default function CastleDetailScreen({ route, navigation }) {
                   resizeMode="cover"
                   accessible={true}
                   accessibilityRole="image"
-                  accessibilityLabel={`Fotografia ${idx + 1} z ${galleryList.length}: ${place.title}`}
+                  accessibilityLabel={`Fotografia ${idx + 1} z ${galleryList.length}: ${displayPlace.title}`}
                 />
               ))}
             </ScrollView>
           ) : (
             <Image
-              source={getImageSource(place.imageUri)}
+              source={getImageSource(displayPlace.imageUri)}
               style={{ width: windowWidth, height: '100%' }}
               resizeMode="cover"
               accessible={true}
               accessibilityRole="image"
-              accessibilityLabel={`Fotografia: ${place.title}`}
+              accessibilityLabel={`Fotografia: ${displayPlace.title}`}
             />
           )}
 
@@ -247,7 +254,7 @@ export default function CastleDetailScreen({ route, navigation }) {
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel="Powrót"
+              accessibilityLabel={t('common.back')}
               accessibilityHint="Wraca do poprzedniego widoku"
             >
               <Ionicons name="arrow-back" size={22 * scale} color="#1C1C1E" />
@@ -263,14 +270,14 @@ export default function CastleDetailScreen({ route, navigation }) {
                   },
                   highContrast && styles.highContrastBorder,
                 ]}
-                onPress={() => toggleFavorite(place.id)}
+                onPress={() => toggleFavorite(displayPlace.id)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 accessible={true}
                 accessibilityRole="button"
                 accessibilityLabel={
                   isFav
-                    ? `Usuń ${place.title} z ulubionych`
-                    : `Zapisz ${place.title} w ulubionych`
+                    ? `Usuń ${displayPlace.title} z ulubionych`
+                    : `Zapisz ${displayPlace.title} w ulubionych`
                 }
                 accessibilityState={{ selected: isFav }}
               >
@@ -288,7 +295,7 @@ export default function CastleDetailScreen({ route, navigation }) {
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel={`Udostępnij zabytek ${place.title}`}
+                accessibilityLabel={`${t('detail.shareTitle')} ${displayPlace.title}`}
                 accessibilityHint="Otwiera menu udostępniania ze szczegółami i linkiem do mapy"
               >
                 <Ionicons name="share-social-outline" size={20 * scale} color="#1C1C1E" />
@@ -334,14 +341,14 @@ export default function CastleDetailScreen({ route, navigation }) {
             accessibilityRole="header"
             allowFontScaling={true}
           >
-            {place.title}
+            {displayPlace.title}
           </Text>
 
-          {place.location?.address ? (
+          {displayPlace.location?.address ? (
             <View
               style={styles.locationRow}
               accessible={true}
-              accessibilityLabel={`Lokalizacja: ulica ${place.location.address}`}
+              accessibilityLabel={`Lokalizacja: ${displayPlace.location.address}`}
             >
               <Ionicons
                 name="location-sharp"
@@ -355,24 +362,24 @@ export default function CastleDetailScreen({ route, navigation }) {
                 ]}
                 allowFontScaling={true}
               >
-                {place.location.address}
+                {displayPlace.location.address}
               </Text>
             </View>
           ) : null}
 
           {/* WCAG: Przycisk przejścia na mapę (Touch Target >= 48x48 dp) */}
-          {place.location?.latitude && place.location?.longitude ? (
+          {displayPlace.location?.latitude && displayPlace.location?.longitude ? (
             <CalmPressable
               style={[
                 styles.mapButton,
                 { backgroundColor: colors.primaryLight, borderColor: colors.primary },
                 highContrast && styles.highContrastMapButton,
               ]}
-              onPress={() => navigation.navigate('Map', { initialPlaceId: place.id })}
+              onPress={() => navigation.navigate('Map', { initialPlaceId: displayPlace.id })}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel={`Pokaż obiekt ${place.title} na mapie`}
+              accessibilityLabel={`${t('detail.showOnMap')}: ${displayPlace.title}`}
               accessibilityHint="Przełącza na widok interaktywnej mapy i centruje kamerę na tym zabytku"
             >
               <Ionicons name="map" size={18 * scale} color={colors.primary} />
@@ -383,7 +390,7 @@ export default function CastleDetailScreen({ route, navigation }) {
                 ]}
                 allowFontScaling={true}
               >
-                Pokaż na mapie
+                {t('detail.showOnMap')}
               </Text>
             </CalmPressable>
           ) : null}
@@ -398,7 +405,7 @@ export default function CastleDetailScreen({ route, navigation }) {
               accessibilityRole="header"
               allowFontScaling={true}
             >
-              Informacje
+              {t('detail.tabs.practical')}
             </Text>
 
             {/* WCAG: Audioprzewodnik (Text-to-Speech) o wymiarach min. 48x48 */}
@@ -412,11 +419,11 @@ export default function CastleDetailScreen({ route, navigation }) {
             ]}
             allowFontScaling={true}
           >
-            {place.fullDescription || place.shortDescription}
+            {displayPlace.fullDescription || displayPlace.shortDescription}
           </Text>
 
           {/* Sekcja ekspozycji i sal wewnętrznych */}
-          {Array.isArray(place.rooms) && place.rooms.length > 0 && (
+          {Array.isArray(displayPlace.rooms) && displayPlace.rooms.length > 0 && (
             <View style={styles.roomsSection}>
               <Text
                 style={[
@@ -426,7 +433,7 @@ export default function CastleDetailScreen({ route, navigation }) {
                 accessibilityRole="header"
                 allowFontScaling={true}
               >
-                Sale i ekspozycje
+                {t('detail.roomsTitle')}
               </Text>
 
               <ScrollView
@@ -436,14 +443,14 @@ export default function CastleDetailScreen({ route, navigation }) {
                 decelerationRate="fast"
                 contentContainerStyle={styles.roomsScrollTrack}
               >
-                {place.rooms.map((room, idx) => (
+                {displayPlace.rooms.map((room, idx) => (
                   <TouchableOpacity
                     key={room.id}
                     style={[
                       styles.roomCard,
                       {
                         width: cardWidth,
-                        marginRight: idx === place.rooms.length - 1 ? 0 : cardGap,
+                        marginRight: idx === displayPlace.rooms.length - 1 ? 0 : cardGap,
                         backgroundColor: colors.backgroundLight,
                       },
                       highContrast && styles.highContrastBorder,

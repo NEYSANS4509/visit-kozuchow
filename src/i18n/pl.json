@@ -1,0 +1,259 @@
+{
+  "common": {
+    "appName": "Visit Kożuchów",
+    "back": "Wróć",
+    "close": "Zamknij",
+    "open": "Otwórz",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "share": "Udostępnij",
+    "search": "Szukaj...",
+    "distance": "Dystans",
+    "error": "Wystąpił błąd",
+    "loading": "Wczytywanie..."
+  },
+  "nav": {
+    "welcome": "Powitanie",
+    "explore": "Katalog",
+    "map": "Mapa",
+    "qr": "Skaner QR",
+    "settings": "Ustawienia",
+    "detail": "Szczegóły"
+  },
+  "welcome": {
+    "badge": "OFICJALNY PRZEWODNIK MIEJSKI",
+    "title": "Odkryj tajemnice",
+    "titleCity": "Kożuchowa",
+    "subtitle": "Ponad 700 lat fascynującej historii, unikalne mury obronne, piastowski zamek i interaktywny asystent AI.",
+    "startBtn": "Rozpocznij zwiedzanie",
+    "features": {
+      "monuments": "12 unikalnych zabytków",
+      "audio": "Audioprzewodnik lektora",
+      "map": "Nawigacja satelitarna GPS",
+      "ai": "Przewodnik AI w czasie rzeczywistym"
+    }
+  },
+  "explore": {
+    "searchPlaceholder": "Szukaj zabytku, ulicy, atrakcji...",
+    "categories": {
+      "all": "Wszystkie",
+      "monuments": "Zabytki",
+      "nature": "Parki i Przyroda",
+      "memorials": "Miejsca pamięci",
+      "architecture": "Architektura"
+    },
+    "aiBannerTitle": "Wirtualny Przewodnik AI",
+    "aiBannerDesc": "Zadaj pytanie o historię, trasę lub najbliższą restaurację",
+    "aiBannerBtn": "Rozmawiaj",
+    "qrBannerTitle": "Skanuj kody QR w mieście",
+    "qrBannerDesc": "Zeskanuj tabliczkę na zabytku, aby natychmiast otworzyć audioprzewodnik",
+    "placesCount": "{{count}} zabytków w Kożuchowie",
+    "noResults": "Nie znaleziono zabytków spełniających kryteria.",
+    "clearSearch": "Wyczyść wyszukiwanie",
+    "favorites": "Ulubione",
+    "favoritesEmpty": "Brak zapisanych ulubionych",
+    "favoritesEmptySub": "Dotknij ikonę zakładki na dowolnym zabytku, aby dodać go do swojego planu.",
+    "mapFullScreen": "Pełny ekran",
+    "mapGpsTitle": "Kożuchów z góry (GPS)",
+    "mapTapToOpen": "Dotknij, aby przejść do pełnej mapy",
+    "minutes": "min",
+    "wheelchair": "Dostępne dla wózków"
+  },
+  "map": {
+    "filterAll": "Wszystkie",
+    "filterMonuments": "Zabytki",
+    "filterNature": "Parki",
+    "myLocation": "Moja lokalizacja",
+    "openRoutePlanner": "Zaplanuj trasę",
+    "activeRouteTitle": "Aktywny szlak",
+    "routeStop": "PUNKT {{current}} Z {{total}}",
+    "nextStop": "Następny",
+    "endRoute": "Zakończ",
+    "shareRoute": "Udostępnij trasę",
+    "distance": "Dystans",
+    "duration": "Czas",
+    "stops": "przystanków",
+    "planCustomRoute": "Zaplanuj własną trasę",
+    "quickRoutes": "Szybkie propozycje szlaków:",
+    "classicRoute": "Klasyczna pętla (1h)",
+    "fullRoute": "Wszystkie zabytki (2.5h)",
+    "customRouteTab": "Własna trasa",
+    "aiRoutesTab": "Szlaki AI",
+    "selectPlacesTitle": "Wybierz miejsca do odwiedzenia:",
+    "selectPlacesDesc": "Wybierz z listy obiekty, które chcesz odwiedzić w Kożuchowie. Na mapie zostanie wyznaczona przejrzysta ścieżka z ponumerowanymi punktami.",
+    "aiPresetsTitle": "Gotowe szlaki turystyczne przygotowane przez AI:",
+    "loadRoute": "Wczytaj tę trasę na mapę",
+    "routePts": "pkt",
+    "applyRoute": "Zatwierdź trasę",
+    "satelliteView": "Satelita",
+    "standardView": "Mapa"
+  },
+  "detail": {
+    "tabs": {
+      "description": "Opis",
+      "curiosities": "Ciekawostki",
+      "rooms": "Ekspozycje",
+      "practical": "Informacje"
+    },
+    "listenAudio": "Odsłuchaj audioprzewodnik",
+    "stopAudio": "Zatrzymaj nagranie",
+    "showOnMap": "Pokaż na mapie",
+    "openingHours": "Godziny otwarcia",
+    "address": "Adres",
+    "duration": "Czas zwiedzania",
+    "wheelchairAccessible": "Dostępne dla osób z niepełnosprawnościami",
+    "wheelchairNotAccessible": "Obiekt z barierami architektonicznymi (schody)",
+    "roomsTitle": "Sale i ekspozycje wewnętrzne",
+    "funFactTitle": "Czy wiesz, że...",
+    "shareTitle": "Podziel się zabytkiem"
+  },
+  "qr": {
+    "title": "Zeskanuj kod QR",
+    "subtitle": "Skieruj obiektyw aparatu na kod QR znajdujący się na tablicy informacyjnej zabytku",
+    "cameraPermission": "Aplikacja potrzebuje dostępu do aparatu, aby skanować kody QR.",
+    "grantPermission": "Udziel zgody",
+    "scanSuccess": "Pomyślnie rozpoznano zabytek!",
+    "scanFailed": "Kod QR nie pasuje do żadnego znanego zabytku Kożuchowa."
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "languageSection": "Język aplikacji",
+    "languageDesc": "Wybierz język interfejsu, audioprzewodnika oraz asystenta AI:",
+    "languages": {
+      "pl": "Polski (Polski)",
+      "en": "English (Angielski)",
+      "de": "Deutsch (Niemiecki)"
+    },
+    "accessibilitySection": "Dostępność (WCAG 2.1)",
+    "colorBlind": "Tryb dla daltonistów",
+    "colorBlindDesc": "Zastępuje pary czerwień-zieleń bezpieczną paletą i dubluje statusy tekstem.",
+    "highContrast": "Wysoki kontrast",
+    "highContrastDesc": "Kontrast tekstu od 7:1 (WCAG AAA) oraz wyraźne krawędzie.",
+    "largeText": "Większy tekst",
+    "largeTextDesc": "Zwiększa bazowy rozmiar czcionek o 25% bez zniekształcania układu.",
+    "reduceMotion": "Ograniczenie animacji",
+    "reduceMotionDesc": "Wyłącza mikro-efekty i przejścia. Zapewnia komfort osobom z chorobą lokomocyjną (kinetozą).",
+    "previewTitle": "Podgląd wybranych ułatwień dostępu:",
+    "previewSafe": "Status: Bezpieczny dla wzroku",
+    "previewAccessible": "Status: Dostępny",
+    "previewButton": "Przykładowy przycisk",
+    "resetBtn": "Przywróć domyślne ustawienia",
+    "footerBuild": "Visit Kożuchów • Wersja 1.0 (Kompilacja wielojęzyczna)",
+    "footerStandard": "Projekt realizowany w oparciu o wytyczne WCAG 2.1 na poziomie AA"
+  },
+  "chat": {
+    "title": "Przewodnik AI",
+    "subtitle": "Ekspert historii Kożuchowa",
+    "placeholder": "Napisz pytanie o Kożuchów...",
+    "send": "Wyślij",
+    "thinking": "Przewodnik przygotowuje odpowiedź...",
+    "quickPrompts": [
+      "Co warto zobaczyć w 1 godzinę?",
+      "Opowiedz o ukrytej wieży zamku",
+      "Gdzie zjeść obiad w pobliżu?",
+      "Dlaczego mury są wyjątkowe?"
+    ],
+    "openPlace": "Otwórz: {{title}}",
+    "showRoute": "Pokaż trasę na mapie ({{count}} pkt)",
+    "speakAnswer": "Odsłuchaj odpowiedź lektorem",
+    "fallbackError": "Przepraszam, nie udało się w tej chwili przygotować odpowiedzi. Zadaj pytanie ponownie."
+  },
+  "places": {
+    "place_01": {
+      "title": "Zamek Kożuchów",
+      "category": "Zabytki",
+      "shortDescription": "Zabytkowy zamek wybudowany w XIII–XIV w. przez Piastów głogowsko-żagańskich.",
+      "fullDescription": "Zamek w Kożuchowie – zabytkowa warownia wzniesiona w XIII–XIV w. w miejscu dawnego drewniano-ziemnego grodu przez Piastów głogowsko-żagańskich. Obiekt wybudowano na podwyższeniu i palach w podmokłym terenie, a wewnątrz jego skrzydeł ukryty jest XIV-wieczny cylindryczny stołp z lochami głodowymi. Rezydował tu książę Zygmunt Jagiellończyk (późniejszy król Zygmunt I Stary). Zamek przetrwał wielki pożar miasta w 1488 r. i do dziś stanowi serce militarnej historii regionu.",
+      "funFact": "Cylindryczna wieża obronna (stołp) o murach grubości 2,6 m jest całkowicie schowana wewnątrz nowożytnego skrzydła zamkowego – z zewnątrz jest niewidoczna!",
+      "openingHours": "Całodobowo / Wnętrza: 09:00 - 17:00"
+    },
+    "place_02": {
+      "title": "Kościół pw. Matki Boskiej Gromnicznej",
+      "category": "Architektura",
+      "shortDescription": "Monumentalna XIII-wieczna świątynia z kamienną głową i żaglowcami na suficie.",
+      "fullDescription": "Kościół pw. Matki Boskiej Gromnicznej (dawniej św. Jana Chrzciciela) to najstarsza budowla sakralna w Kożuchowie, wzniesiona w XIII wieku z romańskich ciosów kamiennych, a następnie rozbudowywana w stylach gotyckim i barokowym. W zewnętrzną ścianę prezbiterium wmurowana jest tajemnicza, wczesnośredniowieczna kamienna rzeźba – „Głowa w murze”. Na barokowym sklepieniu umieszczono niezwykłe sztukaterie przedstawiające morskie okręty żaglowe.",
+      "funFact": "Śródlądowy kościół na Środkowym Nadodrzu posiada na suficie barokową flotę morskich żaglowców – niezwykły motyw marynistyczny daleko od morza!",
+      "openingHours": "Dni powszednie: 08:00 – 18:00\nNiedziele: 07:30 – 19:00"
+    },
+    "place_03": {
+      "title": "Baszta Krośnieńska",
+      "category": "Zabytki",
+      "shortDescription": "Średniowieczna baszta bramna z XIV wieku o wysokości ponad 20 metrów.",
+      "fullDescription": "Baszta Krośnieńska to jedyna ocalała część z dawnych trzech potężnych zespołów bramnych Kożuchowa – rozebranych bram Żagańskiej oraz Głogowskiej. Wzniesiona w XIV wieku w ciągu kamiennych murów obronnych, osiąga ponad 20 metrów wysokości i zachowała oryginalne strzelnice. Przetrwała dzięki zaadaptowaniu jej w XIX wieku na mieszkania, a dziś mieści Izbę Regionalną.",
+      "funFact": "Baszta ocalała przed rozbiórką tylko dlatego, że w XIX wieku urządzono w niej mieszkania dla ubogich mieszczan!",
+      "openingHours": "Dostępna z zewnątrz całodobowo"
+    },
+    "place_04": {
+      "title": "Średniowieczne mury obronne i fosa",
+      "category": "Zabytki",
+      "shortDescription": "Jeden z najlepiej zachowanych pełnych pierścieni fortyfikacji miejskich w Europie.",
+      "fullDescription": "Średniowieczne mury obronne w Kożuchowie tworzą niemal nienaruszony pierścień fortyfikacji z przełomu XIII i XIV wieku o obwodzie ponad 1000 metrów i wysokości dochodzącej do 8 metrów. Wzniesione z kamienia polnego i cegły, posiadały pierwotnie kilkanaście baszt łupinowych. Otaczająca je sucha fosa o szerokości do 20 metrów została w XIX wieku przekształcona w zielony park spacerowy.",
+      "funFact": "Kożuchowski pierścień murów jest zachowany w ponad 90% – to jeden z najkompletniejszych zespołów obronnych w całej Europie Środkowej!",
+      "openingHours": "Całodobowo (park i promenada miejska)"
+    },
+    "place_05": {
+      "title": "Baszta – „Domek Kata”",
+      "category": "Zabytki",
+      "shortDescription": "Średniowieczna baszta czatownicza zaadaptowana na siedzibę miejskiego kata.",
+      "fullDescription": "Baszta zwana „Domkiem Kata” to dawna baszta czatownicza wkomponowana w linię południowo-zachodnich murów miejskich. Według podań miejskich i tradycji, z racji wykonywanego zawodu, który skazywał kata na infamię i izolację od społeczności, mieszkał on właśnie w tej odosobnionej baszcie przy obwarowaniach.",
+      "funFact": "Miejski kat w dawnych wiekach zajmował się nie tylko egzekucjami i torturami, lecz także oczyszczaniem miasta i leczeniem złamań!",
+      "openingHours": "Widok z zewnątrz całodobowo"
+    },
+    "place_06": {
+      "title": "Rynek i Ratusz w Kożuchowie",
+      "category": "Zabytki",
+      "shortDescription": "Zabytkowy rynek z gotycko-klasycystycznym ratuszem i labiryntem piwnic.",
+      "fullDescription": "Kożuchowski Rynek wytyczono w XIII wieku na planie regularnej szachownicy. W jego sercu wznosi się Ratusz o gotyckim rodowodzie, przebudowywany po kolejnych pożarach w stylach renesansowym i klasycystycznym. Pod rynkiem i kamienicami rozciągają się wielokondygnacyjne piwnice, w których w średniowieczu i nowożytności leżakowało słynne piwo kożuchowskie.",
+      "funFact": "Kożuchowskie piwo było w XV wieku tak cenione, że eksportowano je na dwory książęce do Głogowa i Wrocławia!",
+      "openingHours": "Rynek: całodobowo / Ratusz: w dni robocze 07:30 - 15:30"
+    },
+    "place_07": {
+      "title": "Lapidarium Rzeźby Nagrobnej",
+      "category": "Miejsca pamięci",
+      "shortDescription": "Dawny cmentarz ewangelicki z niemal 200 płytami nagrobnymi z XVI–XIX w.",
+      "fullDescription": "Lapidarium rzeźby nagrobnej przy ul. 1 Maja to unikatowy w skali Polski XVII-wieczny dawny cmentarz ewangelicki założony w 1634 roku. Ocalało tu niemal 200 renesansowych, barokowych i rokokowych płyt nagrobnych oraz epitafiów mieszczańskich i szlacheckich wmurowanych w mur cmentarny i kaplice. Nekropolia zachwyca bogatą symboliką wanitatywną (klepsydry, czaszki, Chronos).",
+      "funFact": "To jedno z najlepiej zachowanych i najbogatszych lapidariów protestanckich w Europie Środkowej!",
+      "openingHours": "Otwarte w ciągu dnia (08:00 - zmierzch)"
+    },
+    "place_08": {
+      "title": "Barokowy Portyk i Park Miejski",
+      "category": "Parki i Przyroda",
+      "shortDescription": "Kunsztowny portyk pałacowy z 1780 r. z rzeźbami herm i wiekowymi platanami.",
+      "fullDescription": "Barokowy portyk filarowy w Parku Miejskim to ocalała część rezydencji rodziny von Kalckreuth wzniesionej w 1780 roku (sam pałac spłonął w 1945 r.). Cztery filary portyku zwieńczone są kamiennymi rzeźbami herm. W otaczającym parku dworskim stoi pomnik wybitnego filozofa oświeceniowego Salomona Maimona oraz rosną pomnikowe platany i buki czerwonolistne.",
+      "funFact": "Pochowany w Kożuchowie Salomon Maimon był jednym z najwnikliwszych krytyków i komentatorów filozofii Immanuela Kanta!",
+      "openingHours": "Całodobowo (park miejski)"
+    },
+    "place_09": {
+      "title": "Zabytkowa fasada przy ul. Klasztornej",
+      "category": "Architektura",
+      "shortDescription": "Ocalała barokowa fasada kamienicy z płaskorzeźbami św. Piotra i św. Pawła.",
+      "fullDescription": "Zabytkowa fasada przy ul. Klasztornej to XVIII-wieczna ściana frontowa dawnej kamienicy mieszczańskiej, pozostawiona jako trwała ruina i pomnik architektury po rozbiórce zniszczonego budynku w 1959 roku. Zdobią ją bogate stiukowe płaskorzeźby przedstawiające św. Piotra z kluczami i św. Pawła z mieczem oraz muszlowe aureole.",
+      "funFact": "Fasada stoi samotnie niczym teatralna kurtyna – za nią znajduje się zielony skwer!",
+      "openingHours": "Dostępna z ulicy całodobowo"
+    },
+    "place_10": {
+      "title": "Kościół pw. Św. Ducha",
+      "category": "Zabytki",
+      "shortDescription": "Średniowieczna świątynia szpitalna z przełomu XIII i XIV wieku.",
+      "fullDescription": "Kościół pw. Św. Ducha przy ul. 1 Maja to XIV-wieczna gotycka świątynia szpitalna ufundowana dla przytułku poza murami miejskimi. To jedyny zachowany ślad średniowiecznego szpitalnictwa w regionie. Wnętrze prezbiterium zdobi późnogotyckie sklepienie sieciowe oraz ozdobny szczyt z blendami.",
+      "funFact": "Średniowieczne szpitale nie leczyły tak jak dziś, lecz służyły jako schroniska i przytułki dla pielgrzymów, chorych i ubogich!",
+      "openingHours": "Otwarte podczas nabożeństw oraz na życzenie"
+    },
+    "place_11": {
+      "title": "Wieża Kościoła Ewangelickiego",
+      "category": "Zabytki",
+      "shortDescription": "Monumentalna wieża z 1826 r., relikt jednego ze śląskich Kościołów Łaski.",
+      "fullDescription": "Wieża na Placu Ewangelickim to monumentalna pamiątka po dawnym ewangelickim Kościele Łaski z lat 1709–1710, wzniesionym na mocy cesarskiej ugody altransztadzkiej. Sam szachulcowy kościół rozebrano w latach 60./70. XX wieku, jednak majestatyczna klasycystyczna wieża z 1826 roku ocalała i dominuje w panoramie miasta.",
+      "funFact": "Kościół Łaski w Kożuchowie był jednym z zaledwie 6 takich protestanckich kościołów dozwolonych przez cesarza na całym Śląsku!",
+      "openingHours": "Widok z zewnątrz całodobowo"
+    },
+    "place_12": {
+      "title": "Wieża Ciśnień",
+      "category": "Architektura",
+      "shortDescription": "39-metrowy zabytek inżynierii komunalnej z 1908 r. w stylu neogotyckim.",
+      "fullDescription": "Kożuchowska wieża ciśnień z 1908 roku to unikatowy zabytek techniki wzniesiony na najwyższym wzgórzu miasta (112 m n.p.m.) o wysokości prawie 39 metrów. Wybudowana z czerwonej cegły klinkierowej w stylu neogotycko-secesyjnym, mieści stalowy zbiornik typu Intze o pojemności 150 m³. W portalu wejściowym zachowała się płaskorzeźba z herbem Kożuchowa.",
+      "funFact": "Dzięki usytuowaniu na wzgórzu ciśnienie w miejskich wodociągach wytwarzano czysto grawitacyjnie bez użycia pomp elektrycznych!",
+      "openingHours": "Widok z zewnątrz całodobowo"
+    }
+  }
+}

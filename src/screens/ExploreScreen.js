@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 import { PLACES } from '../data/places';
 import { useAccessibility } from '../context/AccessibilityContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useScaledStyles } from '../hooks/useScale';
 import { getImageSource } from '../utils/imageSource';
 import LegalModal from '../components/LegalModal';
@@ -138,6 +139,7 @@ export default function ExploreScreen({ navigation }) {
   const { scale, styles } = useScaledStyles(createStyles);
   const insets = useSafeAreaInsets();
   const { colors, highContrast, colorBlindMode, getScaledFontSize } = useAccessibility();
+  const { t, translatePlace } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [legalModalVisible, setLegalModalVisible] = useState(false);
@@ -146,9 +148,9 @@ export default function ExploreScreen({ navigation }) {
 
   const { isFavorite, toggleFavorite, favoriteCount } = useFavorites();
 
-  // Dynamiczne filtrowanie obiektów po nazwie, adresie, kategorii oraz filtrze ulubionych
+  // Dynamiczne filtrowanie przetłumaczonych obiektów po tytule, adresie i kategorii
   const filteredPlaces = useMemo(() => {
-    let list = PLACES;
+    let list = PLACES.map((p) => translatePlace(p));
     if (activeFilter === 'favorites') {
       list = list.filter((p) => isFavorite(p.id));
     }
@@ -160,7 +162,7 @@ export default function ExploreScreen({ navigation }) {
         p.category?.toLowerCase().includes(q) ||
         p.location?.address?.toLowerCase().includes(q)
     );
-  }, [searchQuery, activeFilter, isFavorite]);
+  }, [searchQuery, activeFilter, isFavorite, translatePlace]);
 
   // Stabilna referencja do nawigacji do karty zabytku
   const handleCardPress = useCallback(
@@ -221,7 +223,7 @@ export default function ExploreScreen({ navigation }) {
             accessible={true}
             accessibilityRole="header"
           >
-            Zwiedzaj
+            {t('nav.explore')}
           </Text>
 
           <View style={styles.headerActions}>
@@ -283,13 +285,13 @@ export default function ExploreScreen({ navigation }) {
                 styles.searchInput,
                 { color: colors.textDark, fontSize: getScaledFontSize(15 * scale) },
               ]}
-              placeholder="Szukaj zabytku, ulicy..."
+              placeholder={t('explore.searchPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
               allowFontScaling={true}
               accessible={true}
-              accessibilityLabel="Pole wyszukiwania zabytków i ulic"
+              accessibilityLabel={t('explore.searchPlaceholder')}
               accessibilityHint="Wpisz nazwę zabytku lub ulicy, aby przefiltrować listę"
             />
             {searchQuery.length > 0 && (
@@ -320,7 +322,7 @@ export default function ExploreScreen({ navigation }) {
             accessible={true}
             accessibilityRole="tab"
             accessibilityState={{ selected: activeFilter === 'all' }}
-            accessibilityLabel={`Wszystkie obiekty (${PLACES.length})`}
+            accessibilityLabel={`${t('explore.categories.all')} (${PLACES.length})`}
           >
             <Text
               style={[
@@ -332,7 +334,7 @@ export default function ExploreScreen({ navigation }) {
               ]}
               allowFontScaling={true}
             >
-              Wszystkie ({PLACES.length})
+              {t('explore.categories.all')} ({PLACES.length})
             </Text>
           </CalmPressable>
 
@@ -354,7 +356,7 @@ export default function ExploreScreen({ navigation }) {
             accessible={true}
             accessibilityRole="tab"
             accessibilityState={{ selected: activeFilter === 'favorites' }}
-            accessibilityLabel={`Ulubione obiekty (${favoriteCount})`}
+            accessibilityLabel={`${t('explore.favorites')} (${favoriteCount})`}
           >
             <Ionicons
               name={activeFilter === 'favorites' ? 'bookmark' : 'bookmark-outline'}
@@ -371,7 +373,7 @@ export default function ExploreScreen({ navigation }) {
               ]}
               allowFontScaling={true}
             >
-              Ulubione ({favoriteCount})
+              {t('explore.favorites')} ({favoriteCount})
             </Text>
           </CalmPressable>
         </View>
@@ -393,8 +395,8 @@ export default function ExploreScreen({ navigation }) {
               allowFontScaling={true}
             >
               {activeFilter === 'favorites'
-                ? 'Brak zapisanych ulubionych'
-                : 'Nie znaleziono pasujących miejsc'}
+                ? t('explore.favoritesEmpty')
+                : t('explore.noResults')}
             </Text>
             {activeFilter === 'favorites' && (
               <Text
@@ -404,7 +406,7 @@ export default function ExploreScreen({ navigation }) {
                 ]}
                 allowFontScaling={true}
               >
-                Dotknij ikonę zakładki na dowolnym zabytku, aby dodać go do swojego planu.
+                {t('explore.favoritesEmptySub')}
               </Text>
             )}
           </View>
@@ -436,7 +438,7 @@ export default function ExploreScreen({ navigation }) {
             accessible={true}
             accessibilityRole="header"
           >
-            Mapa
+            {t('nav.map')}
           </Text>
           <CalmPressable
             style={styles.moreButton}
@@ -444,7 +446,7 @@ export default function ExploreScreen({ navigation }) {
             onPress={() => navigation.navigate('Map')}
             accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Pełny ekran mapy"
+            accessibilityLabel={t('explore.mapFullScreen')}
             accessibilityHint="Otwiera pełnoekranową mapę z pinezkami GPS"
           >
             <Text
@@ -454,7 +456,7 @@ export default function ExploreScreen({ navigation }) {
               ]}
               allowFontScaling={true}
             >
-              Pełny ekran
+              {t('explore.mapFullScreen')}
             </Text>
           </CalmPressable>
         </View>
@@ -524,7 +526,7 @@ export default function ExploreScreen({ navigation }) {
                 ]}
                 allowFontScaling={true}
               >
-                Kożuchów z góry (GPS)
+                {t('explore.mapGpsTitle')}
               </Text>
               <Text
                 style={[
@@ -533,7 +535,7 @@ export default function ExploreScreen({ navigation }) {
                 ]}
                 allowFontScaling={true}
               >
-                Dotknij, aby przejść do pełnej mapy
+                {t('explore.mapTapToOpen')}
               </Text>
             </View>
             <View
@@ -569,7 +571,7 @@ export default function ExploreScreen({ navigation }) {
           hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}
           accessible={true}
           accessibilityRole="tab"
-          accessibilityLabel="Zakładka Odkryj, aktywna"
+          accessibilityLabel={`${t('nav.explore')}, aktywna`}
           accessibilityState={{ selected: true }}
         >
           <Ionicons name="home" size={24 * scale} color={colors.primary} />
@@ -580,7 +582,7 @@ export default function ExploreScreen({ navigation }) {
             ]}
             allowFontScaling={true}
           >
-            Odkryj
+            {t('nav.explore')}
           </Text>
         </TouchableOpacity>
 
@@ -591,7 +593,7 @@ export default function ExploreScreen({ navigation }) {
           hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}
           accessible={true}
           accessibilityRole="tab"
-          accessibilityLabel="Zakładka Mapa"
+          accessibilityLabel={`Zakładka ${t('nav.map')}`}
           accessibilityState={{ selected: false }}
         >
           <Ionicons name="map-outline" size={24 * scale} color={colors.textMuted} />
@@ -602,7 +604,7 @@ export default function ExploreScreen({ navigation }) {
             ]}
             allowFontScaling={true}
           >
-            Mapa
+            {t('nav.map')}
           </Text>
         </TouchableOpacity>
 
@@ -613,7 +615,7 @@ export default function ExploreScreen({ navigation }) {
           hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}
           accessible={true}
           accessibilityRole="tab"
-          accessibilityLabel="Zakładka Skaner kodów QR"
+          accessibilityLabel={`Zakładka ${t('nav.qr')}`}
           accessibilityState={{ selected: false }}
         >
           <Ionicons name="qr-code-outline" size={24 * scale} color={colors.textMuted} />
@@ -624,7 +626,7 @@ export default function ExploreScreen({ navigation }) {
             ]}
             allowFontScaling={true}
           >
-            Skaner
+            {t('nav.qr')}
           </Text>
         </TouchableOpacity>
 
@@ -636,7 +638,7 @@ export default function ExploreScreen({ navigation }) {
           hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Inteligentny Asystent turystyczny AI"
+          accessibilityLabel={t('chat.title')}
           accessibilityHint="Otwiera okno dialogowe z przewodnikiem AI"
         >
           <Ionicons
@@ -654,7 +656,7 @@ export default function ExploreScreen({ navigation }) {
             ]}
             allowFontScaling={true}
           >
-            Asystent AI
+            {t('chat.title')}
           </Text>
         </TouchableOpacity>
       </View>

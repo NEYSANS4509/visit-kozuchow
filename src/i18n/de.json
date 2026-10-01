@@ -1,0 +1,259 @@
+{
+  "common": {
+    "appName": "Visit Kożuchów",
+    "back": "Zurück",
+    "close": "Schließen",
+    "open": "Öffnen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "share": "Teilen",
+    "search": "Suchen...",
+    "distance": "Entfernung",
+    "error": "Ein Fehler ist aufgetreten",
+    "loading": "Wird geladen..."
+  },
+  "nav": {
+    "welcome": "Willkommen",
+    "explore": "Katalog",
+    "map": "Karte",
+    "qr": "QR-Scanner",
+    "settings": "Einstellungen",
+    "detail": "Details"
+  },
+  "welcome": {
+    "badge": "OFFIZIELLER STADTFÜHRER",
+    "title": "Entdecken Sie die Geheimnisse von",
+    "titleCity": "Kożuchów (Freystadt)",
+    "subtitle": "Über 700 Jahre faszinierende Geschichte, intakte Stadtmauern, Piastenschloss und interaktiver KI-Reisebegleiter.",
+    "startBtn": "Rundgang starten",
+    "features": {
+      "monuments": "12 einzigartige Baudenkmäler",
+      "audio": "Audioguide-Sprachausgabe",
+      "map": "Satellitengestützte GPS-Karte",
+      "ai": "Echtzeit-KI-Reisebegleiter"
+    }
+  },
+  "explore": {
+    "searchPlaceholder": "Denkmäler, Straßen, Sehenswürdigkeiten...",
+    "categories": {
+      "all": "Alle",
+      "monuments": "Baudenkmäler",
+      "nature": "Parks & Natur",
+      "memorials": "Gedenkstätten",
+      "architecture": "Architektur"
+    },
+    "aiBannerTitle": "Virtueller KI-Reiseleiter",
+    "aiBannerDesc": "Fragen Sie nach Stadtgeschichte, individuellen Routen oder Restaurants",
+    "aiBannerBtn": "Chat starten",
+    "qrBannerTitle": "QR-Codes vor Ort scannen",
+    "qrBannerDesc": "Scannen Sie die Infotafel am Denkmal, um den Audioguide direkt zu starten",
+    "placesCount": "{{count}} Sehenswürdigkeiten in Kożuchów",
+    "noResults": "Keine Sehenswürdigkeiten für diese Suchkriterien gefunden.",
+    "clearSearch": "Suche zurücksetzen",
+    "favorites": "Favoriten",
+    "favoritesEmpty": "Noch keine Favoriten gespeichert",
+    "favoritesEmptySub": "Tippen Sie auf das Lesezeichensymbol eines Denkmals, um es zu Ihrer Route hinzuzufügen.",
+    "mapFullScreen": "Vollbild",
+    "mapGpsTitle": "Kożuchów von oben (GPS)",
+    "mapTapToOpen": "Tippen, um die interaktive Karte zu öffnen",
+    "minutes": "Min.",
+    "wheelchair": "Barrierefrei"
+  },
+  "map": {
+    "filterAll": "Alle",
+    "filterMonuments": "Denkmäler",
+    "filterNature": "Parks",
+    "myLocation": "Mein Standort",
+    "openRoutePlanner": "Route planen",
+    "activeRouteTitle": "Aktiver Rundweg",
+    "routeStop": "STATION {{current}} VON {{total}}",
+    "nextStop": "Nächste Station",
+    "endRoute": "Beenden",
+    "shareRoute": "Route teilen",
+    "distance": "Strecke",
+    "duration": "Dauer",
+    "stops": "Stationen",
+    "planCustomRoute": "Eigene Route zusammenstellen",
+    "quickRoutes": "Vorgeschlagene Routen:",
+    "classicRoute": "Klassische Runde (1 Std.)",
+    "fullRoute": "Große Tour aller Denkmäler (2,5 Std.)",
+    "customRouteTab": "Eigene Route",
+    "aiRoutesTab": "KI-Routen",
+    "selectPlacesTitle": "Wählen Sie Orte zum Besuchen:",
+    "selectPlacesDesc": "Wählen Sie Sehenswürdigkeiten aus der Liste, die Sie in Kożuchów besuchen möchten. Auf der Karte wird eine Route mit nummerierten Stationen gezeichnet.",
+    "aiPresetsTitle": "Fertige Routen von der KI erstellt:",
+    "loadRoute": "Diese Route laden",
+    "routePts": "Pkt.",
+    "applyRoute": "Route übernehmen",
+    "satelliteView": "Satellit",
+    "standardView": "Karte"
+  },
+  "detail": {
+    "tabs": {
+      "description": "Überblick",
+      "curiosities": "Besonderheiten",
+      "rooms": "Ausstellungen",
+      "practical": "Infos"
+    },
+    "listenAudio": "Audioguide anhören",
+    "stopAudio": "Wiedergabe stoppen",
+    "showOnMap": "Auf der Karte zeigen",
+    "openingHours": "Öffnungszeiten",
+    "address": "Adresse",
+    "duration": "Besichtigungsdauer",
+    "wheelchairAccessible": "Für Rollstuhlfahrende zugänglich",
+    "wheelchairNotAccessible": "Bauliche Barrieren vorhanden (Stufen)",
+    "roomsTitle": "Räume & Ausstellungen",
+    "funFactTitle": "Wussten Sie schon?",
+    "shareTitle": "Sehenswürdigkeit teilen"
+  },
+  "qr": {
+    "title": "QR-Code scannen",
+    "subtitle": "Richten Sie Ihre Kamera auf das Schild an der Sehenswürdigkeit",
+    "cameraPermission": "Kamerazugriff ist erforderlich, um Denkmal-QR-Codes zu scannen.",
+    "grantPermission": "Berechtigung erteilen",
+    "scanSuccess": "Sehenswürdigkeit erfolgreich erkannt!",
+    "scanFailed": "Der QR-Code gehört zu keinem bekannten Denkmal in Kożuchów."
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "languageSection": "App-Sprache",
+    "languageDesc": "Wählen Sie die Sprache für Oberfläche, Audioguide und KI-Assistenten:",
+    "languages": {
+      "pl": "Polski (Polnisch)",
+      "en": "English (Englisch)",
+      "de": "Deutsch"
+    },
+    "accessibilitySection": "Barrierefreiheit (WCAG 2.1)",
+    "colorBlind": "Modus für Farbenblinde",
+    "colorBlindDesc": "Ersetzt Rot-Grün-Kontraste durch barrierefreie Paletten und Statusbeschriftungen.",
+    "highContrast": "Hoher Kontrast",
+    "highContrastDesc": "Textkontrast über 7:1 (WCAG AAA) und klare Rahmen.",
+    "largeText": "Größerer Text",
+    "largeTextDesc": "Vergrößert die Grundschriftart in der gesamten App um 25 %.",
+    "reduceMotion": "Reduzierte Bewegung",
+    "reduceMotionDesc": "Deaktiviert Animationen und Übergänge für maximalen Komfort bei Reisekrankheit.",
+    "previewTitle": "Vorschau der Barrierefreiheit:",
+    "previewSafe": "Status: Farboptimiert",
+    "previewAccessible": "Status: Barrierefrei",
+    "previewButton": "Beispiel-Schaltfläche",
+    "resetBtn": "Auf Standard zurücksetzen",
+    "footerBuild": "Visit Kożuchów • Version 1.0 (Mehrsprachige Version)",
+    "footerStandard": "Entwickelt nach den WCAG 2.1 Richtlinien auf Stufe AA"
+  },
+  "chat": {
+    "title": "KI-Reiseführer",
+    "subtitle": "Experte für die Geschichte von Freystadt/Kożuchów",
+    "placeholder": "Stellen Sie eine Frage zu Kożuchów...",
+    "send": "Senden",
+    "thinking": "Der Reiseführer formuliert die Antwort...",
+    "quickPrompts": [
+      "Was lohnt sich in 1 Stunde?",
+      "Erzähle vom verborgenen Schlossturm",
+      "Wo kann man hier gut essen?",
+      "Warum ist die Stadtmauer einmalig?"
+    ],
+    "openPlace": "Öffnen: {{title}}",
+    "showRoute": "Route auf Karte anzeigen ({{count}} Punkte)",
+    "speakAnswer": "Antwort vorlesen lassen",
+    "fallbackError": "Entschuldigung, derzeit konnte keine Antwort generiert werden. Bitte fragen Sie erneut."
+  },
+  "places": {
+    "place_01": {
+      "title": "Schloss Kożuchów (Schloss Freystadt)",
+      "category": "Baudenkmäler",
+      "shortDescription": "Mittelalterliche Wehranlage aus dem 13.–14. Jh., erbaut von den schlesischen Piasten.",
+      "fullDescription": "Das Schloss in Kożuchów ist eine mittelalterliche Festung, die im 13.–14. Jahrhundert an der Stelle einer früheren Holz-Erde-Burg von den Piastenherzögen von Glogau und Sagan errichtet wurde. Erbaut auf Pfählen im Sumpfgelände, verbirgt es in seinem Inneren einen zylindrischen Bergfried aus dem 14. Jahrhundert mit Hungerverlies, der von späteren Schlossflügeln komplett umbaut wurde. Hier residierte Prinz Sigismund Jagiello (der spätere König Sigismund I. der Alte).",
+      "funFact": "Der runde Wehrturm (Bergfried) mit 2,6 Meter dicken Mauern ist vollständig im Inneren des Gebäudes verborgen und von außen unsichtbar!",
+      "openingHours": "Gelände: 24/7 / Innenräume: 09:00 - 17:00"
+    },
+    "place_02": {
+      "title": "Kirche Mariä Lichtmess",
+      "category": "Architektur",
+      "shortDescription": "Monumentale Kirche aus dem 13. Jh. mit Steinkopf und Segelschiffen an der Decke.",
+      "fullDescription": "Die Pfarrkirche Mariä Lichtmess (ehemals St. Johannes der Täufer) ist das älteste Sakralbauwerk in Kożuchów, im 13. Jahrhundert aus romanischen Werksteinen erbaut und später im gotischen und barocken Stil erweitert. In die Choraußenwand ist eine geheimnisvolle Steinskulptur eingemauert – der „Kopf in der Mauer“. Die barocke Decke zeigt ein außergewöhnliches Stuckrelief mit Hochsee-Segelschiffen.",
+      "funFact": "Mitten im Binnenland Niederschlesiens ziert eine kunstvolle Flotte barocker Hochsee-Segelschiffe das Gewölbe der Pfarrkirche!",
+      "openingHours": "Werktags: 08:00 – 18:00\nSonntags: 07:30 – 19:00"
+    },
+    "place_03": {
+      "title": "Crossener Torturm (Baszta Krośnieńska)",
+      "category": "Baudenkmäler",
+      "shortDescription": "Mittelalterlicher Torturm aus dem 14. Jahrhundert mit über 20 Metern Höhe.",
+      "fullDescription": "Der Crossener Torturm ist der einzige erhaltene Rest der drei einst mächtigen Toranlagen von Kożuchów (Crossener, Saganer und Glogauer Tor). Errichtet im 14. Jahrhundert entlang der steinernen Wehrmauern, erreicht er über 20 Meter Höhe mit originalen Schießscharten. Vor dem Abriss im 19. Jahrhundert rettete ihn der Umbau zu Wohnungen.",
+      "funFact": "Der Turm entging dem Abriss im 19. Jahrhundert nur deshalb, weil er damals in Sozialwohnungen für arme Bürger umgewandelt wurde!",
+      "openingHours": "Außenansicht rund um die Uhr zugänglich"
+    },
+    "place_04": {
+      "title": "Mittelalterliche Stadtmauer und Stadtgraben",
+      "category": "Baudenkmäler",
+      "shortDescription": "Einer der am besten erhaltenen geschlossenen Stadtmauerringe in ganz Europa.",
+      "fullDescription": "Die mittelalterliche Stadtmauer von Kożuchów bildet einen nahezu unversehrten Befestigungsring aus der Wende des 13. und 14. Jahrhunderts mit einem Umfang von über 1.000 Metern und einer Höhe von bis zu 8 Metern. Der bis zu 20 Meter breite trockene Stadtgraben wurde im 19. Jahrhundert in eine grüne Stadtpromenade verwandelt.",
+      "funFact": "Über 90 Prozent der mittelalterlichen Wehrmauer sind bis heute intakt – eine der vollständigsten Anlagen in ganz Mitteleuropa!",
+      "openingHours": "Rund um die Uhr (Stadtpark und Mauerpromenade)"
+    },
+    "place_05": {
+      "title": "Henkerturm (Baszta – Domek Kata)",
+      "category": "Baudenkmäler",
+      "shortDescription": "Mittelalterlicher Wehrturm, der als Wohnsitz des Scharfrichters diente.",
+      "fullDescription": "Der Henkerturm ist ein ehemaliger Wachturm an der südwestlichen Stadtmauer. Da das Scharfrichteramt im Mittelalter als ehrlos galt und der Henker gesellschaftlich gemieden wurde, musste er außerhalb des Stadtkerns in diesem abgelegenen Mauerturm wohnen.",
+      "funFact": "Im Mittelalter vollstreckte der Henker nicht nur Urteile, sondern war auch für die Stadtreinigung und das Einrichten von Knochenbrüchen zuständig!",
+      "openingHours": "Außenansicht rund um die Uhr zugänglich"
+    },
+    "place_06": {
+      "title": "Marktplatz und Rathaus",
+      "category": "Baudenkmäler",
+      "shortDescription": "Historischer Marktplatz mit gotisch-klassizistischem Rathaus und Bierkellern.",
+      "fullDescription": "Der Marktplatz von Kożuchów wurde im 13. Jahrhundert nach einem regelmäßigen Schachbrettmuster angelegt. In seinem Zentrum steht das Rathaus mit gotischem Ursprung, das nach Stadtbränden im Renaissance- und klassizistischen Stil erneuert wurde. Unter dem Marktplatz erstrecken sich ausgedehnte Gewölbekeller, in denen das Freystädter Bier lagerte.",
+      "funFact": "Das Freystädter Bier war im 15. Jahrhundert so berühmt, dass es an die Fürstenhöfe in Glogau und Breslau exportiert wurde!",
+      "openingHours": "Marktplatz: 24/7 / Rathaus: Werktags 07:30 - 15:30"
+    },
+    "place_07": {
+      "title": "Lapidarium der Grabmalkunst",
+      "category": "Gedenkstätten",
+      "shortDescription": "Ehemaliger evangelischer Friedhof mit fast 200 Grabplatten aus dem 16.–19. Jh.",
+      "fullDescription": "Das Lapidarium der Grabmalkunst in der 1 Maja Straße ist ein in Polen einmaliger ehemaliger evangelischer Friedhof, der 1634 angelegt wurde. Fast 200 Grabplatten und Epitaphien aus Renaissance, Barock und Rokoko sind in die Friedhofsmauer und Kapellen eingelassen. Die Anlage besticht durch reiche Vanitas-Symbolik (Sanduhren, Totenköpfe, Chronos).",
+      "funFact": "Es gilt als eines der reichsten und besterhaltenen protestantischen Lapidarien in ganz Mitteleuropa!",
+      "openingHours": "Tagsüber geöffnet (08:00 Uhr bis Dämmerung)"
+    },
+    "place_08": {
+      "title": "Barocker Säulenportikus und Stadtpark",
+      "category": "Parks & Natur",
+      "shortDescription": "Schlossportikus von 1780 mit Skulpturenhermen und uralten Platanen.",
+      "fullDescription": "Der barocke Säulenportikus im Stadtpark ist der erhaltene Teil des Schlosses der Familie von Kalckreuth aus dem Jahr 1780 (das Schloss brannte 1945 ab). Vier Säulen tragen kunstvolle Hermenskulpturen. Im Park steht ein Denkmal für den Aufklärungsphilosophen Salomon Maimon sowie monumentale alte Platanen.",
+      "funFact": "Salomon Maimon, der in Kożuchów begraben liegt, wurde von Immanuel Kant als einer seiner schärfsten und tiefgründigsten Kritiker gewürdigt!",
+      "openingHours": "Rund um die Uhr (öffentlicher Park)"
+    },
+    "place_09": {
+      "title": "Historische Barockfassade (ul. Klasztorna)",
+      "category": "Architektur",
+      "shortDescription": "Erhaltene Bürgerhausfassade aus dem 18. Jh. mit Reliefs von Petrus und Paulus.",
+      "fullDescription": "Die historische Fassade in der Klasztorna-Straße ist die erhaltene Vorderwand eines barocken Bürgerhauses aus dem 18. Jahrhundert, die nach dem Abbruch des baufälligen Gebäudes 1959 als Baudenkmal gesichert wurde. Sie zeigt kunstvolle Stuckreliefs des heiligen Petrus mit Schlüsseln und des heiligen Paulus mit Schwert.",
+      "funFact": "Die Fassade steht frei wie eine Theaterkulisse – direkt dahinter befindet sich eine grüne Grünanlage!",
+      "openingHours": "Von der Straße aus rund um die Uhr sichtbar"
+    },
+    "place_10": {
+      "title": "Heilig-Geist-Kirche",
+      "category": "Baudenkmäler",
+      "shortDescription": "Mittelalterliche Hospitalkirche von der Wende des 13. und 14. Jahrhunderts.",
+      "fullDescription": "Die Heilig-Geist-Kirche ist eine gotische Hospitalkirche aus dem 14. Jahrhundert, die für ein Spital vor den Toren der Stadt gestiftet wurde. Sie ist das einzige erhaltene Zeugnis des mittelalterlichen Hospitalwesens in der Region und besitzt ein spätgotisches Netzgewölbe.",
+      "funFact": "Mittelalterliche Spitäler dienten nicht nur als Krankenhäuser, sondern vor allem als Herbergen und Asyle für Pilger und Bedürftige!",
+      "openingHours": "Zu Gottesdiensten und auf Anfrage geöffnet"
+    },
+    "place_11": {
+      "title": "Evangelischer Kirchturm",
+      "category": "Baudenkmäler",
+      "shortDescription": "Monumentaler Kirchturm von 1826, Relikt einer der schlesischen Gnadenkirchen.",
+      "fullDescription": "Der Turm auf dem Evangelischen Platz ist das Relikt einer der sechs schlesischen Gnadenkirchen, die 1709 nach der Altranstädter Konvention erbaut wurden. Während die Fachwerkkirche in den 1960er/70er Jahren abgetragen wurde, ragt der klassizistische Turm von 1826 weiterhin weithin sichtbar empor.",
+      "funFact": "Die Gnadenkirche in Freystadt war eine von nur sechs evangelischen Kirchen, die der Kaiser in ganz Schlesien genehmigte!",
+      "openingHours": "Außenansicht rund um die Uhr zugänglich"
+    },
+    "place_12": {
+      "title": "Historischer Wasserturm",
+      "category": "Architektur",
+      "shortDescription": "39 Meter hohes technisches Denkmal aus dem Jahr 1908 im neugotischen Stil.",
+      "fullDescription": "Der historische Wasserturm von 1908 steht auf dem höchsten Punkt der Stadt (112 m ü. M.) und ragt fast 39 Meter empor. Errichtet aus rotem Klinkermauerwerk im neugotisch-jugendstiligen Übergangsstil, beherbergt er einen stählernen Intze-Behälter mit 150 m³ Fassungsvermögen.",
+      "funFact": "Dank der Lage auf dem höchsten Hügel wurde der Wasserdruck im Leitungsnetz rein durch Schwerkraft ohne elektrische Pumpen erzeugt!",
+      "openingHours": "Außenansicht rund um die Uhr zugänglich"
+    }
+  }
+}

@@ -1,0 +1,259 @@
+{
+  "common": {
+    "appName": "Visit Kożuchów",
+    "back": "Back",
+    "close": "Close",
+    "open": "Open",
+    "cancel": "Cancel",
+    "save": "Save",
+    "share": "Share",
+    "search": "Search...",
+    "distance": "Distance",
+    "error": "An error occurred",
+    "loading": "Loading..."
+  },
+  "nav": {
+    "welcome": "Welcome",
+    "explore": "Explore",
+    "map": "Map",
+    "qr": "QR Scanner",
+    "settings": "Settings",
+    "detail": "Details"
+  },
+  "welcome": {
+    "badge": "OFFICIAL CITY GUIDE",
+    "title": "Discover the secrets of",
+    "titleCity": "Kożuchów",
+    "subtitle": "Over 700 years of captivating history, intact medieval fortifications, Piast castle, and an interactive real-time AI guide.",
+    "startBtn": "Start Exploring",
+    "features": {
+      "monuments": "12 unique historical sites",
+      "audio": "Narrated audio guide",
+      "map": "Satellite GPS navigation",
+      "ai": "Real-time AI tour guide"
+    }
+  },
+  "explore": {
+    "searchPlaceholder": "Search monuments, streets, sights...",
+    "categories": {
+      "all": "All",
+      "monuments": "Monuments",
+      "nature": "Parks & Nature",
+      "memorials": "Memorial Sites",
+      "architecture": "Architecture"
+    },
+    "aiBannerTitle": "Virtual AI Tour Guide",
+    "aiBannerDesc": "Ask questions about town history, custom routes, or dining",
+    "aiBannerBtn": "Chat Now",
+    "qrBannerTitle": "Scan QR codes in the town",
+    "qrBannerDesc": "Scan any monument plaque to instantly trigger the audio guide",
+    "placesCount": "{{count}} historic sites in Kożuchów",
+    "noResults": "No historical sites matching your query.",
+    "clearSearch": "Clear search",
+    "favorites": "Favorites",
+    "favoritesEmpty": "No favorites saved yet",
+    "favoritesEmptySub": "Tap the bookmark icon on any monument to add it to your itinerary.",
+    "mapFullScreen": "Full Screen",
+    "mapGpsTitle": "Kożuchów from above (GPS)",
+    "mapTapToOpen": "Tap to open full interactive map",
+    "minutes": "min",
+    "wheelchair": "Wheelchair accessible"
+  },
+  "map": {
+    "filterAll": "All",
+    "filterMonuments": "Monuments",
+    "filterNature": "Parks",
+    "myLocation": "My Location",
+    "openRoutePlanner": "Plan a Route",
+    "activeRouteTitle": "Active Walking Trail",
+    "routeStop": "STOP {{current}} OF {{total}}",
+    "nextStop": "Next Stop",
+    "endRoute": "End Route",
+    "shareRoute": "Share Route",
+    "distance": "Distance",
+    "duration": "Duration",
+    "stops": "stops",
+    "planCustomRoute": "Plan your custom route",
+    "quickRoutes": "Suggested walking routes:",
+    "classicRoute": "Classic highlights loop (1h)",
+    "fullRoute": "All monuments grand tour (2.5h)",
+    "customRouteTab": "Custom Route",
+    "aiRoutesTab": "AI Routes",
+    "selectPlacesTitle": "Select sights to visit:",
+    "selectPlacesDesc": "Select sights from the list to visit in Kożuchów. A clear walking trail with numbered stops will be plotted on the map.",
+    "aiPresetsTitle": "Pre-planned walking routes by AI:",
+    "loadRoute": "Load this route on map",
+    "routePts": "stops",
+    "applyRoute": "Confirm Route",
+    "satelliteView": "Satellite",
+    "standardView": "Map"
+  },
+  "detail": {
+    "tabs": {
+      "description": "Overview",
+      "curiosities": "Fun Facts",
+      "rooms": "Exhibitions",
+      "practical": "Info"
+    },
+    "listenAudio": "Listen to Audio Guide",
+    "stopAudio": "Stop Narration",
+    "showOnMap": "Show on Map",
+    "openingHours": "Opening Hours",
+    "address": "Address",
+    "duration": "Estimated Visit",
+    "wheelchairAccessible": "Accessible for wheelchair users",
+    "wheelchairNotAccessible": "Architectural barriers present (stairs)",
+    "roomsTitle": "Exhibitions & Rooms",
+    "funFactTitle": "Did you know?",
+    "shareTitle": "Share this monument"
+  },
+  "qr": {
+    "title": "Scan QR Code",
+    "subtitle": "Point your camera at the QR plaque located on the monument",
+    "cameraPermission": "Camera access is required to scan monument QR codes.",
+    "grantPermission": "Grant Permission",
+    "scanSuccess": "Monument identified successfully!",
+    "scanFailed": "QR code does not match any recognized Kożuchów monument."
+  },
+  "settings": {
+    "title": "Settings",
+    "languageSection": "App Language",
+    "languageDesc": "Choose interface, audio guide, and AI assistant language:",
+    "languages": {
+      "pl": "Polski (Polish)",
+      "en": "English",
+      "de": "Deutsch (German)"
+    },
+    "accessibilitySection": "Accessibility (WCAG 2.1)",
+    "colorBlind": "Color Blind Mode",
+    "colorBlindDesc": "Replaces problematic red-green hues with accessible palettes and status text.",
+    "highContrast": "High Contrast",
+    "highContrastDesc": "Contrast ratio above 7:1 (WCAG AAA) with distinct borders.",
+    "largeText": "Large Text",
+    "largeTextDesc": "Increases base font scale by 25% across the entire app.",
+    "reduceMotion": "Reduce Motion",
+    "reduceMotionDesc": "Disables animations and transitions. Enhances comfort for vestibular motion sensitivity.",
+    "previewTitle": "Accessibility Live Preview:",
+    "previewSafe": "Status: Color-safe",
+    "previewAccessible": "Status: Accessible",
+    "previewButton": "Sample Action Button",
+    "resetBtn": "Reset to Defaults",
+    "footerBuild": "Visit Kożuchów • Version 1.0 (Multilingual Build)",
+    "footerStandard": "Built in accordance with WCAG 2.1 Level AA accessibility standards"
+  },
+  "chat": {
+    "title": "AI Tour Guide",
+    "subtitle": "Kożuchów Heritage Expert",
+    "placeholder": "Ask anything about Kożuchów...",
+    "send": "Send",
+    "thinking": "The guide is composing an answer...",
+    "quickPrompts": [
+      "What should I see in 1 hour?",
+      "Tell me about the hidden castle tower",
+      "Where can I grab lunch nearby?",
+      "Why are the city walls unique?"
+    ],
+    "openPlace": "Open: {{title}}",
+    "showRoute": "Show route on map ({{count}} stops)",
+    "speakAnswer": "Listen to audio narration",
+    "fallbackError": "Sorry, I could not generate an answer right now. Please try asking again."
+  },
+  "places": {
+    "place_01": {
+      "title": "Kożuchów Castle",
+      "category": "Monuments",
+      "shortDescription": "13th-14th century fortress built by the Piast Dukes of Głogów and Żagań.",
+      "fullDescription": "Kożuchów Castle is a medieval fortress erected in the 13th-14th centuries on the site of an earlier timber-and-earth stronghold. Built on stilts in marshy terrain, it conceals a 14th-century cylindrical bergfried (keep) with starvation dungeons completely enclosed inside later wings. Prince Sigismund Jagiellon (later King Sigismund I the Old) resided here. The castle survived the great city fire of 1488 and stands today as the military heart of the region.",
+      "funFact": "The 14th-century cylindrical defense tower with 2.6-meter-thick stone walls is completely enclosed inside the castle building and cannot be seen from the outside!",
+      "openingHours": "Grounds: 24/7 / Interior: 09:00 - 17:00"
+    },
+    "place_02": {
+      "title": "Church of Our Lady of the Candlemas",
+      "category": "Architecture",
+      "shortDescription": "Monumental 13th-century church with a stone head and ships on the ceiling.",
+      "fullDescription": "The Church of Our Lady of Candlemas (formerly St. John the Baptist) is the oldest sacred building in Kożuchów, originally built in the 13th century from Romanesque cut stone blocks and later expanded in Gothic and Baroque styles. A mysterious early medieval sculpture known as the 'Head in the Wall' is embedded in the chancel wall. The Baroque vault features stucco nautical sailing ships—an extraordinary motif for an inland church.",
+      "funFact": "This inland church in Western Poland features an elaborate fleet of ocean-going sailing ships carved in relief on the ceiling!",
+      "openingHours": "Weekdays: 08:00 – 18:00\nSundays: 07:30 – 19:00"
+    },
+    "place_03": {
+      "title": "Krosno Gate Tower",
+      "category": "Monuments",
+      "shortDescription": "14th-century medieval gate tower rising over 20 meters high.",
+      "fullDescription": "The Krosno Gate Tower is the sole surviving part of the three fortified gate complexes that once guarded Kożuchów. Built in the 14th century along the stone defensive walls, it stands over 20 meters high with original keyhole and slit embrasures. It was spared from demolition in the 19th century because it was converted into apartments, and today it houses regional museum exhibits.",
+      "funFact": "The tower was spared demolition in the 19th century solely because it was converted into municipal apartments for impoverished townsfolk!",
+      "openingHours": "Exterior view available 24/7"
+    },
+    "place_04": {
+      "title": "Medieval Defensive Walls & Moat",
+      "category": "Monuments",
+      "shortDescription": "One of the most complete surviving medieval city wall circuits in Europe.",
+      "fullDescription": "The medieval town walls of Kożuchów form an almost complete ring of stone-and-brick fortifications from the turn of the 13th and 14th centuries, with a perimeter exceeding 1,000 meters and heights up to 8 meters. Originally reinforced with dozens of open-backed bastions, the dry moat up to 20 meters wide was transformed into a serene green promenade in the 19th century.",
+      "funFact": "Over 90% of the medieval defensive ring remains intact, making it one of the best-preserved medieval circuits in all of Central Europe!",
+      "openingHours": "24/7 (public city park and ramparts)"
+    },
+    "place_05": {
+      "title": "Bastion - \"Executioner's House\"",
+      "category": "Monuments",
+      "shortDescription": "Medieval watchtower bastion adapted as the town executioner's dwelling.",
+      "fullDescription": "This bastion, known as the Executioner's House, is a former medieval watchtower built into the southwestern ramparts. Due to the infamous and ostracized nature of his trade, the municipal executioner was forced to reside away from the community on the outer periphery of the walls.",
+      "funFact": "In medieval and early modern times, executioners also performed municipal cleansing and were licensed to set broken bones!",
+      "openingHours": "Exterior view available 24/7"
+    },
+    "place_06": {
+      "title": "Town Hall & Market Square",
+      "category": "Monuments",
+      "shortDescription": "Historic square with a Gothic-Neoclassical Town Hall and ancient cellars.",
+      "fullDescription": "Kożuchów's Market Square was laid out in the 13th century on a regular chessboard grid. At its center stands the Town Hall with Gothic origins, remodeled in Renaissance and Neoclassical styles. Deep multi-level cellars extend beneath the square, where Kożuchów's celebrated beer was once aged.",
+      "funFact": "In the 15th century, beer brewed in Kożuchów was so renowned that it was exported directly to the ducal courts in Głogów and Wrocław!",
+      "openingHours": "Square: 24/7 / Town Hall: Weekdays 07:30 - 15:30"
+    },
+    "place_07": {
+      "title": "Lapidarium of Sepulchral Art",
+      "category": "Memorial Sites",
+      "shortDescription": "Historic 17th-century cemetery with nearly 200 tombstones and epitaphs.",
+      "fullDescription": "The Lapidarium of Sepulchral Art on 1 Maja Street is a unique 17th-century Protestant burial ground founded in 1634. Nearly 200 Renaissance, Baroque, and Rococo gravestones and epitaphs are embedded in the cemetery wall and chapel structures, presenting rich vanitas symbolism (hourglasses, skulls, Chronos).",
+      "funFact": "It is widely recognized as one of the best-preserved and richest Protestant sepulchral lapidaria in Central Europe!",
+      "openingHours": "Open during daylight (08:00 - dusk)"
+    },
+    "place_08": {
+      "title": "Baroque Portico & City Park",
+      "category": "Parks & Nature",
+      "shortDescription": "1780 palace portico adorned with herm statues and monumental trees.",
+      "fullDescription": "The Baroque pillared portico in the City Park is the surviving remnant of the von Kalckreuth family residence erected in 1780 (the palace was destroyed in 1945). The four pillars are crowned by sculpted stone herms. The surrounding park contains a monument to Enlightenment philosopher Salomon Maimon and centuries-old plane trees.",
+      "funFact": "Salomon Maimon, buried in Kożuchów, was praised by Immanuel Kant as one of the sharpest critics and deepest thinkers of his philosophy!",
+      "openingHours": "24/7 (public city park)"
+    },
+    "place_09": {
+      "title": "Historic Facade on Klasztorna Street",
+      "category": "Architecture",
+      "shortDescription": "Surviving 18th-century facade adorned with bas-reliefs of St. Peter and St. Paul.",
+      "fullDescription": "The historic facade on Klasztorna Street is the preserved 18th-century front wall of a townhouse, retained as a monument after the demolished building was cleared in 1959. It features ornate stucco reliefs depicting St. Peter with keys and St. Paul with a sword.",
+      "funFact": "The facade stands completely freestanding like a theatrical stage set—a green park square lies directly behind it!",
+      "openingHours": "Viewable from the street 24/7"
+    },
+    "place_10": {
+      "title": "Church of the Holy Spirit",
+      "category": "Monuments",
+      "shortDescription": "Medieval hospital church from the turn of the 13th and 14th centuries.",
+      "fullDescription": "The Church of the Holy Spirit is a 14th-century Gothic hospital church founded to serve an almshouse outside the city walls. It represents the only preserved trace of medieval healthcare in the region, featuring late Gothic net vaulting and a gabled facade.",
+      "funFact": "In medieval times, hospitals were not medical clinics but hospices and shelters for the sick, poor, and arriving pilgrims!",
+      "openingHours": "Open during religious services and on request"
+    },
+    "place_11": {
+      "title": "Evangelical Church Tower",
+      "category": "Monuments",
+      "shortDescription": "Monumental tower from 1826, relic of a historic Church of Grace.",
+      "fullDescription": "The tower on Evangelical Square is a monumental remnant of one of Silesia's six historic Churches of Grace permitted under the Treaty of Altranstädt in 1709. While the timber-framed church was dismantled in the 1960s, the majestic 1826 neoclassical tower still commands the skyline.",
+      "funFact": "This Church of Grace was one of only six Protestant churches permitted by the Austrian Emperor across all of Silesia!",
+      "openingHours": "Exterior view available 24/7"
+    },
+    "place_12": {
+      "title": "Historic Water Tower",
+      "category": "Architecture",
+      "shortDescription": "39-meter municipal engineering monument from 1908 in Neo-Gothic style.",
+      "fullDescription": "Kożuchów's historic water tower from 1908 is a municipal engineering marvel built on the town's highest summit (112 m above sea level). Constructed from red clinker brick in Neo-Gothic and Art Nouveau style, it houses a steel Intze reservoir with a 150 m³ capacity.",
+      "funFact": "Because it was built on the town's highest hill, municipal water pressure was maintained entirely by natural gravity without electric pumps!",
+      "openingHours": "Exterior view available 24/7"
+    }
+  }
+}

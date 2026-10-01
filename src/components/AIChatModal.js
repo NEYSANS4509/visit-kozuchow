@@ -1,5 +1,5 @@
 // src/components/AIChatModal.js
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Modal,
   View,
@@ -21,15 +21,7 @@ import * as Location from 'expo-location';
 import { PLACES } from '../data/places';
 import { sendChatMessage } from '../services/aiService';
 import { useAccessibility } from '../context/AccessibilityContext';
-
-const SUGGESTIONS = [
-  'Trasa na 2 godziny',
-  'Trasa na 1 godzinę',
-  'Gdzie najbliżej zjem?',
-  'Tajemnica wieży zamku',
-  'Mury obronne i fosa',
-  'Lapidarium rzeźby nagrobnej',
-];
+import { useLanguage } from '../context/LanguageContext';
 
 /**
  * Modal inteligentnego przewodnika turystycznego AI.
@@ -44,14 +36,36 @@ const SUGGESTIONS = [
 export default function AIChatModal({ visible, onClose }) {
   const navigation = useNavigation();
   const { colors, highContrast, colorBlindMode, getScaledFontSize } = useAccessibility();
+  const { t, language, ttsLocale, translatePlace } = useLanguage();
+
+  const getWelcomeText = useCallback(() => {
+    if (language === 'en') {
+      return 'Hello! I am your AI tour guide for Kożuchów with live GPS navigation. Ask me about historical secrets, walking routes, or dining!';
+    }
+    if (language === 'de') {
+      return 'Hallo! Ich bin dein KI-Reiseleiter für Kożuchów mit GPS-Standort. Frag mich nach historischen Geheimnissen, Routen oder Restaurants!';
+    }
+    return 'Cześć! Jestem inteligentnym przewodnikiem po Kożuchowie z obsługą GPS. Zapytaj o ciekawostki historyczne lub gdzie masz najbliżej na obiad!';
+  }, [language]);
 
   const [messages, setMessages] = useState([
     {
       id: 'init_1',
       sender: 'ai',
-      text: 'Cześć! Jestem inteligentnym przewodnikiem po Kożuchowie z obsługą GPS. Zapytaj o ciekawostki historyczne lub gdzie masz najbliżej na obiad!',
+      text: getWelcomeText(),
     },
   ]);
+
+  // Aktualizacja wiadomości powitalnej przy zmianie języka
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].sender === 'ai') {
+        return [{ id: 'init_1', sender: 'ai', text: getWelcomeText() }];
+      }
+      return prev;
+    });
+  }, [language, getWelcomeText]);
+
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
@@ -139,7 +153,7 @@ export default function AIChatModal({ visible, onClose }) {
         targetRoute = {
           placeIds: matchedPlaces.map((p) => p.id),
           count: matchedPlaces.length,
-          places: matchedPlaces,
+          places: matchedPlaces.map(translatePlace),
         };
       }
     }
@@ -154,7 +168,7 @@ export default function AIChatModal({ visible, onClose }) {
           p.title?.toLowerCase().includes(rawTargetId.toLowerCase())
       );
       if (foundPlace && !targetPlaces.some((tp) => tp.id === foundPlace.id)) {
-        targetPlaces.push(foundPlace);
+        targetPlaces.push(translatePlace(foundPlace));
       }
     }
 
@@ -214,25 +228,25 @@ export default function AIChatModal({ visible, onClose }) {
     setInputText('');
     setLoading(true);
 
-    const aiAnswer = await sendChatMessage(text, messages, userLocation);
+    const aiAnswer = await sendChatMessage(text, messages, userLocation, language);
 
     const aiMsg = {
       id: `ai_${Date.now()}`,
       sender: 'ai',
       text:
         aiAnswer ||
-        'Przepraszam, nie udało się w tej chwili przygotować odpowiedzi. Zadaj pytanie ponownie lub wybierz jedną z podpowiedzi poniżej.',
+        t('chat.fallbackError'),
     };
 
     setMessages((prev) => [...prev, aiMsg]);
     setLoading(false);
   };
 
-  // Odsłuchanie odpowiedzi AI za pomocą syntezatora mowy
+  // Odsłuchanie odpowiedzi AI za pomocą syntezatora mowy w wybranym języku
   const playVoice = (text) => {
     Speech.stop();
     Speech.speak(text, {
-      language: 'pl-PL',
+      language: ttsLocale,
       pitch: 1.0,
       rate: 0.95,
     });
@@ -266,7 +280,7 @@ export default function AIChatModal({ visible, onClose }) {
                   numberOfLines={1}
                   allowFontScaling={true}
                 >
-                  Przewodnik AI Kożuchów
+                  {t('chat.title')}
                 </Text>
                 <View style={styles.gpsStatusRow}>
                   <Ionicons
@@ -283,7 +297,13 @@ export default function AIChatModal({ visible, onClose }) {
                     numberOfLines={1}
                     allowFontScaling={true}
                   >
-                    {userLocation ? 'GPS Aktywny (lokalizacja live)' : 'Baza wiedzy lokalnej'}
+                    {userLocation
+                      ? language === 'en'
+                        ? 'Live GPS Active'
+                        : language === 'de'
+                        ? 'Live-GPS Aktiv'
+                        : 'GPS Aktywny (lokalizacja live)'
+                      : t('chat.subtitle')}
                   </Text>
                 </View>
               </View>
@@ -296,7 +316,7 @@ export default function AIChatModal({ visible, onClose }) {
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel="Zamknij asystenta AI"
+              accessibilityLabel={t('common.close')}
             >
               <Ionicons name="close" size={26} color={colors.textDark} />
             </TouchableOpacity>
@@ -305,7 +325,38 @@ export default function AIChatModal({ visible, onClose }) {
           {/* Szybkie podpowiedzi pytań (chips min. 48 dp) */}
           <View style={[styles.chipsBar, { backgroundColor: colors.white }]}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsScroll}>
-              {SUGGESTIONS.map((item, idx) => (
+              {[
+                language === 'en'
+                  ? '1-hour walking route'
+                  : language === 'de'
+                  ? 'Rundgang 1 Stunde'
+                  : 'Trasa na 1 godzinę',
+                language === 'en'
+                  ? '2-hour highlights tour'
+                  : language === 'de'
+                  ? 'Rundgang 2 Stunden'
+                  : 'Trasa na 2 godziny',
+                language === 'en'
+                  ? 'Where can I eat nearby?'
+                  : language === 'de'
+                  ? 'Wo kann ich essen?'
+                  : 'Gdzie najbliżej zjem?',
+                language === 'en'
+                  ? 'Castle tower mystery'
+                  : language === 'de'
+                  ? 'Geheimnis des Schlossturms'
+                  : 'Tajemnica wieży zamku',
+                language === 'en'
+                  ? 'Defensive walls & moat'
+                  : language === 'de'
+                  ? 'Stadtmauer und Stadtgraben'
+                  : 'Mury obronne i fosa',
+                language === 'en'
+                  ? 'Sepulchral Lapidarium'
+                  : language === 'de'
+                  ? 'Lapidarium der Grabmalkunst'
+                  : 'Lapidarium rzeźby nagrobnej',
+              ].map((item, idx) => (
                 <TouchableOpacity
                   key={`sug_${idx}`}
                   style={[
@@ -316,7 +367,7 @@ export default function AIChatModal({ visible, onClose }) {
                   activeOpacity={0.7}
                   accessible={true}
                   accessibilityRole="button"
-                  accessibilityLabel={`Podpowiedź pytania: ${item}`}
+                  accessibilityLabel={`Podpowiedź: ${item}`}
                 >
                   <Text
                     style={[
@@ -453,7 +504,7 @@ export default function AIChatModal({ visible, onClose }) {
                             numberOfLines={1}
                             allowFontScaling={true}
                           >
-                            Otwórz: {place.title}
+                            {t('common.open')}: {place.title}
                           </Text>
                         </View>
                         <Ionicons name="chevron-forward" size={18} color={colors.primary} />
@@ -469,7 +520,7 @@ export default function AIChatModal({ visible, onClose }) {
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       accessible={true}
                       accessibilityRole="button"
-                      accessibilityLabel="Odsłuchaj tę odpowiedź przewodnika na głos"
+                      accessibilityLabel={t('chat.speakAnswer')}
                     >
                       <Ionicons name="volume-medium-outline" size={18} color={colors.primary} />
                       <Text
@@ -479,7 +530,7 @@ export default function AIChatModal({ visible, onClose }) {
                         ]}
                         allowFontScaling={true}
                       >
-                        Odsłuchaj
+                        {language === 'en' ? 'Listen' : language === 'de' ? 'Anhören' : 'Odsłuchaj'}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -492,7 +543,7 @@ export default function AIChatModal({ visible, onClose }) {
                 style={[styles.bubble, styles.aiBubble, styles.loadingRow]}
                 accessible={true}
                 accessibilityRole="progressbar"
-                accessibilityLabel="Przewodnik analizuje fakty i przygotowuje odpowiedź"
+                accessibilityLabel={t('chat.thinking')}
               >
                 <ActivityIndicator size="small" color={colors.primary} />
                 <Text
@@ -502,7 +553,7 @@ export default function AIChatModal({ visible, onClose }) {
                   ]}
                   allowFontScaling={true}
                 >
-                  Przewodnik analizuje fakty...
+                  {t('chat.thinking')}
                 </Text>
               </View>
             )}
@@ -515,7 +566,7 @@ export default function AIChatModal({ visible, onClose }) {
                 styles.input,
                 { color: colors.textDark, fontSize: getScaledFontSize(14) },
               ]}
-              placeholder="Zapytaj o zabytek, historię..."
+              placeholder={t('chat.placeholder')}
               placeholderTextColor={colors.textMuted}
               value={inputText}
               onChangeText={setInputText}
@@ -523,7 +574,7 @@ export default function AIChatModal({ visible, onClose }) {
               returnKeyType="send"
               allowFontScaling={true}
               accessible={true}
-              accessibilityLabel="Pole wprowadzania pytania do asystenta AI"
+              accessibilityLabel={t('chat.placeholder')}
             />
             {/* Przycisk wysłania min. 48x48 */}
             <TouchableOpacity
@@ -539,7 +590,7 @@ export default function AIChatModal({ visible, onClose }) {
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               accessible={true}
               accessibilityRole="button"
-              accessibilityLabel="Wyślij pytanie do przewodnika AI"
+              accessibilityLabel={t('chat.send')}
               accessibilityState={{ disabled: !inputText.trim() || loading }}
             >
               <Ionicons name="arrow-up" size={22} color="#FFFFFF" />

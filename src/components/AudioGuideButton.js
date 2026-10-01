@@ -5,6 +5,7 @@ import { StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
 import { useAccessibility } from '../context/AccessibilityContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useScale } from '../hooks/useScale';
 import CalmPressable from './CalmPressable';
 
@@ -31,27 +32,28 @@ const normalizeTextForSpeech = (rawText) => {
 };
 
 /**
- * Wyszukuje najlepszy dostępny polski głos w systemie (np. Enhanced, Premium lub Siri).
+ * Wyszukuje najlepszy dostępny głos w systemie dla danego języka (np. Enhanced, Premium lub Siri).
  *
+ * @param {string} langCode - Kod języka ('pl', 'en', 'de')
  * @returns {Promise<string|null>} Identyfikator głosu lub null
  */
-const getBestPolishVoice = async () => {
+const getBestVoiceForLanguage = async (langCode = 'pl') => {
   try {
     const availableVoices = await Speech.getAvailableVoicesAsync();
-    const polishVoices = availableVoices.filter((v) =>
-      v.language?.toLowerCase().startsWith('pl')
+    const matchingVoices = availableVoices.filter((v) =>
+      v.language?.toLowerCase().startsWith(langCode.toLowerCase())
     );
 
-    if (polishVoices.length === 0) return null;
+    if (matchingVoices.length === 0) return null;
 
     // Priorytet: głos o wysokiej jakości (Enhanced/Premium) lub głos Siri
-    const highQualityVoice = polishVoices.find((v) => {
+    const highQualityVoice = matchingVoices.find((v) => {
       const q = String(v.quality || '').toLowerCase();
       const n = String(v.name || '').toLowerCase();
       return q === 'enhanced' || q === 'premium' || n.includes('siri') || n.includes('enhanced');
     });
 
-    return highQualityVoice?.identifier || polishVoices[0].identifier;
+    return highQualityVoice?.identifier || matchingVoices[0].identifier;
   } catch {
     return null;
   }
@@ -67,6 +69,7 @@ const getBestPolishVoice = async () => {
 export default function AudioGuideButton({ text, style }) {
   const { scale } = useScale();
   const { colors, highContrast } = useAccessibility();
+  const { t, ttsLocale, language } = useLanguage();
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => {
@@ -85,15 +88,18 @@ export default function AudioGuideButton({ text, style }) {
 
     if (!text) return;
 
-    const cleanedText = normalizeTextForSpeech(text);
-    const bestVoiceId = await getBestPolishVoice();
+    const cleanedText =
+      language === 'pl'
+        ? normalizeTextForSpeech(text)
+        : text.replace(/\s+/g, ' ').trim();
+    const bestVoiceId = await getBestVoiceForLanguage(language);
 
     setIsSpeaking(true);
 
     Speech.speak(cleanedText, {
-      language: 'pl-PL',
+      language: ttsLocale || 'pl-PL',
       voice: bestVoiceId || undefined,
-      rate: 0.87, // Spokojne tempo
+      rate: 0.88, // Spokojne tempo
       pitch: 0.98,
       onDone: () => setIsSpeaking(false),
       onStopped: () => setIsSpeaking(false),
@@ -111,8 +117,8 @@ export default function AudioGuideButton({ text, style }) {
       accessibilityRole="button"
       accessibilityLabel={
         isSpeaking
-          ? 'Zatrzymaj odczytywanie audioprzewodnika'
-          : 'Odsłuchaj audioprzewodnik (czytanie na głos)'
+          ? t('detail.stopAudio')
+          : t('detail.listenAudio')
       }
       accessibilityHint="Uruchamia lub zatrzymuje syntezator mowy z opisem obiektu"
       accessibilityState={{ busy: isSpeaking }}
