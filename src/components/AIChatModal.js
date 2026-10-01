@@ -261,7 +261,7 @@ export default function AIChatModal({ visible, onClose }) {
           keyboardVerticalOffset={Platform.OS === 'ios' ? 75 : 25}
         >
           {/* Nagłówek okna czatu */}
-          <View style={[styles.header, highContrast && styles.highContrastHeader]}>
+          <View style={[styles.header, { borderBottomColor: colors.borderLight }, highContrast && styles.highContrastHeader]}>
             <View style={styles.headerTitleBox}>
               <View
                 style={[
@@ -323,7 +323,7 @@ export default function AIChatModal({ visible, onClose }) {
           </View>
 
           {/* Szybkie podpowiedzi pytań (chips min. 48 dp) */}
-          <View style={[styles.chipsBar, { backgroundColor: colors.white }]}>
+          <View style={[styles.chipsBar, { backgroundColor: colors.white, borderBottomColor: colors.borderLight }]}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsScroll}>
               {[
                 language === 'en'
@@ -561,7 +561,7 @@ export default function AIChatModal({ visible, onClose }) {
           </ScrollView>
 
           {/* Dolny pasek wprowadzania tekstu */}
-          <View style={[styles.inputArea, { backgroundColor: colors.white }, highContrast && styles.highContrastTopBorder]}>
+          <View style={[styles.inputArea, { backgroundColor: colors.white, borderTopColor: colors.borderLight }, highContrast && styles.highContrastTopBorder]}>
             <TextInput
               style={[
                 styles.input,
@@ -617,7 +617,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
   },
   highContrastHeader: {
     borderBottomWidth: 2,
@@ -660,17 +659,14 @@ const styles = StyleSheet.create({
   chipsBar: {
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
   },
   chipsScroll: {
     paddingHorizontal: 14,
     gap: 10,
   },
   chip: {
-    backgroundColor: '#F1F5F9',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
     borderRadius: 16,
+    borderWidth: 1,
     paddingHorizontal: 14,
     minHeight: 44,
     justifyContent: 'center',
@@ -701,7 +697,6 @@ const styles = StyleSheet.create({
   aiBubble: {
     alignSelf: 'flex-start',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
   },
   highContrastBubble: {
     borderWidth: 2,
@@ -769,7 +764,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: Platform.OS === 'ios' ? 24 : 16,
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
     gap: 10,
   },
   highContrastTopBorder: {
@@ -780,7 +774,6 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 48,
     maxHeight: 90,
-    backgroundColor: '#F1F5F9',
     borderRadius: 24,
     paddingHorizontal: 16,
     paddingVertical: 8,

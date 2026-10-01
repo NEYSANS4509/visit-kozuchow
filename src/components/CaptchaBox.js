@@ -59,6 +59,7 @@ export default function CaptchaBox({ onVerified }) {
     <View
       style={[
         styles.container,
+        { backgroundColor: colors.surfaceMuted, borderColor: colors.borderLight },
         highContrast && styles.highContrastContainer,
       ]}
       accessible={true}
@@ -78,7 +79,7 @@ export default function CaptchaBox({ onVerified }) {
       </View>
 
       <View style={styles.solveRow}>
-        <View style={styles.mathEquationBox}>
+        <View style={[styles.mathEquationBox, { backgroundColor: colors.backgroundLight }]}>
           <Text
             style={[
               styles.mathText,
@@ -93,7 +94,12 @@ export default function CaptchaBox({ onVerified }) {
         <TextInput
           style={[
             styles.input,
-            { color: colors.textDark, fontSize: getScaledFontSize(16) },
+            {
+              backgroundColor: colors.white,
+              borderColor: colors.borderLight,
+              color: colors.textDark,
+              fontSize: getScaledFontSize(16),
+            },
             isSuccess && styles.inputSuccess,
             error && styles.inputError,
             highContrast && styles.highContrastInput,
@@ -182,9 +188,7 @@ export default function CaptchaBox({ onVerified }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
     borderRadius: 14,
     padding: 14,
     marginVertical: 10,
@@ -208,7 +212,6 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   mathEquationBox: {
-    backgroundColor: '#E2E8F0',
     paddingHorizontal: 12,
     minHeight: 48,
     borderRadius: 10,
@@ -222,9 +225,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     minHeight: 48,
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#94A3B8',
     borderRadius: 10,
     paddingHorizontal: 10,
     textAlign: 'center',

@@ -23,6 +23,7 @@ import { useScaledStyles } from '../hooks/useScale';
 import { getImageSource } from '../utils/imageSource';
 import CalmPressable from '../components/CalmPressable';
 import FadeInView from '../components/FadeInView';
+import { DARK_MAP_STYLE } from '../theme/mapStyles';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -134,7 +135,7 @@ export default function MapScreen({ route, navigation }) {
   const initialRoutePlaces = route?.params?.routePlaces;
 
   const { scale, styles } = useScaledStyles(createStyles);
-  const { colors, highContrast, colorBlindMode, getScaledFontSize } = useAccessibility();
+  const { colors, highContrast, colorBlindMode, isDarkMode, getScaledFontSize } = useAccessibility();
   const { t, translatePlace } = useLanguage();
 
   const mapRef = useRef(null);
@@ -150,6 +151,13 @@ export default function MapScreen({ route, navigation }) {
   const [selectedPlace, setSelectedPlace] = useState(initialPlace);
   const [userLocation, setUserLocation] = useState(null);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
+
+  // Dynamiczny typ mapy: w trybie ciemnym domyślnie elegancka mapa wektorowa (standard), z opcją przełączenia na satelitę
+  const [mapType, setMapType] = useState(isDarkMode ? 'standard' : 'hybrid');
+
+  useEffect(() => {
+    setMapType(isDarkMode ? 'standard' : 'hybrid');
+  }, [isDarkMode]);
 
   // Stan tras turystycznych
   const [activeRouteIds, setActiveRouteIds] = useState([]);
@@ -477,7 +485,7 @@ export default function MapScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Interaktywna mapa satelitarna z nazwami ulic i obiektami (mapType="hybrid") */}
+      {/* Interaktywna mapa satelitarna lub wektorowa (dostosowuje się do trybu ciemnego) */}
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -488,7 +496,9 @@ export default function MapScreen({ route, navigation }) {
           latitudeDelta: KOZUCHOW_COORDINATES.latitudeDelta,
           longitudeDelta: KOZUCHOW_COORDINATES.longitudeDelta,
         }}
-        mapType="hybrid"
+        mapType={mapType}
+        userInterfaceStyle={isDarkMode ? 'dark' : 'light'}
+        customMapStyle={mapType === 'standard' && isDarkMode ? DARK_MAP_STYLE : []}
         showsUserLocation={hasLocationPermission}
         showsMyLocationButton={false}
         showsCompass={true}
@@ -499,7 +509,7 @@ export default function MapScreen({ route, navigation }) {
         {routeCoordinates.length > 1 && (
           <Polyline
             coordinates={routeCoordinates}
-            strokeColor={colorBlindMode ? '#38BDF8' : '#A78BFA'}
+            strokeColor={isDarkMode ? '#38BDF8' : (colorBlindMode ? '#0284C7' : '#8B5CF6')}
             strokeWidth={4 * scale}
             lineDashPattern={[0]}
           />
@@ -533,7 +543,10 @@ export default function MapScreen({ route, navigation }) {
               <View
                 style={[
                   styles.markerContainer,
-                  { backgroundColor: colors.primary },
+                  {
+                    backgroundColor: colors.primary,
+                    borderColor: isDarkMode ? colors.white : '#FFFFFF',
+                  },
                   isStopInRoute && {
                     backgroundColor: colorBlindMode ? '#0284C7' : '#8B5CF6',
                   },
@@ -572,7 +585,11 @@ export default function MapScreen({ route, navigation }) {
         {/* Wiersz 1: Przycisk powrotu oraz Przycisk "Utwórz trasę dla siebie" */}
         <View style={styles.topBarRow} pointerEvents="box-none">
           <CalmPressable
-            style={[styles.headerCircleButton, highContrast && styles.highContrastControlButton]}
+            style={[
+              styles.headerCircleButton,
+              { backgroundColor: colors.white, borderColor: colors.borderLight },
+              highContrast && styles.highContrastControlButton,
+            ]}
             onPress={() => navigation.goBack()}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             accessible={true}
@@ -586,8 +603,14 @@ export default function MapScreen({ route, navigation }) {
           <CalmPressable
             style={[
               styles.routeCreatorPill,
-              activeRoutePlaces.length > 0 && {
-                backgroundColor: colorBlindMode ? '#0284C7' : '#8B5CF6',
+              {
+                backgroundColor:
+                  activeRoutePlaces.length > 0
+                    ? colorBlindMode
+                      ? '#0284C7'
+                      : '#8B5CF6'
+                    : colors.white,
+                borderColor: colors.borderLight,
               },
               highContrast && styles.highContrastControlButton,
             ]}
@@ -626,7 +649,7 @@ export default function MapScreen({ route, navigation }) {
           <View
             style={[
               styles.activeRouteBanner,
-              { backgroundColor: colors.white },
+              { backgroundColor: colors.white, borderColor: colors.borderLight },
               highContrast && styles.highContrastCard,
             ]}
             accessible={true}
@@ -687,7 +710,7 @@ export default function MapScreen({ route, navigation }) {
               </CalmPressable>
 
               <CalmPressable
-                style={styles.activeRouteShareBtn}
+                style={[styles.activeRouteShareBtn, { backgroundColor: colors.surfaceMuted }]}
                 onPress={handleShareActiveRoute}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 accessible={true}
@@ -731,10 +754,36 @@ export default function MapScreen({ route, navigation }) {
         ]}
         pointerEvents="box-none"
       >
+        {/* Przełącznik warstwy mapy: Wektorowa (ciemna) vs Satelitarna */}
+        <CalmPressable
+          style={[
+            styles.floatingActionButton,
+            styles.layerActionButton,
+            { backgroundColor: colors.white, borderColor: colors.borderLight },
+            highContrast && styles.highContrastControlButton,
+          ]}
+          onPress={() => setMapType((prev) => (prev === 'hybrid' ? 'standard' : 'hybrid'))}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={
+            mapType === 'hybrid'
+              ? t('map.standardView')
+              : t('map.satelliteView')
+          }
+        >
+          <Ionicons
+            name={mapType === 'hybrid' ? 'map-outline' : 'earth-outline'}
+            size={22 * scale}
+            color={colors.primary}
+          />
+        </CalmPressable>
+
         <CalmPressable
           style={[
             styles.floatingActionButton,
             styles.recenterActionButton,
+            { backgroundColor: colors.white, borderColor: colors.borderLight },
             highContrast && styles.highContrastControlButton,
           ]}
           onPress={handleRecenter}
@@ -760,7 +809,7 @@ export default function MapScreen({ route, navigation }) {
             <CalmPressable
               style={[
                 styles.placeCard,
-                { backgroundColor: colors.white },
+                { backgroundColor: colors.white, borderColor: colors.borderLight },
                 highContrast && styles.highContrastCard,
               ]}
               targetScale={0.985}
@@ -841,7 +890,7 @@ export default function MapScreen({ route, navigation }) {
                 </Text>
               </View>
 
-              <View style={styles.cardArrowCircle}>
+              <View style={[styles.cardArrowCircle, { backgroundColor: colors.surfaceMuted }]}>
                 <Ionicons name="chevron-forward" size={18 * scale} color={colors.primary} />
               </View>
             </CalmPressable>
@@ -863,7 +912,7 @@ export default function MapScreen({ route, navigation }) {
           edges={['top', 'bottom']}
         >
           {/* Nagłówek modala */}
-          <View style={[styles.modalHeader, { backgroundColor: colors.white }]}>
+          <View style={[styles.modalHeader, { backgroundColor: colors.white, borderBottomColor: colors.borderLight }]}>
             <View style={styles.modalHeaderTitleBox}>
               <Ionicons name="trail-sign" size={22 * scale} color={colors.primary} />
               <Text
@@ -889,7 +938,7 @@ export default function MapScreen({ route, navigation }) {
           </View>
 
           {/* Przełącznik zakładek (Własna trasa / Szlaki AI) */}
-          <View style={[styles.modalTabsBar, { backgroundColor: colors.white }]}>
+          <View style={[styles.modalTabsBar, { backgroundColor: colors.white, borderBottomColor: colors.borderLight }]}>
             <TouchableOpacity
               style={[
                 styles.modalTab,
@@ -953,7 +1002,7 @@ export default function MapScreen({ route, navigation }) {
                 <View
                   style={[
                     styles.routeSummaryCard,
-                    { backgroundColor: colors.white },
+                    { backgroundColor: colors.white, borderColor: colors.borderLight },
                     highContrast && styles.highContrastCard,
                   ]}
                 >
@@ -997,7 +1046,7 @@ export default function MapScreen({ route, navigation }) {
                       key={p.id}
                       style={[
                         styles.placeSelectItem,
-                        { backgroundColor: colors.white },
+                        { backgroundColor: colors.white, borderColor: colors.borderLight },
                         isChecked && styles.placeSelectItemActive,
                         highContrast && styles.highContrastCard,
                       ]}
@@ -1064,7 +1113,7 @@ export default function MapScreen({ route, navigation }) {
                     key={preset.id}
                     style={[
                       styles.presetCard,
-                      { backgroundColor: colors.white },
+                      { backgroundColor: colors.white, borderColor: colors.borderLight },
                       highContrast && styles.highContrastCard,
                     ]}
                     targetScale={0.985}
@@ -1074,7 +1123,7 @@ export default function MapScreen({ route, navigation }) {
                     accessibilityLabel={`${preset.title}: ${preset.subtitle}. Czas przejścia ok. ${preset.durationMinutes} minut.`}
                   >
                     <View style={styles.presetTopRow}>
-                      <View style={styles.presetBadge}>
+                      <View style={[styles.presetBadge, { backgroundColor: isDarkMode ? 'rgba(139, 92, 246, 0.2)' : '#F3E8FF' }]}>
                         <Ionicons name="sparkles" size={13 * scale} color="#8B5CF6" />
                         <Text style={styles.presetBadgeText}>{t('chat.title')}</Text>
                       </View>
@@ -1102,7 +1151,7 @@ export default function MapScreen({ route, navigation }) {
                         const targetRaw = PLACES.find((item) => item.id === pId);
                         const targetP = targetRaw ? translatePlace(targetRaw) : null;
                         return (
-                          <Text key={pId} style={styles.presetStopItem} numberOfLines={1}>
+                          <Text key={pId} style={[styles.presetStopItem, { color: colors.textSecondary }]} numberOfLines={1}>
                             {idx + 1}. {targetP?.title || pId}
                           </Text>
                         );
@@ -1123,7 +1172,7 @@ export default function MapScreen({ route, navigation }) {
 
           {/* Dolny przycisk zatwierdzenia własnej trasy */}
           {selectedRouteTab === 'custom' && (
-            <View style={[styles.modalBottomBar, { backgroundColor: colors.white }]}>
+            <View style={[styles.modalBottomBar, { backgroundColor: colors.white, borderTopColor: colors.borderLight }]}>
               <CalmPressable
                 style={[
                   styles.applyRouteButton,
@@ -1191,7 +1240,7 @@ const createStyles = (scale) =>
       minWidth: 48 * scale,
       minHeight: 48 * scale,
       borderRadius: 24 * scale,
-      backgroundColor: '#FFFFFF',
+      borderWidth: 1,
       justifyContent: 'center',
       alignItems: 'center',
       shadowColor: '#000',
@@ -1208,7 +1257,7 @@ const createStyles = (scale) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8 * scale,
-      backgroundColor: '#FFFFFF',
+      borderWidth: 1,
       paddingHorizontal: 16 * scale,
       paddingVertical: 10 * scale,
       minHeight: 48 * scale,
@@ -1229,6 +1278,7 @@ const createStyles = (scale) =>
       alignItems: 'center',
       justifyContent: 'space-between',
       borderRadius: 16 * scale,
+      borderWidth: 1,
       paddingHorizontal: 14 * scale,
       paddingVertical: 10 * scale,
       shadowColor: '#000',
@@ -1285,7 +1335,6 @@ const createStyles = (scale) =>
       minWidth: 40 * scale,
       minHeight: 40 * scale,
       borderRadius: 20 * scale,
-      backgroundColor: '#F1F5F9',
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -1299,7 +1348,7 @@ const createStyles = (scale) =>
     },
     floatingActionButton: {
       borderRadius: 26 * scale,
-      backgroundColor: '#FFFFFF',
+      borderWidth: 1,
       justifyContent: 'center',
       alignItems: 'center',
       shadowColor: '#000',
@@ -1307,6 +1356,14 @@ const createStyles = (scale) =>
       shadowOpacity: 0.25,
       shadowRadius: 6,
       elevation: 6,
+    },
+    layerActionButton: {
+      width: 44 * scale,
+      height: 44 * scale,
+      minWidth: 44 * scale,
+      minHeight: 44 * scale,
+      marginBottom: 10 * scale,
+      borderRadius: 22 * scale,
     },
     recenterActionButton: {
       width: 52 * scale,
@@ -1323,7 +1380,6 @@ const createStyles = (scale) =>
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 2.5,
-      borderColor: '#FFFFFF',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.35,
@@ -1418,7 +1474,6 @@ const createStyles = (scale) =>
       width: 36 * scale,
       height: 36 * scale,
       borderRadius: 18 * scale,
-      backgroundColor: '#F1F5F9',
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -1433,8 +1488,7 @@ const createStyles = (scale) =>
       justifyContent: 'space-between',
       paddingHorizontal: 16 * scale,
       paddingVertical: 12 * scale,
-      borderBottomWidth: 1,
-      borderBottomColor: '#E2E8F0',
+      borderBottomWidth: StyleSheet.hairlineWidth,
     },
     modalHeaderTitleBox: {
       flexDirection: 'row',
@@ -1452,8 +1506,7 @@ const createStyles = (scale) =>
     },
     modalTabsBar: {
       flexDirection: 'row',
-      borderBottomWidth: 1,
-      borderBottomColor: '#E2E8F0',
+      borderBottomWidth: StyleSheet.hairlineWidth,
     },
     modalTab: {
       flex: 1,
@@ -1474,6 +1527,7 @@ const createStyles = (scale) =>
     },
     routeSummaryCard: {
       borderRadius: 16 * scale,
+      borderWidth: 1,
       padding: 14 * scale,
       marginBottom: 16 * scale,
     },
@@ -1504,6 +1558,7 @@ const createStyles = (scale) =>
       flexDirection: 'row',
       alignItems: 'center',
       borderRadius: 14 * scale,
+      borderWidth: 1,
       padding: 12 * scale,
       marginBottom: 8 * scale,
       minHeight: 64 * scale,
@@ -1541,8 +1596,7 @@ const createStyles = (scale) =>
     modalBottomBar: {
       paddingHorizontal: 16 * scale,
       paddingVertical: 12 * scale,
-      borderTopWidth: 1,
-      borderTopColor: '#E2E8F0',
+      borderTopWidth: StyleSheet.hairlineWidth,
     },
     applyRouteButton: {
       flexDirection: 'row',
@@ -1567,6 +1621,7 @@ const createStyles = (scale) =>
     // Karty szlaków AI
     presetCard: {
       borderRadius: 16 * scale,
+      borderWidth: 1,
       padding: 16 * scale,
       marginBottom: 14 * scale,
     },

@@ -44,7 +44,7 @@ export default function LegalModal({ visible, onClose, initialTab = 'privacy' })
     >
       <SafeAreaView style={[styles.container, { backgroundColor: colors.white }]}>
         {/* Nagłówek okna modalnego z przełącznikiem zakładek (min. 48x48 dp) */}
-        <View style={[styles.header, highContrast && styles.highContrastHeader]}>
+        <View style={[styles.header, { borderBottomColor: colors.borderLight }, highContrast && styles.highContrastHeader]}>
           <View style={[styles.tabButtons, { backgroundColor: colors.surfaceMuted }]} accessible={true} accessibilityRole="tablist">
             <TouchableOpacity
               style={[
@@ -317,7 +317,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
   },
   highContrastHeader: {
     borderBottomWidth: 2,
@@ -325,7 +324,6 @@ const styles = StyleSheet.create({
   },
   tabButtons: {
     flexDirection: 'row',
-    backgroundColor: '#F1F5F9',
     borderRadius: 14,
     padding: 3,
   },
@@ -339,7 +337,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabBtnActive: {
-    backgroundColor: '#FFFFFF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,

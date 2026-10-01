@@ -43,7 +43,7 @@ export default function CastleDetailScreen({ route, navigation }) {
   const placeDataParam = route?.params?.placeData || null;
 
   const { scale, styles, windowWidth, windowHeight } = useScaledStyles(createStyles);
-  const { colors, highContrast, colorBlindMode, getScaledFontSize } = useAccessibility();
+  const { colors, isDarkMode, highContrast, colorBlindMode, getScaledFontSize } = useAccessibility();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { t, translatePlace } = useLanguage();
 
@@ -249,7 +249,11 @@ export default function CastleDetailScreen({ route, navigation }) {
              ========================================================================= */}
           <SafeAreaView style={styles.backButtonSafeArea} edges={['top']}>
             <CalmPressable
-              style={[styles.backPill, highContrast && styles.highContrastBorder]}
+              style={[
+                styles.backPill,
+                { backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.94)' : 'rgba(255, 255, 255, 0.94)' },
+                highContrast && styles.highContrastBorder,
+              ]}
               onPress={() => navigation.goBack()}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               accessible={true}
@@ -257,7 +261,7 @@ export default function CastleDetailScreen({ route, navigation }) {
               accessibilityLabel={t('common.back')}
               accessibilityHint="Wraca do poprzedniego widoku"
             >
-              <Ionicons name="arrow-back" size={22 * scale} color="#1C1C1E" />
+              <Ionicons name="arrow-back" size={22 * scale} color={colors.textDark} />
             </CalmPressable>
 
             <View style={styles.heroRightActions}>
@@ -265,6 +269,7 @@ export default function CastleDetailScreen({ route, navigation }) {
               <CalmPressable
                 style={[
                   styles.backPill,
+                  { backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.94)' : 'rgba(255, 255, 255, 0.94)' },
                   isFav && {
                     backgroundColor: colorBlindMode ? '#0284C7' : '#D97706',
                   },
@@ -284,13 +289,17 @@ export default function CastleDetailScreen({ route, navigation }) {
                 <Ionicons
                   name={isFav ? 'bookmark' : 'bookmark-outline'}
                   size={20 * scale}
-                  color={isFav ? '#FFFFFF' : '#1C1C1E'}
+                  color={isFav ? '#FFFFFF' : colors.textDark}
                 />
               </CalmPressable>
 
               {/* Przycisk udostępnienia zabytku (Feature 4) */}
               <CalmPressable
-                style={[styles.backPill, highContrast && styles.highContrastBorder]}
+                style={[
+                  styles.backPill,
+                  { backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.94)' : 'rgba(255, 255, 255, 0.94)' },
+                  highContrast && styles.highContrastBorder,
+                ]}
                 onPress={handleSharePlace}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 accessible={true}
@@ -298,7 +307,7 @@ export default function CastleDetailScreen({ route, navigation }) {
                 accessibilityLabel={`${t('detail.shareTitle')} ${displayPlace.title}`}
                 accessibilityHint="Otwiera menu udostępniania ze szczegółami i linkiem do mapy"
               >
-                <Ionicons name="share-social-outline" size={20 * scale} color="#1C1C1E" />
+                <Ionicons name="share-social-outline" size={20 * scale} color={colors.textDark} />
               </CalmPressable>
             </View>
           </SafeAreaView>
@@ -452,6 +461,7 @@ export default function CastleDetailScreen({ route, navigation }) {
                         width: cardWidth,
                         marginRight: idx === displayPlace.rooms.length - 1 ? 0 : cardGap,
                         backgroundColor: colors.backgroundLight,
+                        borderColor: colors.borderLight,
                       },
                       highContrast && styles.highContrastBorder,
                     ]}
@@ -700,7 +710,6 @@ const createStyles = (scale) =>
       borderRadius: 18 * scale,
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: '#E2E8F0',
       minHeight: 48 * scale,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
@@ -711,7 +720,6 @@ const createStyles = (scale) =>
     roomImage: {
       width: '100%',
       height: 120 * scale,
-      backgroundColor: '#E2E8F0',
     },
     roomInfo: {
       padding: 12 * scale,

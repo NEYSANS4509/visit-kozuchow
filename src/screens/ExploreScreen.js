@@ -23,6 +23,7 @@ import LegalModal from '../components/LegalModal';
 import AIChatModal from '../components/AIChatModal';
 import CalmPressable from '../components/CalmPressable';
 import FadeInView from '../components/FadeInView';
+import { DARK_MAP_STYLE } from '../theme/mapStyles';
 import { useFavorites } from '../context/FavoritesContext';
 
 /**
@@ -55,7 +56,7 @@ const PlaceCardItem = memo(function PlaceCardItem({
     <CalmPressable
       style={[
         styles.placeCard,
-        { backgroundColor: colors.white },
+        { backgroundColor: colors.white, borderColor: colors.borderLight },
         highContrast && styles.highContrastCard,
       ]}
       onPress={() => onPress(item.id)}
@@ -138,7 +139,7 @@ const PlaceCardItem = memo(function PlaceCardItem({
 export default function ExploreScreen({ navigation }) {
   const { scale, styles } = useScaledStyles(createStyles);
   const insets = useSafeAreaInsets();
-  const { colors, highContrast, colorBlindMode, getScaledFontSize } = useAccessibility();
+  const { colors, highContrast, colorBlindMode, isDarkMode, getScaledFontSize } = useAccessibility();
   const { t, translatePlace } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -270,7 +271,7 @@ export default function ExploreScreen({ navigation }) {
           <View
             style={[
               styles.searchBar,
-              { backgroundColor: colors.white },
+              { backgroundColor: colors.white, borderColor: colors.borderLight },
               highContrast && styles.highContrastCard,
             ]}
           >
@@ -314,7 +315,10 @@ export default function ExploreScreen({ navigation }) {
           <CalmPressable
             style={[
               styles.filterPill,
-              { backgroundColor: activeFilter === 'all' ? colors.primary : colors.white },
+              {
+                backgroundColor: activeFilter === 'all' ? colors.primary : colors.white,
+                borderColor: activeFilter === 'all' ? 'transparent' : colors.borderLight,
+              },
               activeFilter === 'all' && styles.filterPillActive,
               highContrast && styles.highContrastFilterPill,
             ]}
@@ -348,6 +352,7 @@ export default function ExploreScreen({ navigation }) {
                       ? '#0284C7'
                       : '#D97706'
                     : colors.white,
+                borderColor: activeFilter === 'favorites' ? 'transparent' : colors.borderLight,
               },
               activeFilter === 'favorites' && styles.filterPillActive,
               highContrast && styles.highContrastFilterPill,
@@ -478,7 +483,9 @@ export default function ExploreScreen({ navigation }) {
               style={styles.embeddedMap}
               provider={PROVIDER_DEFAULT}
               initialRegion={KOZUCHOW_REGION}
-              mapType="hybrid"
+              mapType={isDarkMode ? 'standard' : 'hybrid'}
+              userInterfaceStyle={isDarkMode ? 'dark' : 'light'}
+              customMapStyle={isDarkMode ? DARK_MAP_STYLE : []}
               showsUserLocation={false}
               showsCompass={false}
               toolbarEnabled={false}
@@ -494,7 +501,7 @@ export default function ExploreScreen({ navigation }) {
                   <View
                     style={[
                       styles.miniMarker,
-                      { backgroundColor: colors.primary },
+                      { backgroundColor: colors.primary, borderColor: isDarkMode ? colors.white : '#FFFFFF' },
                       highContrast && styles.highContrastMarker,
                     ]}
                   >
@@ -517,7 +524,7 @@ export default function ExploreScreen({ navigation }) {
             </MapView>
           </View>
 
-          <View style={[styles.mapInfoBar, { backgroundColor: colors.white }]} pointerEvents="none">
+          <View style={[styles.mapInfoBar, { backgroundColor: colors.white, borderColor: colors.borderLight }]} pointerEvents="none">
             <View style={styles.mapInfoTextWrapper}>
               <Text
                 style={[
@@ -557,6 +564,7 @@ export default function ExploreScreen({ navigation }) {
           styles.bottomNav,
           {
             backgroundColor: colors.white,
+            borderTopColor: colors.borderLight,
             paddingBottom: Math.max(6 * scale, insets.bottom),
             height: 58 * scale + insets.bottom,
           },
@@ -722,7 +730,6 @@ const createStyles = (scale) =>
       borderRadius: 25 * scale,
       paddingHorizontal: 16 * scale,
       borderWidth: 1,
-      borderColor: '#E2E8F0',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.04,
@@ -780,7 +787,6 @@ const createStyles = (scale) =>
       borderRadius: 18 * scale,
       minHeight: 40 * scale,
       borderWidth: 1,
-      borderColor: '#E2E8F0',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05,
@@ -896,7 +902,6 @@ const createStyles = (scale) =>
       height: 26 * scale,
       borderRadius: 13 * scale,
       borderWidth: 2 * scale,
-      borderColor: '#FFFFFF',
       justifyContent: 'center',
       alignItems: 'center',
       shadowColor: '#000',
@@ -916,7 +921,7 @@ const createStyles = (scale) =>
       right: 12 * scale,
       padding: 12 * scale,
       borderRadius: 16 * scale,
-      backgroundColor: 'rgba(255, 255, 255, 0.96)',
+      borderWidth: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -956,7 +961,6 @@ const createStyles = (scale) =>
       left: 0,
       right: 0,
       borderTopWidth: 1,
-      borderTopColor: '#F0F0F0',
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-around',
