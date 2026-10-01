@@ -642,8 +642,9 @@ export default function MapScreen({ route, navigation }) {
                     { fontSize: getScaledFontSize(11 * scale) },
                   ]}
                   allowFontScaling={true}
+                  numberOfLines={1}
                 >
-                  PRZYSTANEK {currentRouteStopIndex + 1} Z {activeRoutePlaces.length}
+                  PUNKT {currentRouteStopIndex + 1} Z {activeRoutePlaces.length}
                 </Text>
               </View>
               <Text
