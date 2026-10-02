@@ -44,3 +44,7 @@ Thumbs.db
 # generated native folders
 /ios
 /android
+
+# Private local notes (author only, not for GitHub)
+Plany_Rozwoju_Roadmap.txt
+Co_Dodano.md
