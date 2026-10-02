@@ -19,7 +19,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Aplikacja Visit Kożuchów potrzebuje dostępu do aparatu, aby skanować kody QR umieszczone na zabytkach i tablicach informacyjnych.",
         "NSLocationWhenInUseUsageDescription": "Aplikacja Visit Kożuchów potrzebuje dostępu do Twojej lokalizacji, aby pokazywać odległość do zabytków i nawigować po trasach spacerowych.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Aplikacja Visit Kożuchów potrzebuje dostępu do Twojej lokalizacji, aby asystent AI i mapa mogły precyzyjnie nawigować turystę w terenie."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Aplikacja Visit Kożuchów potrzebuje dostępu do Twojej lokalizacji, aby asystent AI i mapa mogły precyzyjnie nawigować turystę w terenie.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
