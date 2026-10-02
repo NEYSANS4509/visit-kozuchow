@@ -6,7 +6,7 @@
 
 ## ⚡ Wymagania wstępne na telefonie iPhone (Ważne!)
 
-W systemach **iOS 16, iOS 17 oraz iOS 18** Apple wymaga jednorazowego włączenia trybu programisty:
+W systemach **iOS 16, iOS 17 i wyżej** Apple wymaga jednorazowego włączenia trybu programisty:
 
 1. Na telefonie iPhone wejdź w: **Ustawienia (Settings)** → **Prywatność i ochrona (Privacy & Security)**.
 2. Przewiń na sam dół do sekcji **Bezpieczeństwo** i dotknij **Tryb programisty (Developer Mode)**.
