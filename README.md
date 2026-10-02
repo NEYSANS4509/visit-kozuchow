@@ -22,11 +22,13 @@
 ## 📖 O projekcie
 
 **Visit Kożuchów** to multimedialny przewodnik turystyczny łączący historyczne dziedzictwo jednego z najstarszych i najlepiej ufortyfikowanych miast w Polsce z najnowocześniejszymi technologiami mobilnymi:
-- **Hybrydowa mapa satelitarna** z geolokalizacją GPS w czasie rzeczywistym.
-- **Wielopoziomowy asystent sztucznej inteligencji (LLM)** z odpornością na brak sieci (100% Offline Failsafe Engine).
+- **Hybrydowa mapa satelitarna** (Google Maps na Androidzie / Apple Maps na iOS) z geolokalizacją GPS w czasie rzeczywistym.
+- **Wielopoziomowy asystent sztucznej inteligencji (LLM)** z natywnym ekranem i bezpośrednią nawigacją.
+- **Wielojęzyczność (i18n):** pełna obsługa 3 języków (**polski, angielski, niemiecki**).
+- **Ciemny i jasny motyw (Dark & Light Mode)** z automatyczną adaptacją interfejsu i mapy.
 - **Kreator własnych tras turystycznych** i gotowe szlaki tematyczne.
 - **Skaner kodów QR** dla tablic informacyjnych w terenie i sal zamkowych.
-- **Audioprzewodnik lektorski (TTS)** w języku polskim.
+- **Wielojęzyczny audioprzewodnik lektorski (TTS)** w językach PL, EN i DE.
 - **Kompleksowe wdrożenie międzynarodowego standardu dostępności WCAG 2.1 (AA)**.
 
 ---
@@ -36,11 +38,13 @@
 | Funkcja | Opis |
 | :--- | :--- |
 | 🏰 **Baza 12 zabytków Kożuchowa** | Szczegółowe opisy historyczne, architektura, godziny otwarcia, dostępność dla wózków, lokalne galerie zdjęć w wysokiej rozdzielczości. |
-| 🤖 **Asystent AI (Groq + Offline)** | Konwersacyjny przewodnik odpowiadający na pytania o historię, ciekawostki, gastronomie i odległości. |
-| 🛰️ **Mapa satelitarna wysokiej rozdzielczości** | Pełnoekranowy widok hybrydowy (satelita + ulice) z pinezkami GPS, obliczaniem odległości (wzór Haversine) i centrowaniem kamery. |
-| 📍 **Kreator tras i szlaki AI** | Możliwość ułożenia własnej trasy spacerowej z ponumerowanymi punktami, linią ścieżki (Polyline) oraz 4 gotowe trasy AI (1h do 2.5h). |
+| 🌍 **Trzy języki (i18n: PL / EN / DE)** | Pełne tłumaczenie interfejsu, opisów obiektów, sal zamkowych, audioprzewodnika TTS oraz konwersacji z asystentem AI. |
+| 🤖 **Asystent AI (Groq + Offline)** | Konwersacyjny przewodnik odpowiadający w 3 językach z bezpośrednim przechodzeniem do mapy i szczegółów obiektów. |
+| 🌙 **Ciemny i Jasny Motyw** | Elegancki, czytelny Dark Mode w całej aplikacji bez uciążliwych białych ramek. |
+| 🛰️ **Mapa satelitarna wysokiej rozdzielczości** | Pełnoekranowy widok hybrydowy (satelita + ulice) z pinezkami GPS, kluczem Google Maps API na Androidzie, obliczaniem dystansu i centrowaniem. |
+| 📍 **Kreator tras i szlaki AI** | Możliwość ułożenia własnej trasy spacerowej z ponumerowanymi punktami ("Punkt 10 z 12"), linią ścieżki (Polyline) oraz gotowe trasy AI. |
 | 📷 **Skaner kodów QR** | Błyskawiczny skaner aparatem kodów obiektów (`KZ-01-PLACE`) oraz ekspozycji muzealnych w Zamku (`KZ-01-ROOM`). |
-| 🔊 **Wbudowany audioprzewodnik (TTS)** | Natywna synteza mowy w języku polskim z odtwarzaniem, pauzowaniem, wznawianiem i zatrzymywaniem. |
+| 🔊 **Wielojęzyczny audioprzewodnik (TTS)** | Natywna synteza mowy w językach polskim, angielskim i niemieckim (`pl-PL`, `en-US`, `de-DE`). |
 | 🔍 **Wyszukiwarka i filtry** | Dynamiczne wyszukiwanie z podświetlaniem wyników, podział na kategorie (*Zabytki, Architektura, Parki i Przyroda, Miejsca pamięci*). |
 | ♿ **Dostępność WCAG 2.1 AA** | Tryb dla daltonistów, wysoki kontrast (7:1), powiększony tekst, strefy dotyku $\ge 48\times 48\text{ dp}$, wsparcie TalkBack / VoiceOver. |
 

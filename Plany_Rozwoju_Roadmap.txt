@@ -6,49 +6,17 @@
 DOKUMENTACJA PLANOWANYCH MODUŁÓW I USPRAWNIEŃ DLA KOMISJI OCENIAJĄCEJ / JURY
 
 SPIS TREŚCI:
-1. WIELOJĘZYCZNOŚĆ (I18N): JĘZYK POLSKI, ANGIELSKI I NIEMIECKI [ZREALIZOWANE / STATUS: GOTOWE]
-2. INTERAKTYWNY PASZPORT TURYSTYCZNY (ODKRYTO X Z 12 MIEJSC)
-3. SYSTEM GRYWALIZACJI I ZBIERANIA OSIĄGNIĘĆ (BADGES & ACHIEVEMENTS)
-4. KOŻUCHÓW: KIEDYŚ I DZIŚ (ARCHIWALNE PORÓWNANIA PRZESTRZENNE)
-5. AUTOPRZEWODNIK: INTELIGENTNY GEOFENCING ORAZ BEACONY BLUETOOTH (BLE)
-6. ROZSZERZENIE STANDARDU DOSTĘPNOŚCI CYFROWEJ (WCAG 2.1 / 2.2)
-7. EDUKACYJNE MINI-QUIZY I QUESTING TERENOWY
-8. PRZYGOTOWANIE I PUBLIKACJA NA SYSTEMY ANDROID ORAZ IOS [ZREALIZOWANE / STATUS: GOTOWE DO BUDOWANIA]
-9. PANEL ADMINISTRACYJNY (CMS WEB DASHBOARD) DLA URZĘDU MIEJSKIEGO
-10. HARMONOGRAM WDROŻENIA (FAZY IMPLEMENTACJI I HISTORIA AKTUALIZACJI)
+1. INTERAKTYWNY PASZPORT TURYSTYCZNY (ODKRYTO X Z 12 MIEJSC)
+2. SYSTEM GRYWALIZACJI I ZBIERANIA OSIĄGNIĘĆ (BADGES & ACHIEVEMENTS)
+3. KOŻUCHÓW: KIEDYŚ I DZIŚ (ARCHIWALNE PORÓWNANIA PRZESTRZENNE)
+4. AUTOPRZEWODNIK: INTELIGENTNY GEOFENCING ORAZ BEACONY BLUETOOTH (BLE)
+5. ROZSZERZENIE STANDARDU DOSTĘPNOŚCI CYFROWEJ (WCAG 2.1 / 2.2)
+6. EDUKACYJNE MINI-QUIZY I QUESTING TERENOWY
+7. PANEL ADMINISTRACYJNY (CMS WEB DASHBOARD) DLA URZĘDU MIEJSKIEGO
+8. HARMONOGRAM WDROŻENIA (FAZY IMPLEMENTACJI)
 
 ================================================================================
-1. WIELOJĘZYCZNOŚĆ (I18N): JĘZYK POLSKI, ANGIELSKI I NIEMIECKI [STATUS: ZREALIZOWANE W WERSJI 1.1]
-================================================================================
-
-Status modułu:
-- [x] UKOŃCZONE I WDROŻONE W PRODUKCYJNYM KODZIE APLIKACJI.
-
-Opis wdrożonej funkcjonalności:
-- Pełna internacjonalizacja interfejsu, treści zabytków oraz asystenta AI na 3 języki:
-  1. Język polski (Polski - PL) — natywny język mieszkańców i turystów krajowych.
-  2. Język angielski (English - EN) — uniwersalny język dla turystów zagranicznych z całego świata.
-  3. Język niemiecki (Deutsch - DE) — kluczowy ze względu na bliskość granicy polsko-niemieckiej
-     oraz historyczne zainteresowanie mieszkańców Niemiec dziedzictwem dawnego Śląska (Freystadt).
-
-Zastosowane rozwiązanie technologiczne:
-- Trzy autonomiczne pliki tłumaczeniowe JSON: `src/i18n/pl.json`, `src/i18n/en.json`, `src/i18n/de.json`.
-- Centralny kontekst `LanguageContext.js` zarządzający stanem języka z trwałością w `AsyncStorage`.
-- Dynamiczne tłumaczenie w locie:
-  * Cały interfejs użytkownika (nawigacja, nagłówki, przyciski, modale, filtry).
-  * Dynamiczna funkcja `translatePlace(place)` tłumacząca tytuły, opisy, ciekawostki,
-    legendy, adresy i opisy sal zamkowych.
-  * Wielojęzyczny Audioprzewodnik (Text-to-Speech) dopasowujący automatycznie natywny locale:
-    - Polski: `pl-PL`
-    - Angielski: `en-US`
-    - Niemiecki: `de-DE`
-  * Asystent AI (Groq / Offline fallback) generujący wielojęzyczne odpowiedzi,
-    dynamiczne powitanie i podpowiedzi pytań w wybranym języku.
-- Ergonomiczny selektor języka z flagami w odświeżonym ekranie `SettingsScreen`.
-
-
-================================================================================
-2. INTERAKTYWNY PASZPORT TURYSTYCZNY (ODKRYTO X Z 12 MIEJSC)
+1. INTERAKTYWNY PASZPORT TURYSTYCZNY (ODKRYTO X Z 12 MIEJSC)
 ================================================================================
 
 Opis funkcjonalności:
@@ -69,7 +37,7 @@ Wartość dodana:
 
 
 ================================================================================
-3. SYSTEM GRYWALIZACJI I ZBIERANIA OSIĄGNIĘĆ (BADGES & ACHIEVEMENTS)
+2. SYSTEM GRYWALIZACJI I ZBIERANIA OSIĄGNIĘĆ (BADGES & ACHIEVEMENTS)
 ================================================================================
 
 Opis funkcjonalności:
@@ -87,7 +55,7 @@ Rozwiązanie technologiczne:
 
 
 ================================================================================
-4. KOŻUCHÓW: KIEDYŚ I DZIŚ (ARCHIWALNE PORÓWNANIA PRZESTRZENNE)
+3. KOŻUCHÓW: KIEDYŚ I DZIŚ (ARCHIWALNE PORÓWNANIA PRZESTRZENNE)
 ================================================================================
 
 Opis funkcjonalności:
@@ -105,7 +73,7 @@ Przykłady historyczne w Kożuchowie:
 
 
 ================================================================================
-5. AUTOPRZEWODNIK: INTELIGENTNY GEOFENCING ORAZ BEACONY BLUETOOTH (BLE)
+4. AUTOPRZEWODNIK: INTELIGENTNY GEOFENCING ORAZ BEACONY BLUETOOTH (BLE)
 ================================================================================
 
 Opis funkcjonalności:
@@ -126,7 +94,7 @@ Dwie warstwy technologiczne:
 
 
 ================================================================================
-6. ROZSZERZENIE STANDARDU DOSTĘPNOŚCI CYFROWEJ (WCAG 2.1 / 2.2)
+5. ROZSZERZENIE STANDARDU DOSTĘPNOŚCI CYFROWEJ (WCAG 2.1 / 2.2)
 ================================================================================
 
 Opis funkcjonalności — kompleksowe udogodnienia dla osób z niepełnosprawnościami:
@@ -149,7 +117,7 @@ Opis funkcjonalności — kompleksowe udogodnienia dla osób z niepełnosprawno�
 
 
 ================================================================================
-7. EDUKACYJNE MINI-QUIZY I QUESTING TERENOWY
+6. EDUKACYJNE MINI-QUIZY I QUESTING TERENOWY
 ================================================================================
 
 Opis funkcjonalności:
@@ -161,35 +129,7 @@ Opis funkcjonalności:
 
 
 ================================================================================
-8. PRZYGOTOWANIE I PUBLIKACJA NA SYSTEMY ANDROID ORAZ IOS [STATUS: GOTOWE DO BUDOWANIA]
-================================================================================
-
-Status modułu:
-- [x] PEŁNA GOTOWOŚĆ KONFIGURACYJNA I BUNDLE DLA ANDROID (APK/AAB) ORAZ IOS (IPA/TESTFLIGHT).
-
-Wdrożone przygotowanie techniczne:
-1. Konfiguracja platformowa `app.json`:
-   - Android: `package: "com.visitkozuchow.guide"`, `versionCode: 1`, ikona adaptacyjna,
-     uprawnienia GPS, aparat i audio.
-   - iOS: `bundleIdentifier: "com.visitkozuchow.guide"`, `buildNumber: "1"`, wsparcie tabletów (iPad),
-     pełne opisy uprawnień (`NSCameraUsageDescription`, `NSLocationWhenInUseUsageDescription`,
-     `NSLocationAlwaysAndWhenInUseUsageDescription`).
-   - Deep Linking: zdefiniowany unikalny schemat `scheme: "visitkozuchow"`.
-2. Profile budowania EAS (`eas.json`):
-   - `preview`: generowanie natychmiastowego pliku instalacyjnego Android APK (`buildType: "apk"`)
-     oraz wersji na symulator iOS (`simulator: true`).
-   - `production`: generowanie oficjalnej paczki Android App Bundle (`buildType: "app-bundle"`)
-     dla Google Play oraz wersji produkcyjnej `.ipa` dla TestFlight / Apple App Store.
-3. Skrypty w `package.json`:
-   - `npm run build:android:apk` — budowanie instalacyjnego pliku APK na Androida.
-   - `npm run build:android:aab` — budowanie paczki produkcyjnej do Google Play.
-   - `npm run build:ios:sim` — budowanie pod symulator iOS.
-   - `npm run build:ios:store` — budowanie produkcyjne na iOS.
-   - `npm run build:all` — równoległe budowanie na obie platformy w chmurze EAS.
-
-
-================================================================================
-9. PANEL ADMINISTRACYJNY (CMS WEB DASHBOARD) DLA URZĘDU MIEJSKIEGO
+7. PANEL ADMINISTRACYJNY (CMS WEB DASHBOARD) DLA URZĘDU MIEJSKIEGO
 ================================================================================
 
 Opis funkcjonalności:
@@ -213,20 +153,8 @@ Główne moduły panelu:
 
 
 ================================================================================
-10. HARMONOGRAM WDROŻENIA (FAZY IMPLEMENTACJI I HISTORIA AKTUALIZACJI)
+8. HARMONOGRAM WDROŻENIA (FAZY IMPLEMENTACJI)
 ================================================================================
-
-MODUŁY UKOŃCZONE I WDROŻONE (Wersja 1.1):
-- [x] Pełna wielojęzyczność i18n (język polski, angielski, niemiecki) z osobnymi słownikami JSON.
-- [x] Wielojęzyczny audioprzewodnik TTS (`pl-PL`, `en-US`, `de-DE`) i wielojęzyczny asystent AI.
-- [x] Pełny ciemny motyw (Dark Mode) w całej aplikacji wraz z mapami i likwidacją białych ramek.
-- [x] Odświeżenie ekranu Ustawień (SettingsScreen): stonowany, czytelny, zgodny z WCAG 2.1 AA.
-- [x] Stały widok satelitarny z nazwami ulic (`hybrid`) bez zbędnego przełącznika warstw.
-- [x] Architektura Asystenta AI (AIChatScreen) jako ekranu stosu nawigacyjnego z bezpośrednim
-      przejściem do mapy/szczegółów obiektów (bez zamykania modala i migotania ekranu Explore).
-- [x] Płynna adaptacja klawiatury w czacie AI bez nakładania się na pole tekstowe i bez skoków ekranu.
-- [x] Prawidłowe skalowanie numeracji trasy na mapie ("Punkt 10 z 12") przy trasach >9 obiektów.
-- [x] Przygotowanie do kompilacji i dystrybucji na Android (APK/AAB) oraz iOS (Simulator/Store).
 
 FAZA 1 (Kolejny kwartał rozwojowy):
 - Interaktywny Paszport Turystyczny ze stemplami cyfrowymi (odkryto X z 12 miejsc).
@@ -239,5 +167,4 @@ FAZA 2 (Kolejny etap):
 
 FAZA 3 (Wdrożenie zaawansowane):
 - Inteligentny Autoprzewodnik hands-free (Geofencing GPS + Beacony Bluetooth w salach Zamku).
-- Publikacja w sklepach Google Play oraz Apple App Store.
 - Uruchomienie Panelu Administracyjnego CMS dla Urzędu Miejskiego z powiadomieniami Push.
