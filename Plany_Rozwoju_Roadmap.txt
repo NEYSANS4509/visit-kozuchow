@@ -1,0 +1,243 @@
+================================================================================
+   VISIT KOŻUCHÓW — STRATEGIA I PLANY ROZWOJU PROJEKTU (ROADMAP)
+   Kierunki rozbudowy aplikacji, innowacje technologiczne i nowe funkcjonalności
+================================================================================
+
+DOKUMENTACJA PLANOWANYCH MODUŁÓW I USPRAWNIEŃ DLA KOMISJI OCENIAJĄCEJ / JURY
+
+SPIS TREŚCI:
+1. WIELOJĘZYCZNOŚĆ (I18N): JĘZYK POLSKI, ANGIELSKI I NIEMIECKI [ZREALIZOWANE / STATUS: GOTOWE]
+2. INTERAKTYWNY PASZPORT TURYSTYCZNY (ODKRYTO X Z 12 MIEJSC)
+3. SYSTEM GRYWALIZACJI I ZBIERANIA OSIĄGNIĘĆ (BADGES & ACHIEVEMENTS)
+4. KOŻUCHÓW: KIEDYŚ I DZIŚ (ARCHIWALNE PORÓWNANIA PRZESTRZENNE)
+5. AUTOPRZEWODNIK: INTELIGENTNY GEOFENCING ORAZ BEACONY BLUETOOTH (BLE)
+6. ROZSZERZENIE STANDARDU DOSTĘPNOŚCI CYFROWEJ (WCAG 2.1 / 2.2)
+7. EDUKACYJNE MINI-QUIZY I QUESTING TERENOWY
+8. PRZYGOTOWANIE I PUBLIKACJA NA SYSTEMY ANDROID ORAZ IOS [ZREALIZOWANE / STATUS: GOTOWE DO BUDOWANIA]
+9. PANEL ADMINISTRACYJNY (CMS WEB DASHBOARD) DLA URZĘDU MIEJSKIEGO
+10. HARMONOGRAM WDROŻENIA (FAZY IMPLEMENTACJI I HISTORIA AKTUALIZACJI)
+
+================================================================================
+1. WIELOJĘZYCZNOŚĆ (I18N): JĘZYK POLSKI, ANGIELSKI I NIEMIECKI [STATUS: ZREALIZOWANE W WERSJI 1.1]
+================================================================================
+
+Status modułu:
+- [x] UKOŃCZONE I WDROŻONE W PRODUKCYJNYM KODZIE APLIKACJI.
+
+Opis wdrożonej funkcjonalności:
+- Pełna internacjonalizacja interfejsu, treści zabytków oraz asystenta AI na 3 języki:
+  1. Język polski (Polski - PL) — natywny język mieszkańców i turystów krajowych.
+  2. Język angielski (English - EN) — uniwersalny język dla turystów zagranicznych z całego świata.
+  3. Język niemiecki (Deutsch - DE) — kluczowy ze względu na bliskość granicy polsko-niemieckiej
+     oraz historyczne zainteresowanie mieszkańców Niemiec dziedzictwem dawnego Śląska (Freystadt).
+
+Zastosowane rozwiązanie technologiczne:
+- Trzy autonomiczne pliki tłumaczeniowe JSON: `src/i18n/pl.json`, `src/i18n/en.json`, `src/i18n/de.json`.
+- Centralny kontekst `LanguageContext.js` zarządzający stanem języka z trwałością w `AsyncStorage`.
+- Dynamiczne tłumaczenie w locie:
+  * Cały interfejs użytkownika (nawigacja, nagłówki, przyciski, modale, filtry).
+  * Dynamiczna funkcja `translatePlace(place)` tłumacząca tytuły, opisy, ciekawostki,
+    legendy, adresy i opisy sal zamkowych.
+  * Wielojęzyczny Audioprzewodnik (Text-to-Speech) dopasowujący automatycznie natywny locale:
+    - Polski: `pl-PL`
+    - Angielski: `en-US`
+    - Niemiecki: `de-DE`
+  * Asystent AI (Groq / Offline fallback) generujący wielojęzyczne odpowiedzi,
+    dynamiczne powitanie i podpowiedzi pytań w wybranym języku.
+- Ergonomiczny selektor języka z flagami w odświeżonym ekranie `SettingsScreen`.
+
+
+================================================================================
+2. INTERAKTYWNY PASZPORT TURYSTYCZNY (ODKRYTO X Z 12 MIEJSC)
+================================================================================
+
+Opis funkcjonalności:
+- Wirtualna książeczka turystyczna motywująca do odwiedzenia wszystkich zabytków w mieście.
+- Na głównym ekranie oraz w profilu widoczny pasek postępu:
+  np. "Twój Paszport Kożuchowa: Odkryto 7 z 12 miejsc (58%)".
+- Każdy zabytek posiada unikatową, stylizowaną pieczęć / stempel (grafika stylizowana
+  na średniowieczną pieczęć lakową z herbem lub sylwetką obiektu).
+- Pieczęć odblokowuje się:
+  a) Po fizycznym zeskanowaniu kodu QR na tablicy przy zabytku, LUB
+  b) Na podstawie współrzędnych GPS (gdy turysta znajdzie się w promieniu 15 m od obiektu).
+
+Wartość dodana:
+- Po zebraniu kompletu 12 pieczęci turysta otrzymuje cyfrowy certyfikat "Zdobywca Grodu Kożuchów"
+  z unikalnym numerem, możliwy do pobrania w formacie PDF lub udostępnienia w mediach społecznościowych.
+- Możliwość odbioru fizycznego upominku lub pamiątkowej monety / halerza w punkcie informacji
+  turystycznej na Zamku (Centrum Kultury "Zamek").
+
+
+================================================================================
+3. SYSTEM GRYWALIZACJI I ZBIERANIA OSIĄGNIĘĆ (BADGES & ACHIEVEMENTS)
+================================================================================
+
+Opis funkcjonalności:
+- System odznak i osiągnięć zachęcający do eksploracji mniej znanych zakątków miasta:
+  1. "Śladami Piastów" — odwiedź Zamek Piastowski oraz Kościół pw. Matki Boskiej Gromnicznej.
+  2. "Niezłomny Obrońca" — przejdź całą trasę wzdłuż murów obronnych, fosy, Baszty Krośnieńskiej i Domku Kata.
+  3. "Tajemnice Dawnych Mistrzów" — zobacz barokowy portyk z hermami oraz rokokową fasadę przy ul. Klasztornej.
+  4. "Nocny Strażnik" — odwiedź dowolny zabytek po godzinie 19:00 (pięknie podświetlone mury i baszta).
+  5. "Dociekliwy Turysta" — zadaj asystentowi AI co najmniej 5 pytań o historię miasta.
+  6. "Kompletny Odkrywca" — odwiedź wszystkie 12 obiektów w jeden weekend.
+
+Rozwiązanie technologiczne:
+- Lokalna baza postępów (`AsyncStorage` / SQLite), brak konieczności rejestracji konta.
+- Animowane okna gratulacyjne po zdobyciu odznaki z haptyczną wibracją sukcesu (`Haptics.notificationAsync`).
+
+
+================================================================================
+4. KOŻUCHÓW: KIEDYŚ I DZIŚ (ARCHIWALNE PORÓWNANIA PRZESTRZENNE)
+================================================================================
+
+Opis funkcjonalności:
+- Moduł "Wehikuł Czasu" — zestawienie archiwalnych fotografii, rycin i przedwojennych pocztówek
+  z XIX i początku XX wieku z aktualnymi zdjęciami wykonanymi dokładnie z tego samego kadru.
+- Interaktywny suwak "Before/After Slider":
+  * Przesuwając palcem w lewo/prawo turysta płynnie odsłania przeszłość i teraźniejszość.
+
+Przykłady historyczne w Kożuchowie:
+- Rynek i Ratusz przed i po odbudowie powojennej.
+- Brama Krośnieńska i rozebrana Brama Głogowska.
+- Dawny ewangelicki Kościół Łaski z XVIII w. (przed rozbiórką) w zestawieniu z ocalałą samotną wieżą.
+- Fosa miejska z okresu, gdy płynęła w niej woda vs. współczesny zielony park spacerowy.
+- Dawny pałac von Kalckreuthów vs. ocalały barokowy portyk w parku miejskim.
+
+
+================================================================================
+5. AUTOPRZEWODNIK: INTELIGENTNY GEOFENCING ORAZ BEACONY BLUETOOTH (BLE)
+================================================================================
+
+Opis funkcjonalności:
+- Tryb zwiedzania "Hands-Free" (bez dotykania telefonu):
+  * Turysta chowa telefon do kieszeni lub zakłada słuchawki.
+  * Spacerując po mieście, gdy zbliży się na odległość 5–10 metrów do zabytku,
+    aplikacja automatycznie wybudza się, delikatnie wibruje i uruchamia lektora audio:
+    "Właśnie zbliżasz się do Baszty Krośnieńskiej. Obiekt ten wzniesiono w XIV wieku..."
+
+Dwie warstwy technologiczne:
+1. Geofencing GPS (dla przestrzeni otwartej):
+   - Wirtualne strefy koliste wokół 12 zabytków na zewnątrz (`expo-location` geofencing w tle).
+2. Bluetooth Low Energy (iBeacon / Eddystone) (dla wnętrz Zamku i podziemi):
+   - W salach zamkowych kamienne mury blokują sygnał satelitarny GPS.
+   - Umieszczenie małych, bateryjnych beaconów BLE (koszt kilkudziesięciu złotych za sztukę)
+     przy gablotach w Sali Rycerskiej i Izbie Regionalnej pozwala wykrywać obecność
+     turysty z dokładnością do 1 metra i odtwarzać opowieści o konkretnych eksponatach.
+
+
+================================================================================
+6. ROZSZERZENIE STANDARDU DOSTĘPNOŚCI CYFROWEJ (WCAG 2.1 / 2.2)
+================================================================================
+
+Opis funkcjonalności — kompleksowe udogodnienia dla osób z niepełnosprawnościami:
+
+1. Przewodnik w Polskim Języku Migowym (PJM):
+   - Krótkie materiały wideo z profesjonalnym tłumaczem migowym przy każdym zabytku
+     i sali zamkowej dla osób niesłyszących (z odtwarzaniem offline).
+2. Tekst łatwy do czytania i zrozumienia (ETR — Easy to Read):
+   - Uproszczone opisy zabytków, pisane prostym językiem, krótkimi zdaniami,
+     z piktogramami — dedykowane osobom z niepełnosprawnością intelektualną,
+     spektrum autyzmu, seniorom oraz dzieciom.
+3. Czcionka OpenDyslexic:
+   - Opcja włączenia w panelu dostępności specjalnego kroju pisma o dociążonej dolnej
+     części liter, ułatwiającego czytanie osobom z dysleksją.
+4. Tryb redukcji ruchu (prefers-reduced-motion):
+   - Wyłączenie wszelkich przejść animowanych i przesunięć kamery dla osób z zaburzeniami błędnika.
+5. Sterowanie głosowe (Voice Commands):
+   - Możliwość obsługi aplikacji komendami głosowymi: "Zamek", "Czytaj opis", "Pokaż mapę",
+     dla osób z ograniczeniami ruchowymi rąk.
+
+
+================================================================================
+7. EDUKACYJNE MINI-QUIZY I QUESTING TERENOWY
+================================================================================
+
+Opis funkcjonalności:
+- Moduł edukacyjny dla dzieci, rodzin oraz wycieczek szkolnych.
+- Przy każdym zabytku po zapoznaniu się z opisem odblokowuje się mini-quiz:
+  * 3 pytania sprawdzające spostrzegawczość (np. "Ile herbów znajduje się na fasadzie?",
+    "Z którego wieku pochodzi cylindryczny stołp zamkowy?", "Co trzyma w dłoni figura św. Piotra?").
+- Zdobywanie punktów wiedzy, ranking rodzinny i pamiątkowe odznaki "Młodego Historyka".
+
+
+================================================================================
+8. PRZYGOTOWANIE I PUBLIKACJA NA SYSTEMY ANDROID ORAZ IOS [STATUS: GOTOWE DO BUDOWANIA]
+================================================================================
+
+Status modułu:
+- [x] PEŁNA GOTOWOŚĆ KONFIGURACYJNA I BUNDLE DLA ANDROID (APK/AAB) ORAZ IOS (IPA/TESTFLIGHT).
+
+Wdrożone przygotowanie techniczne:
+1. Konfiguracja platformowa `app.json`:
+   - Android: `package: "com.visitkozuchow.guide"`, `versionCode: 1`, ikona adaptacyjna,
+     uprawnienia GPS, aparat i audio.
+   - iOS: `bundleIdentifier: "com.visitkozuchow.guide"`, `buildNumber: "1"`, wsparcie tabletów (iPad),
+     pełne opisy uprawnień (`NSCameraUsageDescription`, `NSLocationWhenInUseUsageDescription`,
+     `NSLocationAlwaysAndWhenInUseUsageDescription`).
+   - Deep Linking: zdefiniowany unikalny schemat `scheme: "visitkozuchow"`.
+2. Profile budowania EAS (`eas.json`):
+   - `preview`: generowanie natychmiastowego pliku instalacyjnego Android APK (`buildType: "apk"`)
+     oraz wersji na symulator iOS (`simulator: true`).
+   - `production`: generowanie oficjalnej paczki Android App Bundle (`buildType: "app-bundle"`)
+     dla Google Play oraz wersji produkcyjnej `.ipa` dla TestFlight / Apple App Store.
+3. Skrypty w `package.json`:
+   - `npm run build:android:apk` — budowanie instalacyjnego pliku APK na Androida.
+   - `npm run build:android:aab` — budowanie paczki produkcyjnej do Google Play.
+   - `npm run build:ios:sim` — budowanie pod symulator iOS.
+   - `npm run build:ios:store` — budowanie produkcyjne na iOS.
+   - `npm run build:all` — równoległe budowanie na obie platformy w chmurze EAS.
+
+
+================================================================================
+9. PANEL ADMINISTRACYJNY (CMS WEB DASHBOARD) DLA URZĘDU MIEJSKIEGO
+================================================================================
+
+Opis funkcjonalności:
+- Dedykowany, lekki panel internetowy (np. Next.js / React) przeznaczony dla pracowników
+  Wydziału Promocji Urzędu Miejskiego w Kożuchowie oraz kustoszy Centrum Kultury "Zamek":
+
+Główne moduły panelu:
+1. Moduł "Wydarzenia i Święta w Kożuchowie":
+   - Dodawanie bieżących imprez miejskich: Dni Kożuchowa, Turniej Rycerski na Zamku,
+     Święto Jabłka, jarmarki bożonarodzeniowe, koncerty w Lapidarium.
+   - Automatyczne pojawianie się wydarzeń w kalendarzu aplikacji na telefonach turystów.
+2. Powiadomienia Push (Expo Push Notifications):
+   - Możliwość wysłania powiadomienia do turystów w mieście:
+     "Dziś o 16:00 na dziedzińcu Zamku rozpoczyna się pokaz walk rycerskich! Zapraszamy."
+3. Alerty i aktualności turystyczne:
+   - Informowanie o chwilowych zmianach (np. "Dziś wstęp do Lapidarium z przewodnikiem o 14:00",
+     "Tymczasowe prace konserwatorskie na odcinku murów przy ul. Krzywoustego").
+4. Generator kodów QR:
+   - Narzędzie do generowania i drukowania nowych kodów QR dla nowych tablic informacyjnych
+     i wystaw czasowych w Zamku.
+
+
+================================================================================
+10. HARMONOGRAM WDROŻENIA (FAZY IMPLEMENTACJI I HISTORIA AKTUALIZACJI)
+================================================================================
+
+MODUŁY UKOŃCZONE I WDROŻONE (Wersja 1.1):
+- [x] Pełna wielojęzyczność i18n (język polski, angielski, niemiecki) z osobnymi słownikami JSON.
+- [x] Wielojęzyczny audioprzewodnik TTS (`pl-PL`, `en-US`, `de-DE`) i wielojęzyczny asystent AI.
+- [x] Pełny ciemny motyw (Dark Mode) w całej aplikacji wraz z mapami i likwidacją białych ramek.
+- [x] Odświeżenie ekranu Ustawień (SettingsScreen): stonowany, czytelny, zgodny z WCAG 2.1 AA.
+- [x] Stały widok satelitarny z nazwami ulic (`hybrid`) bez zbędnego przełącznika warstw.
+- [x] Architektura Asystenta AI (AIChatScreen) jako ekranu stosu nawigacyjnego z bezpośrednim
+      przejściem do mapy/szczegółów obiektów (bez zamykania modala i migotania ekranu Explore).
+- [x] Płynna adaptacja klawiatury w czacie AI bez nakładania się na pole tekstowe i bez skoków ekranu.
+- [x] Prawidłowe skalowanie numeracji trasy na mapie ("Punkt 10 z 12") przy trasach >9 obiektów.
+- [x] Przygotowanie do kompilacji i dystrybucji na Android (APK/AAB) oraz iOS (Simulator/Store).
+
+FAZA 1 (Kolejny kwartał rozwojowy):
+- Interaktywny Paszport Turystyczny ze stemplami cyfrowymi (odkryto X z 12 miejsc).
+- System odznak i osiągnięć turystycznych (grywalizacja / badges).
+- Edukacyjne mini-quizy wiedzy przy 12 zabytkach.
+
+FAZA 2 (Kolejny etap):
+- Moduł "Kożuchów Kiedyś i Dziś" z suwakiem fotografii archiwalnych (Before/After Slider).
+- Rozbudowa WCAG: wdrożenie filmów w Polskim Języku Migowym (PJM) i uproszczonych tekstów ETR.
+
+FAZA 3 (Wdrożenie zaawansowane):
+- Inteligentny Autoprzewodnik hands-free (Geofencing GPS + Beacony Bluetooth w salach Zamku).
+- Publikacja w sklepach Google Play oraz Apple App Store.
+- Uruchomienie Panelu Administracyjnego CMS dla Urzędu Miejskiego z powiadomieniami Push.

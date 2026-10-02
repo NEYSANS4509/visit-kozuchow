@@ -24,14 +24,14 @@ Aplikacja łączy tradycyjny przewodnik turystyczny z **inteligentnym asystentem
 
 ## 3. Inteligentny Asystent AI (Sztuczna Inteligencja)
 
-W aplikacji zintegrowano wielopoziomowego przewodnika AI, z którym turysta może prowadzić naturalny dialog po polsku.
+W aplikacji zintegrowano wielopoziomowego przewodnika AI ([AIChatScreen](file:///c:/Projects/visit-kozuchow/src/screens/AIChatScreen.js)), z którym turysta może prowadzić naturalny dialog w trzech językach: **polskim**, **angielskim** oraz **niemieckim**.
 
 ### W czym pomaga asystent AI?
 1. **Opowiadanie historii i sekretów miasta:** AI zna szczegółowe fakty o kożuchowskich fortyfikacjach, tajemnicach ukrytej wieży zamku, lochach głodowych, pobycie królewicza Zygmunta Jagiellończyka czy płaskorzeźbach żaglowców na sklepieniu kościoła.
 2. **Inteligentne generowanie tras na żądany czas:** Turysta może napisać np. *„Ułóż mi trasę na 2 godziny”* lub *„Krótki spacer na 1h”*. Asystent układa logiczną kolejność zwiedzania i generuje interaktywny przycisk **„Pokaż trasę na mapie”**, który jednym kliknięciem przenosi wyznaczoną ścieżkę do modułu mapy.
 3. **Rekomendacje gastronomiczne na bazie GPS:** AI analizuje aktualne współrzędne turysty i precyzyjnie wskazuje najbliższy lokal gastronomiczny (Restauracja Rycerska, Pizzeria Ciao Ciao, Nasir Kebab itp.) wraz z **dokładną odległością w metrach**.
-4. **Interaktywne odnośniki do obiektów:** Jeśli AI wspomina o danym zabytku, w dymku wiadomości automatycznie pojawia się kafelek z przyciskiem przejścia do pełnej karty danego miejsca.
-5. **Wbudowany lektor głosowy:** Każda odpowiedź asystenta posiada przycisk *„Odsłuchaj”* (synteza mowy w języku polskim).
+4. **Bezpośrednie kafelki przejścia do obiektów:** Jeśli AI wspomina o danym zabytku, pod dymkiem odpowiedzi pojawiają się czytelne przyciski akcji: **„Pokaż na mapie”** oraz **„Szczegóły”**, które natychmiastowo otwierają docelowy widok bez migotania ekranu katalogu.
+5. **Wbudowany wielojęzyczny lektor głosowy:** Każda odpowiedź asystenta posiada przycisk *„Odsłuchaj”* (synteza mowy w języku polskim, angielskim lub niemieckim).
 
 ### Trzypoziomowa architektura niezawodności (Resilience Architecture):
 * **Poziom 1 (Chmura Groq):** Model rozumujący `openai/gpt-oss-20b` z kontrolowanym parametrem `reasoning_effort: low` i buforem 1200 tokenów. Zapewnia odpowiedzi w czasie ~600 ms bez zacinania.
@@ -120,23 +120,32 @@ Wszystkie obiekty posiadają wyczerpujące opracowanie historyczne, galerię zdj
 
 ---
 
-## 8. Audioprzewodnik (Text-to-Speech)
-* Wbudowany w każdy obiekt komponent `AudioGuideButton`.
-* Lektor odczytuje pełny rys historyczny w języku polskim z możliwością zatrzymania w dowolnym momencie.
-* Działa bez potrzeby pobierania zewnętrznych plików MP3 – wykorzystuje natywny silnik mowy urządzenia.
+## 8. Wielojęzyczność (i18n) i Audioprzewodnik (Text-to-Speech)
+* **Trzy wersje językowe:** Pełne wsparcie dla języka **polskiego (PL)**, **angielskiego (EN)** oraz **niemieckiego (DE)** z bazą w plikach JSON (`pl.json`, `en.json`, `de.json`).
+* **Dynamiczny tłumacz:** Automatyczne tłumaczenie interfejsu, tytułów, opisów, legend, ciekawostek i sal zamkowych.
+* **Wielojęzyczny lektor TTS:** Wbudowany w każdy obiekt komponent `AudioGuideButton` odczytuje historię w wybranym języku (`pl-PL`, `en-US`, `de-DE`) z możliwością zatrzymania w dowolnej chwili.
+* Działa w 100% offline bez potrzeby pobierania zewnętrznych plików audio.
 
 ---
 
-## 9. Standard dostępności cyfrowej WCAG 2.1 (AA)
+## 9. Standard dostępności cyfrowej WCAG 2.1 (AA) i Ciemny Motyw
 Aplikacja została zaprojektowana zgodnie z międzynarodowymi wymogami dostępności dla osób ze szczególnymi potrzebami:
+* **Pełny Ciemny i Jasny Motyw (Dark & Light Mode):** Możliwość wygodnego przełączania w ekranie Ustawień z automatyczną adaptacją paska stanu i eliminacją zbędnych białych ramek.
 * **Rozmiar pól dotykowych (Touch Targets):** Wszystkie przyciski, karty i elementy sterujące posiadają fizyczny wymiar dotykowy **co najmniej 48×48 dp** lub poszerzone marginesy `hitSlop`.
-* **Tryb wysokiego kontrastu (High Contrast):** Współczynnik kontrastu tekstu do tła powyżej **7:1**, wyraźne czarne obramowania wokół przycisków i kart.
+* **Tryb wysokiego kontrastu (High Contrast):** Współczynnik kontrastu tekstu do tła powyżej **7:1**, wyraźne obramowania wokół przycisków i kart.
 * **Tryb dla osób z daltonizmem (Color Blind Mode):** Alternatywna paleta barw eliminująca problematyczne pary kolorów (np. czerwień/zieleń) oraz uzupełnienie statusów ikonami i tekstem.
 * **Powiększony tekst (Large Text):** Globalne zwiększenie rozmiaru fontów w połączeniu z pełnym wsparciem dla systemowego skalowania (`allowFontScaling={true}`).
 * **Czytniki ekranu (TalkBack / VoiceOver):** Wypełnione atrybuty `accessible={true}`, precyzyjne `accessibilityLabel`, semantyczne `accessibilityRole` oraz zarządzanie fokusem (`setAccessibilityFocus`).
 
 ---
 
-## 10. Bezpieczeństwo i zgodność z RODO
+## 10. Przygotowanie do kompilacji i publikacji (Android & iOS)
+Projekt jest w pełni przygotowany do budowania produkcyjnego:
+* **Android:** Konfiguracja `com.visitkozuchow.guide`, `versionCode: 1`, ikony adaptacyjne, gotowe profile EAS dla plików instalacyjnych `.apk` (testy bezpośrednie) oraz `.aab` (Google Play Store).
+* **iOS:** Konfiguracja `bundleIdentifier: "com.visitkozuchow.guide"`, `buildNumber: "1"`, kompletne wpisy uprawnień aparatu i lokalizacji w `infoPlist`, gotowe profile EAS pod symulator oraz `.ipa` do TestFlight / Apple App Store.
+
+---
+
+## 11. Bezpieczeństwo i zgodność z RODO
 * Wbudowany modal informacji prawnych: przejrzysty **Regulamin** oraz **Polityka Prywatności**.
 * Brak śledzenia komercyjnego, brak gromadzenia danych wrażliwych. Lokalizacja GPS przetwarzana jest wyłącznie lokalnie w pamięci urządzenia.
